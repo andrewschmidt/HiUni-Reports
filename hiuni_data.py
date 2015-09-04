@@ -16,7 +16,7 @@ class School(BaseModel):
 	ipeds_id = IntegerField()
 
 	def majors(self):
-		return Major.select().join(School).where(School == self) #Or something.
+		return Major.select().where(School == self)
 
 
 class Major(BaseModel):
