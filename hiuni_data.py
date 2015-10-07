@@ -15,12 +15,12 @@ class School(BaseModel):
 	name = CharField()
 	ipeds_id = IntegerField()
 
-	def majors(self):
-		return Major.select().where(School == self)
+	def programs(self):
+		return Program.select().where(School == self)
 
 
-class Major(BaseModel):
-	school = ForeignKeyField(School, related_name = "majors")
+class Program(BaseModel):
+	school = ForeignKeyField(School, related_name = "programs")
 	name = CharField()
 	cip = FloatField()
 	median_salary = IntegerField()
@@ -71,20 +71,20 @@ class data_helper:
 		return school_ids
 
 
-	def create_majors_for_school(self, school, from_sheet):
-		majors = []
+	def create_programs_for_school(self, school, from_sheet):
+		programs = []
 
 		sheet = from_sheet
 		number_of_rows = sheet.nrows
 
 		for row in range(number_of_rows):
 			row_id = sheet.cell_value(rowx = row, colx = 0)
-			major_name = sheet.cell_value(rowx = row, colx = 2)
+			program_name = sheet.cell_value(rowx = row, colx = 2)
 			cip = sheet.cell_value(rowx = row, colx = 3)
 			median_salary = sheet.cell_value(rowx = row, colx = 5)
 
 			if row_id == school.ipeds_id:
-				major = Major.create(school = school, name = major_name, cip = cip, median_salary = median_salary)
+				program = Program.create(school = school, name = program_name, cip = cip, median_salary = median_salary)
 
 
 	def create_schools_from_sheet(self, sheet):
@@ -111,23 +111,23 @@ class data_helper:
 		return schools
 
 
-	def load_schools_and_majors(self):
+	def load_schools_and_programs(self):
 		# First load the spreadsheet:
 		sheet = self.get_sheet()
 		
 		# Next create the schools:
 		schools = self.create_schools_from_sheet(sheet)
 
-		# Finally create all the majors for each school:
+		# Finally create all the programs for each school:
 		for school in schools:
-			self.create_majors_for_school(school, from_sheet = sheet)
+			self.create_programs_for_school(school, from_sheet = sheet)
 
 
 	def create_database(self):
 		# Only run this once.
 		database.connect()
-		# database.create_tables([School, Major]) #Seriously, just once!
-		self.load_schools_and_majors()
+		# database.create_tables([School, Program]) #Seriously, just once!
+		self.load_schools_and_programs()
 
 
 	def delete_schools(self):
