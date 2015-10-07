@@ -3,23 +3,19 @@
 # But it should not include ROI/sorting algorithms.
 
 
+from data_model import * # The data model & the database connection.
 import xlrd # For reading Excel workbooks.
-from data_model import *
-from peewee import * # Our ORM.
-
-# Connect to the database:
-database = PostgresqlDatabase("hiuni_database", user = "Andrew")
 
 
-def get_sheet():
-		# Load the workbook & sheet:
-		book = xlrd.open_workbook("PayScale Sample (altered).xlsx")
-		sheet = book.sheet_by_name("4-Digit CIP - Experienced Pay")
+def get_xls_sheet():
+	# Load the workbook & sheet:
+	book = xlrd.open_workbook("PayScale Sample (altered).xlsx")
+	sheet = book.sheet_by_name("4-Digit CIP - Experienced Pay")
 
-		return sheet
+	return sheet
 
 
-def get_school_names_from_sheet(sheet):
+def get_school_names_from_xls_sheet(sheet):
 	school_names = []
 	
 	number_of_rows = sheet.nrows - 1
@@ -33,7 +29,7 @@ def get_school_names_from_sheet(sheet):
 	return school_names
 
 
-def get_school_ids_from_sheet(sheet):
+def get_school_ids_from_xls_sheet(sheet):
 	school_ids = []
 	
 	number_of_rows = sheet.nrows - 1
@@ -47,10 +43,10 @@ def get_school_ids_from_sheet(sheet):
 	return school_ids
 
 
-def create_programs_for_school(school, from_sheet):
+def create_programs_for_school(school, from_xls_sheet):
 	programs = []
 
-	sheet = from_sheet
+	sheet = from_xls_sheet
 	number_of_rows = sheet.nrows
 
 	for row in range(number_of_rows):
@@ -63,14 +59,13 @@ def create_programs_for_school(school, from_sheet):
 			program = Program.create(school = school, name = program_name, cip = cip, median_salary = median_salary)
 
 
-def create_schools_from_sheet(sheet):
+def create_schools_from_xls_sheet(sheet):
 	# First, let's get basic info about the schools.
-	school_names = get_school_names_from_sheet(sheet)
-	school_ids = get_school_ids_from_sheet(sheet)
+	school_names = get_school_names_from_xls_sheet(sheet)
+	school_ids = get_school_ids_from_xls_sheet(sheet)
 
 	# Let's add some schools to the database, but only if they aren't already there!
 	schools = []
-	existing_schools = School.select()
 
 	print ""
 
@@ -90,15 +85,15 @@ def create_schools_from_sheet(sheet):
 
 
 def load_schools_and_programs():
-	# First load the spreadsheet:
-	sheet = get_sheet()
+	# First load the XLS spreadsheet:
+	sheet = get_xls_sheet()
 	
 	# Next create the schools:
-	schools = create_schools_from_sheet(sheet)
+	schools = create_schools_from_xls_sheet(sheet)
 
 	# Finally create all the programs for each school:
 	for school in schools:
-		create_programs_for_school(school, from_sheet = sheet)
+		create_programs_for_school(school, from_xls_sheet = sheet)
 
 
 def delete_schools():
