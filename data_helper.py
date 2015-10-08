@@ -7,9 +7,12 @@ from data_model import * # The data model & the database connection.
 import xlrd # For reading Excel workbooks.
 
 
-def get_xls_sheet():
+xls = "PayScale Sample (altered).xlsx" # The current Excel file w/ data from PayScale.
+
+
+def get_xls_sheet(name):
 	# Load the workbook & sheet:
-	book = xlrd.open_workbook("PayScale Sample (altered).xlsx")
+	book = xlrd.open_workbook(name)
 	sheet = book.sheet_by_name("4-Digit CIP - Experienced Pay")
 
 	return sheet
@@ -43,57 +46,119 @@ def get_school_ids_from_xls_sheet(sheet):
 	return school_ids
 
 
-def create_programs_for_school(school, from_xls_sheet):
-	programs = []
-
-	sheet = from_xls_sheet
+def get_programs_data_from_xls_sheet(sheet, for_school):
+	school = for_school
 	number_of_rows = sheet.nrows
+	
+	# Let's search the sheet for programs for our school, and return the basic data about them:
+	names = []
+	cips = []
+	median_salaries = []
 
 	for row in range(number_of_rows):
 		row_id = sheet.cell_value(rowx = row, colx = 0)
-		program_name = sheet.cell_value(rowx = row, colx = 2)
-		cip = sheet.cell_value(rowx = row, colx = 3)
-		median_salary = sheet.cell_value(rowx = row, colx = 5)
-
+		
 		if row_id == school.ipeds_id:
-			program = Program.create(school = school, name = program_name, cip = cip, median_salary = median_salary)
+			cips.append(sheet.cell_value(rowx = row, colx = 3))
+			names.append(sheet.cell_value(rowx = row, colx = 2))
+			median_salaries.append(sheet.cell_value(rowx = row, colx = 5))
+
+	return names, cips, median_salaries
 
 
-def create_schools_from_xls_sheet(sheet):
+def update_programs_from_xls_sheet(sheet, for_school):
+	school = for_school
+	number_of_rows = sheet.nrows
+
+	names, cips, median_salaries = get_programs_data_from_xls_sheet(sheet, for_school = school)
+
+	# Now let's add the new programs, and update the existing ones.
+	updated = []
+	created = []	
+
+	for i in range(len(cips)):	
+		try:
+			query = Program.select().join(School)
+			query_filter = (Program.cip == cips[i]) & (School.ipeds_id == school.ipeds_id)
+			
+			p = query.where(query_filter).get()
+			
+			# Only update the program if something's changed:
+			if p.name != names[i] or p.median_salary != median_salaries[i]:
+				p.name = names[i]
+				p.median_salary = median_salaries[i]
+				
+				p.save()
+
+				updated.append(p)
+
+		except Exception:
+			p = Program()
+			
+			p.school = school
+			p.name = names[i]
+			p.cip = cips[i]
+			p.median_salary = median_salaries[i]
+
+			p.save()
+			
+			created.append(p)
+
+	# Print results:
+	print "\nFor the", school.name + "..."
+	if len(created) > 0: 
+		print "    Created programs:"
+		for program in created:
+			print "        -", program.name
+
+	if len(updated) > 0: 
+		print "    Updated programs:"
+		for program in updated:
+			print "        -", program.name
+
+
+def update_schools_from_xls_sheet(sheet):
 	# First, let's get basic info about the schools.
-	school_names = get_school_names_from_xls_sheet(sheet)
 	school_ids = get_school_ids_from_xls_sheet(sheet)
+	school_names = get_school_names_from_xls_sheet(sheet)
 
-	# Let's add some schools to the database, but only if they aren't already there!
+	# Now let's add the new schools, and update the existing ones untouched.
 	schools = []
 
 	print ""
 
-	for i in range(len(school_names)):
+	for i in range(len(school_ids)):
 		try:
-			School.get(School.name == school_names[i])
+			school = School.get(School.ipeds_id == school_ids[i])
+			print school_names[i], "is already in the database. Checking for updates..."
 
 		except Exception:
-			print "Looks like the", school_names[i], "isn't in the database yet. Adding it!"
-			school = School.create(name = school_names[i], ipeds_id = school_ids[i])
-			schools.append(school)
+			school = School()
+			print school_names[i], "isn't in the database yet. Adding it!"
+		
+		# Set the school's data.
+		school.name = school_names[i]
+		school.ipeds_id = school_ids[i]
+		
+		# Save the school -- either creating it, or updating it!
+		school.save()
 
-		else:
-			print "Duplicate school detected!"
+		# And append it to the array of schools we'll return.
+		schools.append(school)
 
 	return schools
 
 
 def load_schools_and_programs():
 	# First load the XLS spreadsheet:
-	sheet = get_xls_sheet()
+	sheet = get_xls_sheet(name = xls)
 	
-	# Next create the schools:
-	schools = create_schools_from_xls_sheet(sheet)
+	# Next update the schools in the sheet:
+	schools = update_schools_from_xls_sheet(sheet)
 
-	# Finally create all the programs for each school:
+	# Finally update the programs for each school in the sheet:
 	for school in schools:
-		create_programs_for_school(school, from_xls_sheet = sheet)
+		update_programs_from_xls_sheet(sheet, for_school = school)
 
 
 def delete_schools():

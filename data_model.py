@@ -12,7 +12,7 @@ class BaseModel(Model):
 
 class School(BaseModel):
 	name = CharField()
-	ipeds_id = IntegerField()
+	ipeds_id = CharField()
 
 	def programs(self):
 		return Program.select().where(School == self)
@@ -21,5 +21,5 @@ class School(BaseModel):
 class Program(BaseModel):
 	school = ForeignKeyField(School, related_name = "programs")
 	name = CharField()
-	cip = FloatField()
+	cip = CharField()
 	median_salary = IntegerField()
