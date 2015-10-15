@@ -17,7 +17,7 @@ def print_programs():
 
 
 # Commands for data_helper:
-# data_helper.delete_all_schools()
+data_helper.delete_all_schools()
 # data_helper.load_schools_and_programs() # Depreciated.
 # data_helper.drop_tables()
 # data_helper.create_tables()

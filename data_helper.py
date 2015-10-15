@@ -157,10 +157,32 @@ def get_programs_data_from_xls_sheet(sheet, for_school):
 
 # ***************** DATA MODEL INTERACTION *****************
 
+def update_school_with_ipeds_id(ipeds_id, from_cost_sheet):
+	sheet = from_cost_sheet
+
+	# Get all the info on the school from the CSV.
+	name, new_ipeds_id = get_school_info_from_csv_sheet(sheet, for_ipeds_id = ipeds_id)
+
+	# Let's figure out if the school is already in the database, or needs creating.
+	try:
+		school = School.get(School.ipeds_id == ipeds_id)
+		print "\nUpdating info for the", school.name + "."
+	except Exception:
+		school = School()
+		print "\nAdding a school to the database: the", name + "."
+
+	# Then assign the new data. Peewee is smart enough to only make changes if the data actually changed:
+	school.name = name
+	school.ipeds_id = new_ipeds_id
+
+	# Finally, save it:
+	school.save()
+
+
 def update_info_for_school(school, from_cost_sheet):
 	sheet = from_cost_sheet
 
-	print "Updating info for the", school.name
+	print "\nUpdating info for the", school.name + "."
 
 	school.name, school.ipeds_id = get_school_info_from_csv_sheet(sheet, for_ipeds_id = school.ipeds_id)
 		
@@ -237,12 +259,8 @@ def get_ipeds_ids_in_both(cost_sheet, salary_sheet):
 
 
 def import_data_from_sheets(cost_sheet, salary_sheet):
-	# Find out which IPEDS IDs are in both sheets:
-	print "Okay! IDs of schools to check for updates:"
-	
+	# Find out which IPEDS IDs are in both sheets:	
 	ids_from_sheets = get_ipeds_ids_in_both(cost_sheet, salary_sheet)
-	
-	print ids_from_sheets
 
 	schools_to_update = []
 	ids_of_schools_to_add = []
@@ -250,25 +268,28 @@ def import_data_from_sheets(cost_sheet, salary_sheet):
 	for ipeds_id in ids_from_sheets:
 		try:
 			school = School.get(School.ipeds_id == ipeds_id)
-			print "Found a school to update: ", school.name
 			schools_to_update.append(school)
 
 		except Exception:
 			ids_of_schools_to_add.append(ipeds_id)
 
 	for school in schools_to_update:
-		update_info_for_school(school, from_cost_sheet = cost_sheet)
+		update_school_with_ipeds_id(school.ipeds_id, from_cost_sheet = cost_sheet)
 		update_programs_for_school(school, from_salary_sheet = salary_sheet)
 
-	# for ipeds_id in ids_of_schools_to_add:
-	# 	school = create_school_with_ipeds_id(ipeds_id, from_cost_sheet = cost_sheet)
-	# 	update_programs_for_school(school, from_salary_sheet = salary_sheet)
+	for ipeds_id in ids_of_schools_to_add:
+		# Make a new school:
+		update_school_with_ipeds_id(ipeds_id, from_cost_sheet = cost_sheet)
+		# Get the new school:
+		school = School.get(School.ipeds_id == ipeds_id)
+		# Make its programs:
+		update_programs_for_school(school, from_salary_sheet = salary_sheet)
 
 
 def import_data(): # A hands-off version of import_data_from_sheets().
 	cost_sheet = get_csv_sheet(csv_file)
 	salary_sheet = get_xls_sheet(xls_file)
-	print "Let's import!"
+	print "\nLet's import!"
 	import_data_from_sheets(cost_sheet, salary_sheet = salary_sheet)
 
 
@@ -284,7 +305,7 @@ def delete_all_schools():
 
 def create_tables():
 	# Only run this once.
-	# Remember, this doesn't create a database.
+	# Remember, this doesn't create a database. Just the tables.
 	# To do that, use PostgreSQL's "createdb" command.
 	print "\nConnecting to the database..."
 	database.connect()
@@ -293,8 +314,8 @@ def create_tables():
 
 
 def populate_tables():
-	print "\nLoading in data..."
-	load_schools_and_programs()
+	print "\nAttempting to import schools & programs data..."
+	import_data()
 
 
 def drop_tables():
@@ -306,45 +327,45 @@ def drop_tables():
 
 # # ***************** OLD FUNCTIONS *****************
 
-def update_schools_from_xls_sheet(sheet):
-	# First, let's get basic info about the schools.
-	school_ids = get_school_ids_from_xls_sheet(sheet)
-	school_names = get_school_names_from_xls_sheet(sheet)
+# def update_schools_from_xls_sheet(sheet):
+# 	# First, let's get basic info about the schools.
+# 	school_ids = get_school_ids_from_xls_sheet(sheet)
+# 	school_names = get_school_names_from_xls_sheet(sheet)
 
-	# Now let's add the new schools, and update the existing ones untouched.
-	schools = []
+# 	# Now let's add the new schools, and update the existing ones untouched.
+# 	schools = []
 
-	print ""
+# 	print ""
 
-	for i in range(len(school_ids)):
-		try:
-			school = School.get(School.ipeds_id == school_ids[i])
-			print school_names[i], "is already in the database. Checking for updates..."
+# 	for i in range(len(school_ids)):
+# 		try:
+# 			school = School.get(School.ipeds_id == school_ids[i])
+# 			print school_names[i], "is already in the database. Checking for updates..."
 
-		except Exception:
-			school = School()
-			print school_names[i], "isn't in the database yet. Adding it!"
+# 		except Exception:
+# 			school = School()
+# 			print school_names[i], "isn't in the database yet. Adding it!"
 		
-		# Set the school's data.
-		school.name = school_names[i]
-		school.ipeds_id = school_ids[i]
+# 		# Set the school's data.
+# 		school.name = school_names[i]
+# 		school.ipeds_id = school_ids[i]
 		
-		# Save the school -- either creating it, or updating it!
-		school.save()
+# 		# Save the school -- either creating it, or updating it!
+# 		school.save()
 
-		# And append it to the array of schools we'll return.
-		schools.append(school)
+# 		# And append it to the array of schools we'll return.
+# 		schools.append(school)
 
-	return schools
+# 	return schools
 
 
-def load_schools_and_programs(): # THIS WILL BE REPLACED WITH "import_data_from_sheets()"
-	# First load the XLS spreadsheet:
-	sheet = get_xls_sheet(name = xls_file)
+# def load_schools_and_programs(): # THIS WILL BE REPLACED WITH "import_data_from_sheets()"
+# 	# First load the XLS spreadsheet:
+# 	sheet = get_xls_sheet(name = xls_file)
 	
-	# Next update the schools in the sheet:
-	schools = update_schools_from_xls_sheet(sheet)
+# 	# Next update the schools in the sheet:
+# 	schools = update_schools_from_xls_sheet(sheet)
 
-	# Finally update the programs for each school in the sheet:
-	for school in schools:
-		update_programs_for_school(school, from_salary_sheet = sheet)
+# 	# Finally update the programs for each school in the sheet:
+# 	for school in schools:
+# 		update_programs_for_school(school, from_salary_sheet = sheet)
