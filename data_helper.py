@@ -10,7 +10,7 @@ import csv # For reading CSVs.
 
 
 
-csv_file = "IPEDS data.csv" # The CSV file w/ data from IPEDS.
+csv_file = "IPEDS data (altered).csv" # The CSV file w/ data from IPEDS.
 xls_file = "PayScale Sample (altered).xlsx" # The current Excel file w/ data from PayScale.
 
 
@@ -322,50 +322,3 @@ def drop_tables():
 	# Only do this if you're serious.
 	print "\nDropping tables..."
 	database.drop_tables([School, Program], safe = True)
-
-
-
-# # ***************** OLD FUNCTIONS *****************
-
-# def update_schools_from_xls_sheet(sheet):
-# 	# First, let's get basic info about the schools.
-# 	school_ids = get_school_ids_from_xls_sheet(sheet)
-# 	school_names = get_school_names_from_xls_sheet(sheet)
-
-# 	# Now let's add the new schools, and update the existing ones untouched.
-# 	schools = []
-
-# 	print ""
-
-# 	for i in range(len(school_ids)):
-# 		try:
-# 			school = School.get(School.ipeds_id == school_ids[i])
-# 			print school_names[i], "is already in the database. Checking for updates..."
-
-# 		except Exception:
-# 			school = School()
-# 			print school_names[i], "isn't in the database yet. Adding it!"
-		
-# 		# Set the school's data.
-# 		school.name = school_names[i]
-# 		school.ipeds_id = school_ids[i]
-		
-# 		# Save the school -- either creating it, or updating it!
-# 		school.save()
-
-# 		# And append it to the array of schools we'll return.
-# 		schools.append(school)
-
-# 	return schools
-
-
-# def load_schools_and_programs(): # THIS WILL BE REPLACED WITH "import_data_from_sheets()"
-# 	# First load the XLS spreadsheet:
-# 	sheet = get_xls_sheet(name = xls_file)
-	
-# 	# Next update the schools in the sheet:
-# 	schools = update_schools_from_xls_sheet(sheet)
-
-# 	# Finally update the programs for each school in the sheet:
-# 	for school in schools:
-# 		update_programs_for_school(school, from_salary_sheet = sheet)
