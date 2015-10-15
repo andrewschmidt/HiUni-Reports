@@ -243,7 +243,7 @@ def update_programs_for_school(school, from_salary_sheet):
 
 
 
-# ***************** IMPORT FUNCTIONS *****************
+# ***************** DATA IMPORT *****************
 
 def get_ipeds_ids_in_both(cost_sheet, salary_sheet):
 	cost_sheet_ids = get_school_ids_from_csv_sheet(cost_sheet)

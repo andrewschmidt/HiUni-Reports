@@ -28,7 +28,7 @@ def print_programs():
 
 # Local commands:
 print_schools()
-print_programs()
+# print_programs()
 
 
 print ""
