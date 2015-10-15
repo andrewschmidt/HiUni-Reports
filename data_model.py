@@ -2,7 +2,9 @@
 
 
 from peewee import *
-database = PostgresqlDatabase("hiuni_database", user = "Andrew")
+from playhouse.postgres_ext import *
+
+database = PostgresqlExtDatabase("hiuni_database", user = "Andrew")
 
 
 class BaseModel(Model):
@@ -13,6 +15,13 @@ class BaseModel(Model):
 class School(BaseModel):
 	name = CharField()
 	ipeds_id = CharField()
+	# school_type = CharField()
+	# admission_rate = IntegerField()
+	location = HStoreField()
+	
+	# Costs:
+	# total_price = HStoreField()
+	# net_price = HStoreField()
 
 	def programs(self):
 		return Program.select().where(School == self)
