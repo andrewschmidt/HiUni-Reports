@@ -15,8 +15,10 @@ class BaseModel(Model):
 class School(BaseModel):
 	name = CharField()
 	ipeds_id = CharField()
-	# school_type = CharField()
-	# admission_rate = IntegerField()
+	school_type = CharField()
+	admission_rate = IntegerField(null = True)
+	city = CharField()
+	state = CharField()
 	location = HStoreField()
 	
 	# Costs:

@@ -85,16 +85,19 @@ def get_school_info_from_csv_sheet(sheet, for_ipeds_id):
 	# Pluck the appropriate info from the columns in the list -- using a function to safeguard against the columns rearranging.
 	ipeds_id = row[get_number_for_column("unitid", from_csv_sheet = sheet)] # This should always be the same.
 	name = row[get_number_for_column("institution name", from_csv_sheet = sheet)]
+	school_type = row[get_number_for_column("HD2013.Institutional category", from_csv_sheet = sheet)]
+	
+	admission_rate = row[get_number_for_column("DRVIC2013_RV.Percent admitted - total", from_csv_sheet = sheet)]
+	if admission_rate == "": admission_rate = None
 	
 	city = row[get_number_for_column("HD2013.City location of institution", from_csv_sheet = sheet)]
 	state = row[get_number_for_column("HD2013.State abbreviation", from_csv_sheet = sheet)]
-	zip_code = row[get_number_for_column("HD2013.ZIP code", from_csv_sheet = sheet)]
 
 	latitude = row[get_number_for_column("Latitude", from_csv_sheet = sheet)]
 	longitude = row[get_number_for_column("Longitude", from_csv_sheet = sheet)]
 	location = {"latitude": latitude, "longitude": longitude}
 
-	return name, ipeds_id, location
+	return name, ipeds_id, school_type, admission_rate, city, state, location
 
 
 
@@ -165,7 +168,7 @@ def update_school_with_ipeds_id(ipeds_id, from_cost_sheet):
 	sheet = from_cost_sheet
 
 	# Get all the info on the school from the CSV.
-	name, new_ipeds, location = get_school_info_from_csv_sheet(sheet, for_ipeds_id = ipeds_id)
+	name, new_ipeds, school_type, admission_rate, city, state, location = get_school_info_from_csv_sheet(sheet, for_ipeds_id = ipeds_id)
 
 	# Let's figure out if the school is already in the database, or needs creating.
 	try:
@@ -178,6 +181,10 @@ def update_school_with_ipeds_id(ipeds_id, from_cost_sheet):
 	# Then assign the new data. Peewee is smart enough to only make changes if the data actually changed:
 	school.name = name
 	school.ipeds_id = new_ipeds
+	school.school_type = school_type
+	school.admission_rate = admission_rate
+	school.city = city
+	school.state = state
 	school.location = location
 
 	# Finally, save it:
