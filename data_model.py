@@ -17,11 +17,13 @@ class School(BaseModel):
 	ipeds_id = CharField()
 	school_type = CharField()
 	admission_rate = IntegerField(null = True)
+	
+	# Location:
 	city = CharField()
 	state = CharField()
 	location = HStoreField()
 	
-	# Costs:
+	# Cost:
 	# total_price = HStoreField()
 	# net_price = HStoreField()
 
