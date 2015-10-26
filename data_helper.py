@@ -30,7 +30,7 @@ def get_csv_sheet(name):
 	return sheet
 
 
-def get_number_for_column_named(name, from_csv_sheet):
+def get_number_for_column(name, from_csv_sheet):
 	sheet = from_csv_sheet
 	header_row = sheet[0] # does this return the first row? Hope so.
 
@@ -39,7 +39,7 @@ def get_number_for_column_named(name, from_csv_sheet):
 			return number
 
 
-def get_numbers_for_columns_named(name, from_csv_sheet):
+def get_numbers_for_columns(name, from_csv_sheet):
 	sheet = from_csv_sheet
 	header_row = sheet[0] # does this return the first row? Hope so.
 
@@ -49,16 +49,42 @@ def get_numbers_for_columns_named(name, from_csv_sheet):
 		if name in column:
 			column_numbers.append(number)
 
-	if len(column_numbers) > 1:
-		return column_numbers
-	else:
-		column_number = column_numbers[0]
-		return column_number
+	return column_numbers
+		
+		
+def get_school_id_for_row(row, from_csv_sheet):
+	sheet = from_csv_sheet
+	id_column = get_number_for_column("unitid", from_csv_sheet = sheet)
+	school_id = str(row[id_column]).rstrip(".0")
+	return school_id
+	
 
+def get_row_for_school_id(ipeds_id, from_csv_sheet):
+	sheet = from_csv_sheet
+	column_number = get_number_for_column("unitid", from_csv_sheet = sheet)
+
+	for row in sheet:
+		row_id = get_school_id_for_row(row, from_csv_sheet = sheet)
+		if row_id == ipeds_id:
+			return row	
+		
+		
+def get_number_for_nonempty_column(name, for_ipeds_id, from_csv_sheet):
+	sheet = from_csv_sheet
+	header_row = sheet[0]
+	ipeds_id = for_ipeds_id
+	
+	column_numbers = get_numbers_for_columns(name, from_csv_sheet = sheet)
+	row = get_row_for_school_id(ipeds_id, from_csv_sheet = sheet)
+	
+	for column_number in column_numbers:
+		if not row[column_number] == "":
+			return column_number
+			
 
 def get_school_ids_from_csv_sheet(sheet):
 	school_ids = []
-	id_column = get_number_for_column_named("unitid", from_csv_sheet = sheet)
+	id_column = get_number_for_column("unitid", from_csv_sheet = sheet)
 
 	for row in sheet:
 		ipeds_id = str(row[id_column]).rstrip(".0")
@@ -67,30 +93,69 @@ def get_school_ids_from_csv_sheet(sheet):
 			school_ids.append(ipeds_id)
 
 	return school_ids
-
-
-def get_row_from_csv_sheet(sheet, for_ipeds_id):
-	ipeds_id = for_ipeds_id
-	column_number = get_numbers_for_columns_named("unitid", from_csv_sheet = sheet)
-
-	for row in sheet:
-		if row[column_number] == ipeds_id:
-			return row
-
+	
+	
+def get_total_prices_for_school_id(ipeds_id, from_csv_sheet):
+	sheet = from_csv_sheet
+	row = get_row_for_school_id(ipeds_id, from_csv_sheet = sheet)
+	
+	total_price = {}
+	total_price_keys = ["in-state students living on campus", "in-state students living off campus (with family)", "out-of-state students living on campus"]
+	
+	for key in total_price_keys:
+		try:
+			total_price[key] = row[get_number_for_nonempty_column(key, for_ipeds_id = ipeds_id, from_csv_sheet = sheet)]
+		except Exception:
+			pass
+		
+	return total_price
+	
+	
+def get_net_prices_for_school_id(ipeds_id, from_csv_sheet):
+	sheet = from_csv_sheet
+	row = get_row_for_school_id(ipeds_id, from_csv_sheet = sheet)
+	
+	net_price = {}
+	net_price_keys = ["0-30,000", "30,001-48,000", "48,001-75,000", "75,001-110,000", "over 110,000"]
+	
+	for key in net_price_keys:
+		try:
+			net_price[key] = row[get_number_for_nonempty_column(("income "+key), for_ipeds_id = ipeds_id, from_csv_sheet = sheet)]
+		except Exception:
+			pass
+		
+	# Also get the average net price:
+	try:	
+		net_price["average"] = row[get_number_for_nonempty_column("Average net price", for_ipeds_id = ipeds_id, from_csv_sheet = sheet)]
+	except Exception:
+		pass
+		
+	return net_price
+	
 
 def get_school_info_from_csv_sheet(sheet, for_ipeds_id):
 	ipeds_id = for_ipeds_id
-	row = get_row_from_csv_sheet(sheet, for_ipeds_id = ipeds_id)
+	row = get_row_for_school_id(ipeds_id, from_csv_sheet = sheet)
 
 	# Pluck the appropriate info from the columns in the list -- using a function to safeguard against the columns rearranging.
-	ipeds_id = row[get_number_for_column_named("unitid", from_csv_sheet = sheet)] # This should always be the same.
-	name = row[get_number_for_column_named("institution name", from_csv_sheet = sheet)]
+	ipeds_id = row[get_number_for_column("unitid", from_csv_sheet = sheet)] # This should always be the same.
+	name = row[get_number_for_column("institution name", from_csv_sheet = sheet)]
+	school_type = row[get_number_for_column("HD2013.Institutional category", from_csv_sheet = sheet)]
 	
-	city = row[get_number_for_column_named("HD2013.City location of institution", from_csv_sheet = sheet)]
-	state = row[get_number_for_column_named("HD2013.State abbreviation", from_csv_sheet = sheet)]
-	zip_code = row[get_number_for_column_named("HD2013.ZIP code", from_csv_sheet = sheet)]
+	admission_rate = row[get_number_for_column("DRVIC2013_RV.Percent admitted - total", from_csv_sheet = sheet)]
+	if admission_rate == "": admission_rate = None
+	
+	city = row[get_number_for_column("HD2013.City location of institution", from_csv_sheet = sheet)]
+	state = row[get_number_for_column("HD2013.State abbreviation", from_csv_sheet = sheet)]
 
-	return name, ipeds_id
+	latitude = row[get_number_for_column("Latitude", from_csv_sheet = sheet)]
+	longitude = row[get_number_for_column("Longitude", from_csv_sheet = sheet)]
+	location = {"latitude": latitude, "longitude": longitude}
+	
+	total_price = get_total_prices_for_school_id(ipeds_id, from_csv_sheet = sheet)
+	net_price = get_net_prices_for_school_id(ipeds_id, from_csv_sheet = sheet)
+	
+	return name, ipeds_id, school_type, admission_rate, city, state, location, total_price, net_price
 
 
 
@@ -161,7 +226,7 @@ def update_school_with_ipeds_id(ipeds_id, from_cost_sheet):
 	sheet = from_cost_sheet
 
 	# Get all the info on the school from the CSV.
-	name, new_ipeds_id = get_school_info_from_csv_sheet(sheet, for_ipeds_id = ipeds_id)
+	name, new_ipeds, school_type, admission_rate, city, state, location, total_price, net_price = get_school_info_from_csv_sheet(sheet, for_ipeds_id = ipeds_id)
 
 	# Let's figure out if the school is already in the database, or needs creating.
 	try:
@@ -173,19 +238,16 @@ def update_school_with_ipeds_id(ipeds_id, from_cost_sheet):
 
 	# Then assign the new data. Peewee is smart enough to only make changes if the data actually changed:
 	school.name = name
-	school.ipeds_id = new_ipeds_id
-
+	school.ipeds_id = new_ipeds
+	school.school_type = school_type
+	school.admission_rate = admission_rate
+	school.city = city
+	school.state = state
+	school.location = location
+	school.total_price = total_price
+	school.net_price = net_price
+	
 	# Finally, save it:
-	school.save()
-
-
-def update_info_for_school(school, from_cost_sheet):
-	sheet = from_cost_sheet
-
-	print "\nUpdating info for the", school.name + "."
-
-	school.name, school.ipeds_id = get_school_info_from_csv_sheet(sheet, for_ipeds_id = school.ipeds_id)
-		
 	school.save()
 
 
