@@ -24,8 +24,8 @@ class School(BaseModel):
 	location = HStoreField()
 	
 	# Cost:
-	# total_price = HStoreField()
-	# net_price = HStoreField()
+	total_price = HStoreField()
+	net_price = HStoreField()
 
 	def programs(self):
 		return Program.select().where(School == self)
