@@ -67,7 +67,7 @@ def test_roi():
 # Local commands:
 # print_schools()
 # print_programs()
-test_roi()
+# test_roi()
 
 
 print ""
