@@ -25,7 +25,7 @@ class School(BaseModel):
 	
 	# Cost:
 	total_price = HStoreField()
-	net_price = HStoreField()
+	net_price = HStoreField() # For public institutions, net price refers to net price for in-state students only.
 
 	def programs(self):
 		return Program.select().where(School == self)
