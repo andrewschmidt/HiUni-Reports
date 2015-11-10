@@ -100,7 +100,7 @@ def swap_cip_for_test_purposes():
 
 # Local commands:
 # print_schools()
-swap_cip_for_test_purposes()
+# swap_cip_for_test_purposes()
 # print_programs()
 # test_roi()
 test_best_roi_for_cip()
