@@ -7,8 +7,8 @@ import solver
 
 
 def print_schools():
-	print "\nSchools in the database:"
-	for school in schools:
+	print "\nThere are", str(School.select().count()), "schools in the database:"
+	for school in School.select():
 		print "\n    -", school.name + ", with", school.programs.count(), "programs."
 
 		print "        Location:", school.city + ", " + school.state
@@ -100,9 +100,10 @@ def swap_cip_for_test_purposes():
 
 # Local commands:
 
+print_schools()
 # print_programs()
 # test_roi()
 # swap_cip_for_test_purposes()
-# test_best_roi_for_cip()
+test_best_roi_for_cip()
 
 print ""
