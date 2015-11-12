@@ -16,16 +16,24 @@ def calculate_roi(cost, gains):
 def roi_for_program(program, duration, income_level):
 	school = program.school
 	
-	print "\nGetting ROI for", program.name, "at the", school.name +"..."
+	try: 
+		cost = int(school.net_price[income_level])*duration
+		gains = int(program.median_salary)*20 # Let's use a 20-year ROI for now.				
+		roi = calculate_roi(cost, gains)
+		return roi
 	
-	cost = int(school.net_price[income_level])*duration
-	gains = int(program.median_salary)*20 # Let's use a 20-year ROI for now.
+	except Exception:
+ 		print "Error getting ROI."
+		return None
+		
+		
+def programs_by_roi_for_cip(cip, duration, income_level):
+	programs = []
 	
-	print "Total price:", "$" + str(cost)
-	print "20-year income:", "$" + str(gains)
+	for program in Program.select().where(Program.cip == cip):
+		if program.median_salary is not None:
+			programs.append(program)
 	
-	roi = calculate_roi(cost, gains)
-	print "ROI:", str(roi) + "%"
-	return roi
+	programs.sort(key = lambda p: roi_for_program(p, duration = duration, income_level = income_level), reverse = True)
 	
-
+	return programs

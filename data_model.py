@@ -24,8 +24,8 @@ class School(BaseModel):
 	location = HStoreField()
 	
 	# Cost:
-	total_price = HStoreField()
-	net_price = HStoreField()
+	total_price = HStoreField() # To setup, run "CREATE EXTENSION hstore;" for hiuni_database from psql.
+	net_price = HStoreField() # For public institutions, net price refers to net price for in-state students only.
 
 	def programs(self):
 		return Program.select().where(School == self)

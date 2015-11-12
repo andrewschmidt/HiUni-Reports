@@ -8,7 +8,7 @@ import solver
 
 def print_schools():
 	print "\nSchools in the database:"
-	for school in School.select():
+	for school in schools:
 		print "\n    -", school.name + ", with", school.programs.count(), "programs."
 
 		print "        Location:", school.city + ", " + school.state
@@ -42,11 +42,16 @@ def print_programs():
 	print "\nPrograms in the database:"
 	for program in Program.select():
 		print "    -", program.name, "at", program.school.name
+		print "        CIP: " + str(program.cip)
 		print "        Median Salary: $" + str(program.median_salary)
+		roi = solver.roi_for_program(program, duration = 4, income_level = "30,001-48,000")
+		if roi:
+			print "        Typical ROI: " + str(roi) + "%"
+		print ""
 		
 		
 def test_roi():
-	program_name = "Economics"
+	program_name = "Economics" # CIP: 45.06
 	school_name = "University of Southern California"
 	program = Program.select().join(School).where((Program.name == program_name) & (School.name == school_name)).get()
 	
@@ -55,19 +60,49 @@ def test_roi():
 	print "\nThe 20-year ROI for studying", program.name, "at USC is", str(roi)+"%"
 
 
+def test_best_roi_for_cip():
+	cip = "45.06"
+	programs = solver.programs_by_roi_for_cip(cip, duration = 4, income_level = "30,001-48,000")
+	
+	print "\nBest schools for CIP " + cip + ", sorted by ROI:\n"
+	for program in programs:
+		print "    -", program.name, "at", program.school.name
+		print "        CIP: " + str(program.cip)
+		print "        Median Salary: $" + str(program.median_salary)
+		roi = solver.roi_for_program(program, duration = 4, income_level = "30,001-48,000")
+		if roi:
+			print "        ROI: " + str(roi) + "%"
+		print ""
+		
+
+def swap_cip_for_test_purposes():
+	usc = School.get(School.name == "University of Southern California")
+	program = Program.select().join(School).where(Program.name == "Entrepreneurial Studies", School.name == "University of Southern California").get()
+	print "Found the program " + program.name + " at the " + program.school.name + "."
+	if program.cip == "52.07":
+		program.cip = "45.06" # The CIP for...
+		program.save()
+		print "Changed its CIP to: " + program.cip
+	else:
+		program.cip = "52.07" # The original CIP.
+		print "Reverted its CIP to: " + program.cip
+		program.save()
+
+	
 # Commands for data_helper:
 
 # data_helper.drop_tables()
+# data_helper.delete_all_schools()
 # data_helper.create_tables()
 # data_helper.populate_tables()
-# data_helper.delete_all_schools()
 # data_helper.import_data()
 
 
 # Local commands:
-# print_schools()
+print_schools()
 # print_programs()
 # test_roi()
-
+# swap_cip_for_test_purposes()
+# test_best_roi_for_cip()
 
 print ""
