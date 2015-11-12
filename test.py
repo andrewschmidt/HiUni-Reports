@@ -99,18 +99,10 @@ def swap_cip_for_test_purposes():
 
 
 # Local commands:
-<<<<<<< HEAD
-print_schools()
+
 # print_programs()
 # test_roi()
 # swap_cip_for_test_purposes()
 # test_best_roi_for_cip()
-=======
-# print_schools()
-# swap_cip_for_test_purposes()
-# print_programs()
-# test_roi()
-test_best_roi_for_cip()
->>>>>>> origin/building-the-solver
 
 print ""
