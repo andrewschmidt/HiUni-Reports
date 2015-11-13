@@ -320,7 +320,7 @@ def get_ipeds_ids_in_both(cost_sheet, salary_sheet):
 	return ids_in_both
 
 
-def import_data_from_sheets(cost_sheet, salary_sheet):
+def import_school_data_from_sheets(cost_sheet, salary_sheet):
 	# Find out which IPEDS IDs are in both sheets:	
 	ids_from_sheets = get_ipeds_ids_in_both(cost_sheet, salary_sheet)
 
@@ -348,11 +348,11 @@ def import_data_from_sheets(cost_sheet, salary_sheet):
 		update_programs_for_school(school, from_salary_sheet = salary_sheet)
 
 
-def import_data(): # A hands-off version of import_data_from_sheets().
+def import_school_data(): # A hands-off version of import_school_data_from_sheets().
 	cost_sheet = get_csv_sheet(csv_file)
 	salary_sheet = get_xls_sheet(xls_file)
 	print "\nLet's import!"
-	import_data_from_sheets(cost_sheet, salary_sheet = salary_sheet)
+	import_school_data_from_sheets(cost_sheet, salary_sheet = salary_sheet)
 
 
 
@@ -377,7 +377,7 @@ def create_tables():
 
 def populate_tables():
 	print "\nAttempting to import schools & programs data..."
-	import_data()
+	import_school_data()
 
 
 def drop_tables():

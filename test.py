@@ -78,7 +78,7 @@ def test_best_roi_for_cip():
 def swap_cip_for_test_purposes():
 	usc = School.get(School.name == "University of Southern California")
 	program = Program.select().join(School).where(Program.name == "Entrepreneurial Studies", School.name == "University of Southern California").get()
-	print "Found the program " + program.name + " at the " + program.school.name + "."
+	print "\nFound the program " + program.name + " at the " + program.school.name + "."
 	if program.cip == "52.07":
 		program.cip = "45.06" # The CIP for...
 		program.save()
@@ -95,15 +95,15 @@ def swap_cip_for_test_purposes():
 # data_helper.delete_all_schools()
 # data_helper.create_tables()
 # data_helper.populate_tables()
-# data_helper.import_data()
+# data_helper.import_school_data()
 
 
 # Local commands:
 
-print_schools()
+# print_schools()
 # print_programs()
 # test_roi()
 # swap_cip_for_test_purposes()
-test_best_roi_for_cip()
+# test_best_roi_for_cip()
 
 print ""
