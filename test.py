@@ -95,7 +95,11 @@ def import_sample_template():
 
 
 def print_careers():
-	print "\nThere are", str(Career.select().count()), "careers in the database."
+	print "\nThere are", str(Career.select().count()), "careers in the database:"
+
+	careers = Career.select()
+	for career in careers:
+		print "\n    - " + career.name + ", with", career.templates.count(), "templates."
 
 
 def print_templates():
@@ -128,9 +132,10 @@ def print_steps():
 
 print_schools()
 # print_programs()
-# print_careers()
+print_careers()
 # print_templates()
 # print_steps()
+
 # test_roi()
 # swap_cip_for_test_purposes()
 # test_best_roi_for_cip()
