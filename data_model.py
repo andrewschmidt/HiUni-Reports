@@ -40,8 +40,11 @@ class Program(BaseModel):
 
 class Career(BaseModel):
 	name = CharField()
-	nicknames = ArrayField(CharField, null = True)
+	nicknames = ArrayField(CharField, null = True) # Neither of these are being imported yet.
 	description = TextField(null = True)
+
+	def templates(self):
+		return Template.select().where(Career == self)
 
 
 class Template(BaseModel):

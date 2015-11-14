@@ -121,16 +121,16 @@ def print_steps():
 # data_helper.create_tables()
 # data_helper.populate_tables()
 # data_helper.import_school_data()
-import_sample_template()
+# import_sample_template()
 
 
 # Local commands:
 
-# print_schools()
-# print_programs
-print_careers()
-print_templates()
-print_steps()
+print_schools()
+# print_programs()
+# print_careers()
+# print_templates()
+# print_steps()
 # test_roi()
 # swap_cip_for_test_purposes()
 # test_best_roi_for_cip()
