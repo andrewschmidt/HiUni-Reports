@@ -88,20 +88,51 @@ def swap_cip_for_test_purposes():
 		print "Reverted its CIP to: " + program.cip
 		program.save()
 
+
+def import_sample_template():
+	sheet = data_helper.get_csv_sheet("Sample Template.csv")
+	print "\nGot the CSV sheet 'Sample Template'"
+	print str(sheet)
+	data_helper.import_template_from_sheet(sheet)
+
+
+def print_careers():
+	print "\nThere are", str(Career.select().count()), "careers in the database."
+
+
+def print_templates():
+	print "\nThere are", str(Template.select().count()), "templates in the database."
+
 	
+def print_steps():
+	print "\nThere are", str(Step.select().count()), "steps in the database."
+	
+	# steps = Step.select()
+	# for step in steps:
+	# 	print step.title
+	# 	print str(step.number)
+	# 	print step.template.career.name
+
+
+
 # Commands for data_helper:
 
 # data_helper.drop_tables()
 # data_helper.delete_all_schools()
+# data_helper.delete_all_careers()
 # data_helper.create_tables()
 # data_helper.populate_tables()
 # data_helper.import_school_data()
+# import_sample_template()
 
 
 # Local commands:
 
 # print_schools()
-# print_programs()
+# print_programs
+print_careers()
+print_templates()
+print_steps()
 # test_roi()
 # swap_cip_for_test_purposes()
 # test_best_roi_for_cip()

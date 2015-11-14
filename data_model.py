@@ -36,3 +36,37 @@ class Program(BaseModel):
 	name = CharField()
 	cip = CharField()
 	median_salary = IntegerField()
+
+
+class Career(BaseModel):
+	name = CharField()
+	nicknames = ArrayField(CharField, null = True)
+	description = TextField(null = True)
+
+
+class Template(BaseModel):
+	career = ForeignKeyField(Career, related_name = "templates")
+	number = IntegerField()
+
+	def steps(self):
+		return Step.select().where(Template == self)
+
+	def duration(self):
+		duration = 0
+		steps = Step.select().where(Template == self)
+		for step in steps:
+			duration += step.duration
+		return duration
+
+
+class Step(BaseModel):
+	template = ForeignKeyField(Template, related_name = "steps")
+
+	number = IntegerField()
+	title = CharField()
+	description = TextField()
+	
+	school_type = CharField()
+	duration = IntegerField()
+	cips = ArrayField(CharField)
+	sort_by = CharField()

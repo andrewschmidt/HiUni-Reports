@@ -21,7 +21,7 @@ def get_csv_sheet(name):
 	# Load the CSV sheet:
 	sheet = []
 
-	with open(csv_file, 'rb') as f:
+	with open(name, 'rb') as f:
 		reader = csv.reader(f)
 	
 		for row in reader:
@@ -156,6 +156,51 @@ def get_school_info_from_csv_sheet(sheet, for_ipeds_id):
 	net_price = get_net_prices_for_school_id(ipeds_id, from_csv_sheet = sheet)
 	
 	return name, ipeds_id, school_type, admission_rate, city, state, location, total_price, net_price
+
+
+def get_template_data_from_csv_sheet(sheet):
+	row = sheet[1]
+
+	career_name = row[get_number_for_column("Career", from_csv_sheet = sheet)]
+	template_number = int(row[get_number_for_column("Template Number", from_csv_sheet = sheet)])
+
+	print "\nGot some template data from a CSV sheet."
+	print "Career name:", career_name
+	print "Template number:", str(template_number)
+
+	return career_name, template_number
+
+
+def get_steps_data_from_csv_sheet(sheet):
+	numbers = []
+	titles = []
+	descriptions = []
+	school_types = []
+	durations = []
+	cips = []
+	sort_bys = []
+
+	for row in sheet[1:]: # Skips the first row, which is the header row.
+		numbers.append(int(row[get_number_for_column("Step", from_csv_sheet = sheet)]))
+		titles.append(row[get_number_for_column("Title", from_csv_sheet = sheet)])
+		descriptions.append(row[get_number_for_column("Description", from_csv_sheet = sheet)])
+		school_types.append(row[get_number_for_column("School Type", from_csv_sheet = sheet)])
+		durations.append(int(row[get_number_for_column("Duration", from_csv_sheet = sheet)]))
+		sort_bys.append(row[get_number_for_column("Sort By", from_csv_sheet = sheet)])
+		
+		cips_string = str(row[get_number_for_column("CIP", from_csv_sheet = sheet)])
+
+		try:
+			cips_list = cips_string.split(", ")
+			print "\nSuccessfully split step's CIPs into:", str(cips_list)
+		except Exception:
+			cips_list = []
+			cips_list.append(cips_string)
+			print "\nFailed to split CIPs, maybe there was only one. Stored:", str(cips_list)
+
+		cips.append(cips_list)
+
+	return numbers, titles, descriptions, school_types, durations, cips, sort_bys
 
 
 
@@ -304,8 +349,92 @@ def update_programs_for_school(school, from_salary_sheet):
 			print "        -", program.name
 
 
+def update_career(name, nicknames, description):
+	try:
+		career = Career.get(Career.name == name)
+		print "\nUpdating info for the career '" + career.name + "'."
+	except Exception:
+		career = Career()
+		print "\nAdding a career to the database: ", name + "."
+
+	career.name = name
+	
+	if nicknames is not None and nicknames is not "":
+		for name in nicknames:
+			career.nicknames.append(name)
+
+	if description is not None and description is not "":		
+		career.description = description
+
+	print "Saving the career..."
+	
+	career.save()
+
+
+def update_template_from_sheet(sheet):
+	career_name, template_number = get_template_data_from_csv_sheet(sheet)
+
+	# First let's fetch the career, creating it if necessary in the process:
+	update_career(career_name, nicknames = None, description = None)
+	career = Career.get(Career.name == career_name)
+
+	# Next either update the info for an existing template, or create a new one. This is based on the "template number":
+	try:
+		template = Template.select().join(Career).where(Template.number == template_number & Career == career).get()
+		print "\nUpdating info for the template number", template.number, "for the career '" + career.name + "'."
+	except Exception:
+		template = Template()
+		print "\nAdding a template, number", str(template_number) + ", for the career '" + career.name + "'."
+
+	template.career = career
+	template.number = template_number
+
+	template.save()
+
+
+def update_steps_for_template(template, from_sheet):
+	sheet = from_sheet
+
+	numbers, titles, descriptions, school_types, durations, cips, sort_bys = get_steps_data_from_csv_sheet(sheet)
+
+	for i in range(len(titles)):
+		try:
+			step = Step.select().join(Template).where(Step.number == numbers[i] & Template == template).get()
+			print "\nUpdating info for the step, '" + step.title + "'."
+		except Exception:
+			step = Step()
+			print "\nAdding a step, titled '" + titles[i] + "'."
+
+		step.template = template
+
+		step.number = numbers[i]
+		step.title = titles[i]
+		step.description = descriptions[i]
+		
+		step.school_type = school_types[i]
+		step.duration = durations[i]
+		step.cips = cips[i]
+		step.sort_by = sort_bys[i]
+
+		step.save()
+
+
 
 # ***************** DATA IMPORT *****************
+
+def import_template_from_sheet(sheet):
+	print "\nAttempting to update template info..."
+	update_template_from_sheet(sheet)
+
+	print "\nAttempting to get template data from the CSV sheet..."
+	career_name, template_number = get_template_data_from_csv_sheet(sheet)
+
+	print "\nAttempting to fetch that template..."
+	template = Template.select().join(Career).where((Template.number == template_number) & (Career.name == career_name)).get()
+
+	print "\nAttempting to update the steps for the template #" + str(template.number) + "."
+	update_steps_for_template(template, from_sheet = sheet)
+
 
 def get_ipeds_ids_in_both(cost_sheet, salary_sheet):
 	cost_sheet_ids = get_school_ids_from_csv_sheet(cost_sheet)
@@ -365,6 +494,13 @@ def delete_all_schools():
 		school.delete_instance(recursive = True)
 
 
+def delete_all_careers():
+	# This should also remove related templates and steps.
+	careers = Career.select()
+	for career in careers:
+		career.delete_instance(recursive = True)
+
+
 def create_tables():
 	# Only run this once.
 	# Remember, this doesn't create a database. Just the tables.
@@ -372,7 +508,8 @@ def create_tables():
 	print "\nConnecting to the database..."
 	database.connect()
 	print "\nCreating tables..."
-	database.create_tables([School, Program])
+	# database.create_tables([School, Program])
+	database.create_tables([Career, Template, Step])
 
 
 def populate_tables():
@@ -383,4 +520,5 @@ def populate_tables():
 def drop_tables():
 	# Only do this if you're serious.
 	print "\nDropping tables..."
-	database.drop_tables([School, Program], safe = True)
+	# database.drop_tables([School, Program], safe = True)
+	database.drop_tables([Career, Template, Step], safe = True)
