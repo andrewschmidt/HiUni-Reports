@@ -91,8 +91,6 @@ def swap_cip_for_test_purposes():
 
 def import_sample_template():
 	sheet = data_helper.get_csv_sheet("Sample Template.csv")
-	print "\nGot the CSV sheet 'Sample Template'"
-	print str(sheet)
 	data_helper.import_template_from_sheet(sheet)
 
 
@@ -123,7 +121,7 @@ def print_steps():
 # data_helper.create_tables()
 # data_helper.populate_tables()
 # data_helper.import_school_data()
-# import_sample_template()
+import_sample_template()
 
 
 # Local commands:

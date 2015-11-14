@@ -164,10 +164,6 @@ def get_template_data_from_csv_sheet(sheet):
 	career_name = row[get_number_for_column("Career", from_csv_sheet = sheet)]
 	template_number = int(row[get_number_for_column("Template Number", from_csv_sheet = sheet)])
 
-	print "\nGot some template data from a CSV sheet."
-	print "Career name:", career_name
-	print "Template number:", str(template_number)
-
 	return career_name, template_number
 
 
@@ -189,15 +185,7 @@ def get_steps_data_from_csv_sheet(sheet):
 		sort_bys.append(row[get_number_for_column("Sort By", from_csv_sheet = sheet)])
 		
 		cips_string = str(row[get_number_for_column("CIP", from_csv_sheet = sheet)])
-
-		try:
-			cips_list = cips_string.split(", ")
-			print "\nSuccessfully split step's CIPs into:", str(cips_list)
-		except Exception:
-			cips_list = []
-			cips_list.append(cips_string)
-			print "\nFailed to split CIPs, maybe there was only one. Stored:", str(cips_list)
-
+		cips_list = cips_string.split(", ")
 		cips.append(cips_list)
 
 	return numbers, titles, descriptions, school_types, durations, cips, sort_bys
@@ -355,7 +343,7 @@ def update_career(name, nicknames, description):
 		print "\nUpdating info for the career '" + career.name + "'."
 	except Exception:
 		career = Career()
-		print "\nAdding a career to the database: ", name + "."
+		print "\nAdding a career to the database:", name + "."
 
 	career.name = name
 	
@@ -365,8 +353,6 @@ def update_career(name, nicknames, description):
 
 	if description is not None and description is not "":		
 		career.description = description
-
-	print "Saving the career..."
 	
 	career.save()
 
@@ -380,11 +366,11 @@ def update_template_from_sheet(sheet):
 
 	# Next either update the info for an existing template, or create a new one. This is based on the "template number":
 	try:
-		template = Template.select().join(Career).where(Template.number == template_number & Career == career).get()
-		print "\nUpdating info for the template number", template.number, "for the career '" + career.name + "'."
+		template = Template.select().join(Career).where((Template.number == template_number) & (Template.career == career)).get()
+		print "\nUpdating info for the template number", template.number, "for the career '" + career.name + ".'"
 	except Exception:
 		template = Template()
-		print "\nAdding a template, number", str(template_number) + ", for the career '" + career.name + "'."
+		print "\nAdding template number", str(template_number) + ", for the career '" + career.name + ".'"
 
 	template.career = career
 	template.number = template_number
@@ -399,11 +385,11 @@ def update_steps_for_template(template, from_sheet):
 
 	for i in range(len(titles)):
 		try:
-			step = Step.select().join(Template).where(Step.number == numbers[i] & Template == template).get()
-			print "\nUpdating info for the step, '" + step.title + "'."
+			step = Step.select().join(Template).where((Step.number == numbers[i]) & (Step.template == template)).get()
+			print "    - Updating info for step #" + str(step.number) + "."
 		except Exception:
 			step = Step()
-			print "\nAdding a step, titled '" + titles[i] + "'."
+			print "    - Adding a step, titled '" + titles[i] + "'"
 
 		step.template = template
 
@@ -423,16 +409,11 @@ def update_steps_for_template(template, from_sheet):
 # ***************** DATA IMPORT *****************
 
 def import_template_from_sheet(sheet):
-	print "\nAttempting to update template info..."
 	update_template_from_sheet(sheet)
 
-	print "\nAttempting to get template data from the CSV sheet..."
 	career_name, template_number = get_template_data_from_csv_sheet(sheet)
-
-	print "\nAttempting to fetch that template..."
 	template = Template.select().join(Career).where((Template.number == template_number) & (Career.name == career_name)).get()
 
-	print "\nAttempting to update the steps for the template #" + str(template.number) + "."
 	update_steps_for_template(template, from_sheet = sheet)
 
 
