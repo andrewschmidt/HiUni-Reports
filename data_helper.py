@@ -10,9 +10,8 @@ import csv # For reading CSVs.
 
 
 
-csv_file = "IPEDS data (altered).csv" # The CSV file w/ data from IPEDS.
-xls_file = "PayScale Sample (altered).xlsx" # The current Excel file w/ data from PayScale.
-
+ipeds_file = "IPEDS data (altered).csv" # The CSV file w/ data from IPEDS.
+payscale_file = "2015-10 Four Digit Experienced Pay (Converted) just USC.csv" # The CSV file w/ data from PayScale.
 
 
 # ***************** CSV FUNCTIONS *****************
@@ -33,6 +32,9 @@ def get_csv_sheet(name):
 def get_number_for_column(name, from_csv_sheet):
 	sheet = from_csv_sheet
 	header_row = sheet[0] # does this return the first row? Hope so.
+
+	if header_row[0] == name:
+		return 0
 
 	for number, column in enumerate(header_row):
 		if name in column:
@@ -85,6 +87,9 @@ def get_number_for_nonempty_column(name, for_ipeds_id, from_csv_sheet):
 def get_school_ids_from_csv_sheet(sheet):
 	school_ids = []
 	id_column = get_number_for_column("unitid", from_csv_sheet = sheet)
+
+	if id_column is None:
+		id_column = get_number_for_column("IPEDS ID", from_csv_sheet = sheet)
 
 	for row in sheet:
 		ipeds_id = str(row[id_column]).rstrip(".0")
@@ -191,8 +196,42 @@ def get_steps_data_from_csv_sheet(sheet):
 	return numbers, titles, descriptions, school_types, durations, cips, sort_bys
 
 
+def get_school_names_from_csv_sheet(sheet):
+	school_names = []
+	name_column = get_number_for_column("School", from_csv_sheet = sheet)
+
+	for row in sheet:
+		if not row[name_column] in school_names:
+			school_names.append(row[name_column])
+
+	return school_names
+
+
+def get_programs_data_from_csv_sheet(sheet, for_school):
+	school = for_school
+	
+	id_column = get_number_for_column("IPEDS ID", from_csv_sheet = sheet)
+	name_column = get_number_for_column("Major", from_csv_sheet = sheet)
+	cip_column = get_number_for_column("CIP Code", from_csv_sheet = sheet)
+	median_salary_column = get_number_for_column("Median Pay", from_csv_sheet = sheet)
+
+	# Let's search the sheet for programs for our school, and return the basic data about them:
+	names = []
+	cips = []
+	median_salaries = []
+
+	for row in sheet:
+		if row[id_column] == school.ipeds_id:
+			names.append(row[name_column])
+			cips.append(row[cip_column])
+			median_salaries.append(row[median_salary_column])
+
+	return names, cips, median_salaries
+
+
 
 # ***************** XLS FUNCTIONS *****************
+# Can probably remove these now.
 
 def get_xls_sheet(name):
 	# Load the workbook & sheet:
@@ -286,9 +325,8 @@ def update_school_with_ipeds_id(ipeds_id, from_cost_sheet):
 
 def update_programs_for_school(school, from_salary_sheet):
 	sheet = from_salary_sheet
-	number_of_rows = sheet.nrows
 
-	names, cips, median_salaries = get_programs_data_from_xls_sheet(sheet, for_school = school)
+	names, cips, median_salaries = get_programs_data_from_csv_sheet(sheet, for_school = school)
 	
 	# Now let's add the new programs, and update the existing ones.
 	updated = []
@@ -348,6 +386,7 @@ def update_career(name, nicknames, description):
 	career.name = name
 	
 	if nicknames is not None and nicknames is not "":
+		print "Nicknames for the career were not None OR:"
 		for name in nicknames:
 			career.nicknames.append(name)
 
@@ -419,7 +458,7 @@ def import_template_from_sheet(sheet):
 
 def get_ipeds_ids_in_both(cost_sheet, salary_sheet):
 	cost_sheet_ids = get_school_ids_from_csv_sheet(cost_sheet)
-	salary_sheet_ids = get_school_ids_from_xls_sheet(salary_sheet)
+	salary_sheet_ids = get_school_ids_from_csv_sheet(salary_sheet)
 
 	ids_in_both = []
 
@@ -459,8 +498,8 @@ def import_school_data_from_sheets(cost_sheet, salary_sheet):
 
 
 def import_school_data(): # A hands-off version of import_school_data_from_sheets().
-	cost_sheet = get_csv_sheet(csv_file)
-	salary_sheet = get_xls_sheet(xls_file)
+	cost_sheet = get_csv_sheet(ipeds_file)
+	salary_sheet = get_csv_sheet(payscale_file)
 	print "\nLet's import!"
 	import_school_data_from_sheets(cost_sheet, salary_sheet = salary_sheet)
 

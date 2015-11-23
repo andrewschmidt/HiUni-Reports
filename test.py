@@ -10,11 +10,10 @@ def print_schools():
 	print "\nThere are", str(School.select().count()), "schools in the database:"
 	for school in School.select():
 		print "\n    -", school.name + ", with", school.programs.count(), "programs."
-
 		print "        Location:", school.city + ", " + school.state
 		# print "        Location:", school.location["latitude"] + ",", school.location["longitude"]
-
 		print "        Admission rate:", str(school.admission_rate) + "%"
+		print "        IPEDS ID:", str(school.ipeds_id)
 
 		try:
 			check_total_price = school.total_price["in-state students living on campus"]
@@ -131,8 +130,9 @@ def print_steps():
 # Local commands:
 
 print_schools()
-# print_programs()
-print_careers()
+print_programs()
+# import_sample_template()
+# print_careers()
 # print_templates()
 # print_steps()
 
