@@ -143,7 +143,7 @@ def repopulate_everything():
 
 # Local commands:
 
-# print_number_of_schools()
+print_number_of_schools()
 # print_schools()
 # print_programs()
 # import_sample_template()
@@ -156,6 +156,6 @@ def repopulate_everything():
 # test_best_roi_for_cip()
 
 # destroy_and_rebuild_tables()
-repopulate_everything()
+# repopulate_everything()
 
 print ""

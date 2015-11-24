@@ -442,7 +442,7 @@ def import_school_data_from_sheets(cost_sheet, salary_sheet):
 	ids_from_sheets = get_ipeds_ids_in_both(cost_sheet, salary_sheet)
 
 	schools_done = 0
-	total_schools = ids_from_sheets.count()
+	total_schools = len(ids_from_sheets)
 
 	for ipeds_id in ids_from_sheets:
 		# Make or update the school for the ID:
@@ -454,29 +454,6 @@ def import_school_data_from_sheets(cost_sheet, salary_sheet):
 
 		schools_done += 1
 		print "\nUpdated/created", str(schools_done) + "/" + str(total_schools), "schools\n"
-
-	# schools_to_update = []
-	# ids_of_schools_to_add = []
-
-	# for ipeds_id in ids_from_sheets:
-	# 	try:
-	# 		school = School.get(School.ipeds_id == ipeds_id)
-	# 		schools_to_update.append(school)
-
-	# 	except Exception:
-	# 		ids_of_schools_to_add.append(ipeds_id)
-
-	# for school in schools_to_update:
-	# 	update_school_with_ipeds_id(school.ipeds_id, from_cost_sheet = cost_sheet)
-	# 	update_programs_for_school(school, from_salary_sheet = salary_sheet)
-
-	# for ipeds_id in ids_of_schools_to_add:
-	# 	# Make a new school:
-	# 	update_school_with_ipeds_id(ipeds_id, from_cost_sheet = cost_sheet)
-	# 	# Get the new school:
-	# 	school = School.get(School.ipeds_id == ipeds_id)
-	# 	# Make its programs:
-	# 	update_programs_for_school(school, from_salary_sheet = salary_sheet)
 
 
 def import_school_data(): # A hands-off version of import_school_data_from_sheets().
