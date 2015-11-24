@@ -6,15 +6,18 @@ import data_helper
 import solver
 
 
+def print_number_of_schools():
+	print "\nThere are", str(School.select().count()), "schools in the database, offering", str(Program.select().count()), "programs."
+
+
 def print_schools():
 	print "\nThere are", str(School.select().count()), "schools in the database:"
 	for school in School.select():
 		print "\n    -", school.name + ", with", school.programs.count(), "programs."
-
 		print "        Location:", school.city + ", " + school.state
 		# print "        Location:", school.location["latitude"] + ",", school.location["longitude"]
-
 		print "        Admission rate:", str(school.admission_rate) + "%"
+		print "        IPEDS ID:", str(school.ipeds_id)
 
 		try:
 			check_total_price = school.total_price["in-state students living on campus"]
@@ -44,6 +47,7 @@ def print_programs():
 		print "    -", program.name, "at", program.school.name
 		print "        CIP: " + str(program.cip)
 		print "        Median Salary: $" + str(program.median_salary)
+		print "        Reportable? " + str(program.reportable)
 		roi = solver.roi_for_program(program, duration = 4, income_level = "30,001-48,000")
 		if roi:
 			print "        Typical ROI: " + str(roi) + "%"
@@ -109,11 +113,21 @@ def print_templates():
 def print_steps():
 	print "\nThere are", str(Step.select().count()), "steps in the database."
 	
-	# steps = Step.select()
-	# for step in steps:
-	# 	print step.title
-	# 	print str(step.number)
-	# 	print step.template.career.name
+	steps = Step.select()
+	for step in steps:
+		print step.title
+		print str(step.number)
+		print step.template.career.name
+
+
+def destroy_and_rebuild_tables():
+	data_helper.drop_tables()
+	data_helper.create_tables()
+
+
+def repopulate_everything():
+	data_helper.import_school_data()
+	import_sample_template()
 
 
 
@@ -123,21 +137,25 @@ def print_steps():
 # data_helper.delete_all_schools()
 # data_helper.delete_all_careers()
 # data_helper.create_tables()
-# data_helper.populate_tables()
 # data_helper.import_school_data()
 # import_sample_template()
 
 
 # Local commands:
 
-print_schools()
+print_number_of_schools()
+# print_schools()
 # print_programs()
-print_careers()
+# import_sample_template()
+# print_careers()
 # print_templates()
 # print_steps()
 
 # test_roi()
 # swap_cip_for_test_purposes()
 # test_best_roi_for_cip()
+
+# destroy_and_rebuild_tables()
+# repopulate_everything()
 
 print ""

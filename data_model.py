@@ -36,6 +36,7 @@ class Program(BaseModel):
 	name = CharField()
 	cip = CharField()
 	median_salary = IntegerField()
+	reportable = BooleanField()
 
 
 class Career(BaseModel):
