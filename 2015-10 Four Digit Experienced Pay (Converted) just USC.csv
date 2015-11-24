@@ -1,2 +1,7 @@
 IPEDS ID,School,Major,CIP Code,25th Percentile Pay,Median Pay,75th Percentile Pay,Confidence Level on the Median,Report or Don't Report,Lower Bound 90% CI(25th),Upper Bound 90% CI(25th),Lower Bound 90% CI(50th),Upper Bound 90% CI(50th),Lower Bound 90% CI(75th),Upper Bound 90% CI(75th)
 123961,University of Southern California (USC),Management Information Systems (MIS),52.12,Low Data,129000,Low Data,Low Data,Don't Report,Low Data,Low Data,Low Data,Low Data,Low Data,Low Data
+6666666,School of Barista Arts,Latte Making,666.66,,54000,,,Report,,,,,,
+6666666,School of Barista Arts,AeroPress Arts,666.67,,66000,,,Report,,,,,,
+9999999,University of Coffee Mongers,Latte Making,666.66,,72000,,,Report,,,,,,
+9999999,University of Coffee Mongers,Developing your Palate: A Test in Tasting,999.99,,46000,,,Report,,,,,,
+6666666,School of Barista Arts,Basic Barista-ing,666.68,,28000,,,Report,,,,,,

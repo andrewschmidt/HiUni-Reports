@@ -9,9 +9,8 @@ import xlrd # For reading Excel workbooks.
 import csv # For reading CSVs.
 
 
-
 ipeds_file = "IPEDS data (altered).csv" # The CSV file w/ data from IPEDS.
-payscale_file = "2015-10 Four Digit Experienced Pay (Converted) just USC.csv" # The CSV file w/ data from PayScale.
+payscale_file = "2015-10 Four Digit Experienced Pay (Converted).csv" # The CSV file w/ data from PayScale.
 
 
 # ***************** CSV FUNCTIONS *****************
@@ -43,7 +42,7 @@ def get_number_for_column(name, from_csv_sheet):
 
 def get_numbers_for_columns(name, from_csv_sheet):
 	sheet = from_csv_sheet
-	header_row = sheet[0] # does this return the first row? Hope so.
+	header_row = sheet[0]
 
 	column_numbers = []
 
@@ -56,9 +55,19 @@ def get_numbers_for_columns(name, from_csv_sheet):
 		
 def get_school_id_for_row(row, from_csv_sheet):
 	sheet = from_csv_sheet
+
 	id_column = get_number_for_column("unitid", from_csv_sheet = sheet)
-	school_id = str(row[id_column]).rstrip(".0")
-	return school_id
+	if id_column is None:
+		id_column = get_number_for_column("IPEDS ID", from_csv_sheet = sheet)
+
+	try:
+		school_id = str(int(row[id_column])) # This wasn't working: str(row[id_column]).rstrip(".0")
+		# print "SCHOOL_ID_FOR_ROW: Converted cell to integer, then string. Cell contained:", str(row[id_column]) + ", converted to:", school_id
+		return school_id
+
+	except Exception:
+		# print "SCHOOL_ID_FOR_ROW: Failed to convert cell to integer, then to string. Cell contains:", str(row[id_column])
+		return None
 	
 
 def get_row_for_school_id(ipeds_id, from_csv_sheet):
@@ -86,16 +95,30 @@ def get_number_for_nonempty_column(name, for_ipeds_id, from_csv_sheet):
 
 def get_school_ids_from_csv_sheet(sheet):
 	school_ids = []
-	id_column = get_number_for_column("unitid", from_csv_sheet = sheet)
+	# id_column = get_number_for_column("unitid", from_csv_sheet = sheet)
 
-	if id_column is None:
-		id_column = get_number_for_column("IPEDS ID", from_csv_sheet = sheet)
+	# if id_column is None:
+	# 	id_column = get_number_for_column("IPEDS ID", from_csv_sheet = sheet)
 
 	for row in sheet:
-		ipeds_id = str(row[id_column]).rstrip(".0")
-		
-		if ipeds_id not in school_ids:
+		ipeds_id = get_school_id_for_row(row, from_csv_sheet = sheet)
+		if not ipeds_id is None:
 			school_ids.append(ipeds_id)
+
+	# for row in sheet:
+	# 	if row[id_column] != "unitid":
+	# 		try:
+	# 			ipeds_id = str(int(row[id_column])) # This wasn't working: str(row[id_column]).rstrip(".0")
+				
+	# 			print "SCHOOL_IDS_FROM_CSV_SHEET: Converted cell to integer, then string. Cell contained:", str(row[id_column]) + ", converted to:", ipeds_id
+				
+	# 			if ipeds_id not in school_ids:
+	# 				school_ids.append(ipeds_id)
+
+	# 		except Exception:
+	# 			print "SCHOOL_IDS_FROM_CSV_SHEET: Failed to convert cell to integer, then to string. Cell contains:", str(row[id_column])
+	# 			pass
+		
 
 	return school_ids
 	
@@ -214,81 +237,25 @@ def get_programs_data_from_csv_sheet(sheet, for_school):
 	name_column = get_number_for_column("Major", from_csv_sheet = sheet)
 	cip_column = get_number_for_column("CIP Code", from_csv_sheet = sheet)
 	median_salary_column = get_number_for_column("Median Pay", from_csv_sheet = sheet)
+	reportable_column = get_number_for_column("Report or Don't Report", from_csv_sheet = sheet)
 
 	# Let's search the sheet for programs for our school, and return the basic data about them:
 	names = []
 	cips = []
 	median_salaries = []
+	reportables = []
 
 	for row in sheet:
 		if row[id_column] == school.ipeds_id:
 			names.append(row[name_column])
 			cips.append(row[cip_column])
 			median_salaries.append(row[median_salary_column])
+			if row[reportable_column] == "Don't Report":
+				reportables.append(False)
+			else:
+				reportables.append(True)
 
-	return names, cips, median_salaries
-
-
-
-# ***************** XLS FUNCTIONS *****************
-# Can probably remove these now.
-
-def get_xls_sheet(name):
-	# Load the workbook & sheet:
-	book = xlrd.open_workbook(name)
-	sheet = book.sheet_by_name("4-Digit CIP - Experienced Pay")
-
-	return sheet
-
-
-def get_school_names_from_xls_sheet(sheet):
-	school_names = []
-	
-	number_of_rows = sheet.nrows - 1
-
-	cell_values = sheet.col_values(1, start_rowx = 1, end_rowx = None)
-
-	for value in cell_values:
-		if not value in school_names:
-			school_names.append(value)
-
-	return school_names
-
-
-def get_school_ids_from_xls_sheet(sheet):
-	school_ids = []
-	
-	number_of_rows = sheet.nrows - 1
-
-	cell_values = sheet.col_values(0, start_rowx = 1, end_rowx = None)
-
-	for value in cell_values:
-		value = str(value).rstrip(".0") # Convert to string, drop any trailing zero.
-
-		if not value in school_ids:
-			school_ids.append(value)
-
-	return school_ids
-
-
-def get_programs_data_from_xls_sheet(sheet, for_school):
-	school = for_school
-	number_of_rows = sheet.nrows
-	
-	# Let's search the sheet for programs for our school, and return the basic data about them:
-	names = []
-	cips = []
-	median_salaries = []
-
-	for row in range(number_of_rows):
-		row_id = str(sheet.cell_value(rowx = row, colx = 0)).rstrip(".0")
-		
-		if row_id == school.ipeds_id:
-			cips.append(sheet.cell_value(rowx = row, colx = 3))
-			names.append(sheet.cell_value(rowx = row, colx = 2))
-			median_salaries.append(sheet.cell_value(rowx = row, colx = 5))
-
-	return names, cips, median_salaries
+	return names, cips, median_salaries, reportables
 
 
 
@@ -326,7 +293,7 @@ def update_school_with_ipeds_id(ipeds_id, from_cost_sheet):
 def update_programs_for_school(school, from_salary_sheet):
 	sheet = from_salary_sheet
 
-	names, cips, median_salaries = get_programs_data_from_csv_sheet(sheet, for_school = school)
+	names, cips, median_salaries, reportables = get_programs_data_from_csv_sheet(sheet, for_school = school)
 	
 	# Now let's add the new programs, and update the existing ones.
 	updated = []
@@ -340,7 +307,7 @@ def update_programs_for_school(school, from_salary_sheet):
 			p = query.where(query_filter).get()
 			
 			# Only update the program if something's changed:
-			if p.name != names[i] or p.median_salary != median_salaries[i]:
+			if p.name != names[i] or p.median_salary != median_salaries[i] or p.reportable != reportables[i]:
 				p.name = names[i]
 				p.median_salary = median_salaries[i]
 				
@@ -355,6 +322,7 @@ def update_programs_for_school(school, from_salary_sheet):
 			p.name = names[i]
 			p.cip = cips[i]
 			p.median_salary = median_salaries[i]
+			p.reportable = reportables[i]
 
 			p.save()
 			
@@ -473,28 +441,42 @@ def import_school_data_from_sheets(cost_sheet, salary_sheet):
 	# Find out which IPEDS IDs are in both sheets:	
 	ids_from_sheets = get_ipeds_ids_in_both(cost_sheet, salary_sheet)
 
-	schools_to_update = []
-	ids_of_schools_to_add = []
+	schools_done = 0
+	total_schools = ids_from_sheets.count()
 
 	for ipeds_id in ids_from_sheets:
-		try:
-			school = School.get(School.ipeds_id == ipeds_id)
-			schools_to_update.append(school)
-
-		except Exception:
-			ids_of_schools_to_add.append(ipeds_id)
-
-	for school in schools_to_update:
-		update_school_with_ipeds_id(school.ipeds_id, from_cost_sheet = cost_sheet)
-		update_programs_for_school(school, from_salary_sheet = salary_sheet)
-
-	for ipeds_id in ids_of_schools_to_add:
-		# Make a new school:
+		# Make or update the school for the ID:
 		update_school_with_ipeds_id(ipeds_id, from_cost_sheet = cost_sheet)
-		# Get the new school:
+		# Get the school:
 		school = School.get(School.ipeds_id == ipeds_id)
-		# Make its programs:
+		# Make or update its programs:
 		update_programs_for_school(school, from_salary_sheet = salary_sheet)
+
+		schools_done += 1
+		print "\nUpdated/created", str(schools_done) + "/" + str(total_schools), "schools\n"
+
+	# schools_to_update = []
+	# ids_of_schools_to_add = []
+
+	# for ipeds_id in ids_from_sheets:
+	# 	try:
+	# 		school = School.get(School.ipeds_id == ipeds_id)
+	# 		schools_to_update.append(school)
+
+	# 	except Exception:
+	# 		ids_of_schools_to_add.append(ipeds_id)
+
+	# for school in schools_to_update:
+	# 	update_school_with_ipeds_id(school.ipeds_id, from_cost_sheet = cost_sheet)
+	# 	update_programs_for_school(school, from_salary_sheet = salary_sheet)
+
+	# for ipeds_id in ids_of_schools_to_add:
+	# 	# Make a new school:
+	# 	update_school_with_ipeds_id(ipeds_id, from_cost_sheet = cost_sheet)
+	# 	# Get the new school:
+	# 	school = School.get(School.ipeds_id == ipeds_id)
+	# 	# Make its programs:
+	# 	update_programs_for_school(school, from_salary_sheet = salary_sheet)
 
 
 def import_school_data(): # A hands-off version of import_school_data_from_sheets().
@@ -528,7 +510,7 @@ def create_tables():
 	print "\nConnecting to the database..."
 	database.connect()
 	print "\nCreating tables..."
-	# database.create_tables([School, Program])
+	database.create_tables([School, Program])
 	database.create_tables([Career, Template, Step])
 
 
@@ -540,5 +522,5 @@ def populate_tables():
 def drop_tables():
 	# Only do this if you're serious.
 	print "\nDropping tables..."
-	# database.drop_tables([School, Program], safe = True)
+	database.drop_tables([School, Program], safe = True)
 	database.drop_tables([Career, Template, Step], safe = True)
