@@ -13,13 +13,21 @@ def calculate_roi(cost, gains):
 	return roi
 	
 
-def roi_for_program(program, duration, income_level):
+def roi_for_program(program, duration, income_level, home_state):
 	school = program.school
 	
 	try: 
-		cost = int(school.net_price[income_level])*duration
 		gains = int(program.median_salary)*20 # Let's use a 20-year ROI for now.				
+		if school.state == home_state:
+			try:
+				cost = int(school.net_price[income_level])*duration
+			except Exception:
+				cost = int(school.total_price["in-state students living on campus"])*duration
+		else:
+			cost = int(school.total_price["out-of-state students living on campus"])*duration
+		
 		roi = calculate_roi(cost, gains)
+		
 		return roi
 	
 	except Exception:
@@ -27,13 +35,13 @@ def roi_for_program(program, duration, income_level):
 		return None
 		
 		
-def programs_by_roi_for_cip(cip, duration, income_level):
+def programs_by_roi_for_cip(cip, duration, income_level, home_state):
 	programs = []
 	
 	for program in Program.select().where(Program.cip == cip):
 		if program.median_salary is not None:
 			programs.append(program)
 	
-	programs.sort(key = lambda p: roi_for_program(p, duration = duration, income_level = income_level), reverse = True)
+	programs.sort(key = lambda p: roi_for_program(p, duration = duration, income_level = income_level, home_state = home_state), reverse = True)
 	
 	return programs

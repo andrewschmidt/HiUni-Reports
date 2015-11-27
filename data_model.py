@@ -48,6 +48,18 @@ class Career(BaseModel):
 		return Template.select().where(Career == self)
 
 
+class Student(BaseModel):
+	name = CharField()
+	career = ForeignKeyField(Career)
+	income = CharField()
+	budget = IntegerField()
+	
+	# Location:
+	city = CharField()
+	state = CharField()
+	location = HStoreField(null = True) # For storing latitude and longitude keys.
+
+
 class Template(BaseModel):
 	career = ForeignKeyField(Career, related_name = "templates")
 	number = IntegerField()

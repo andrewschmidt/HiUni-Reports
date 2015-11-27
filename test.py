@@ -64,10 +64,11 @@ def test_roi():
 	print "\nThe 20-year ROI for studying", program.name, "at USC is", str(roi)+"%"
 
 
-def get_best_roi_schools_for_cip(cip, how_many):
+def get_best_roi_schools_for_cip(cip, how_many, home_state):
 	print ""
+	state = home_state
 
-	programs = solver.programs_by_roi_for_cip(cip, duration = 4, income_level = "30,001-48,000")
+	programs = solver.programs_by_roi_for_cip(cip, duration = 4, income_level = "30,001-48,000", home_state = state)
 
 	if len(programs) > 0:
 
@@ -84,7 +85,7 @@ def get_best_roi_schools_for_cip(cip, how_many):
 				print "   #" + str(schools_found+1) + ":", program.name, "at", program.school.name
 				print "        Median Salary: $" + str(program.median_salary)
 				
-				roi = solver.roi_for_program(program, duration = 4, income_level = "30,001-48,000")
+				roi = solver.roi_for_program(program, duration = 4, income_level = "30,001-48,000", home_state = state)
 				if roi:
 					print "        ROI: " + str(roi) + "%"
 				
@@ -92,7 +93,7 @@ def get_best_roi_schools_for_cip(cip, how_many):
 				# 	print "        Report? Yes"
 				# else:
 				# 	print "        Report? No"
-				
+			
 				print ""
 
 				schools_found += 1
@@ -114,6 +115,16 @@ def print_careers():
 		print "\n    - " + career.name + ", with", career.templates.count(), "templates."
 
 
+def print_students():
+	number_of_students = Student.select().count()
+	print "\nThere are", str(number_of_students), "students in the database:"
+
+	if number_of_students > 0:
+		students = Student.select()
+		for student in students:
+			print "\n    - " + student.name + "."
+
+
 def print_templates():
 	print "\nThere are", str(Template.select().count()), "templates in the database."
 
@@ -126,6 +137,30 @@ def print_steps():
 		print step.title
 		print str(step.number)
 		print step.template.career.name
+
+
+def create_sample_student():
+	name = "Lindsay Santiago"
+	career = Career.get(Career.name == "Barista")
+	income = "30,001-48,000"
+	budget = 120000
+	city = "Los Angeles"
+	state = "California"
+
+	create_student(name, career, income, budget, city, state)
+
+
+def create_student(name, career, income, budget, city, state):
+	student = Student()
+	
+	student.name = name
+	student.career = career
+	student.income = income
+	student.budget = budget
+	student.city = city
+	student.state = state
+
+	student.save()
 
 
 def destroy_and_rebuild_tables():
@@ -155,11 +190,13 @@ def repopulate_everything():
 # print_schools()
 # print_programs()
 # import_sample_template()
+# create_sample_student()
+# print_students()
 # print_careers()
 # print_templates()
 # print_steps()
 
-get_best_roi_schools_for_cip("09.04", how_many = 5) # Economics = 45.06, Design = 50.04, Biology = 26.01, Drama = 50.05, Journalism = 09.04
+get_best_roi_schools_for_cip("26.01", how_many = 5, home_state = "California") # Economics = 45.06, Design = 50.04, Biology = 26.01, Drama = 50.05, Journalism = 09.04, Architecture = 04.02
 # test_roi()
 # swap_cip_for_test_purposes()
 

@@ -489,6 +489,7 @@ def create_tables():
 	print "\nCreating tables..."
 	database.create_tables([School, Program])
 	database.create_tables([Career, Template, Step])
+	database.create_tables([Student])
 
 
 def populate_tables():
