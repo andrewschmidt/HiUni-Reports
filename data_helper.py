@@ -453,7 +453,7 @@ def import_school_data_from_sheets(cost_sheet, salary_sheet):
 		update_programs_for_school(school, from_salary_sheet = salary_sheet)
 
 		schools_done += 1
-		print "\nUpdated/created", str(schools_done) + "/" + str(total_schools), "schools\n"
+		print "\nUpdated/created", str(schools_done) + "/" + str(total_schools), "schools"
 
 
 def import_school_data(): # A hands-off version of import_school_data_from_sheets().

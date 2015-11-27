@@ -64,33 +64,41 @@ def test_roi():
 	print "\nThe 20-year ROI for studying", program.name, "at USC is", str(roi)+"%"
 
 
-def test_best_roi_for_cip():
-	cip = "45.06"
-	programs = solver.programs_by_roi_for_cip(cip, duration = 4, income_level = "30,001-48,000")
-	
-	print "\nBest schools for CIP " + cip + ", sorted by ROI:\n"
-	for program in programs:
-		print "    -", program.name, "at", program.school.name
-		print "        CIP: " + str(program.cip)
-		print "        Median Salary: $" + str(program.median_salary)
-		roi = solver.roi_for_program(program, duration = 4, income_level = "30,001-48,000")
-		if roi:
-			print "        ROI: " + str(roi) + "%"
-		print ""
-		
+def get_best_roi_schools_for_cip(cip, how_many):
+	print ""
 
-def swap_cip_for_test_purposes():
-	usc = School.get(School.name == "University of Southern California")
-	program = Program.select().join(School).where(Program.name == "Entrepreneurial Studies", School.name == "University of Southern California").get()
-	print "\nFound the program " + program.name + " at the " + program.school.name + "."
-	if program.cip == "52.07":
-		program.cip = "45.06" # The CIP for...
-		program.save()
-		print "Changed its CIP to: " + program.cip
+	programs = solver.programs_by_roi_for_cip(cip, duration = 4, income_level = "30,001-48,000")
+
+	if len(programs) > 0:
+
+		print "\nTop", str(how_many), "schools for CIP:", cip + ", sorted by ROI:\n"
+		
+		schools_found = 0
+		i = 0
+
+		while schools_found < how_many:
+			program = programs[i]
+			i += 1
+
+			if program.reportable:
+				print "   #" + str(schools_found+1) + ":", program.name, "at", program.school.name
+				print "        Median Salary: $" + str(program.median_salary)
+				
+				roi = solver.roi_for_program(program, duration = 4, income_level = "30,001-48,000")
+				if roi:
+					print "        ROI: " + str(roi) + "%"
+				
+				# if program.reportable:
+				# 	print "        Report? Yes"
+				# else:
+				# 	print "        Report? No"
+				
+				print ""
+
+				schools_found += 1
+
 	else:
-		program.cip = "52.07" # The original CIP.
-		print "Reverted its CIP to: " + program.cip
-		program.save()
+		print "Couldn't find any reportable programs for that CIP."
 
 
 def import_sample_template():
@@ -143,7 +151,7 @@ def repopulate_everything():
 
 # Local commands:
 
-print_number_of_schools()
+# print_number_of_schools()
 # print_schools()
 # print_programs()
 # import_sample_template()
@@ -151,9 +159,9 @@ print_number_of_schools()
 # print_templates()
 # print_steps()
 
+get_best_roi_schools_for_cip("09.04", how_many = 5) # Economics = 45.06, Design = 50.04, Biology = 26.01, Drama = 50.05, Journalism = 09.04
 # test_roi()
 # swap_cip_for_test_purposes()
-# test_best_roi_for_cip()
 
 # destroy_and_rebuild_tables()
 # repopulate_everything()

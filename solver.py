@@ -23,7 +23,7 @@ def roi_for_program(program, duration, income_level):
 		return roi
 	
 	except Exception:
- 		print "Error getting ROI."
+ 		print "Error getting ROI for", program.name, "at", school.name + "."
 		return None
 		
 		
