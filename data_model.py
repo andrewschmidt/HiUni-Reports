@@ -50,11 +50,12 @@ class Career(BaseModel):
 
 class Student(BaseModel):
 	name = CharField()
+	email = CharField()
+	
 	career = ForeignKeyField(Career)
 	income = CharField()
 	budget = IntegerField()
 	
-	# Location:
 	city = CharField()
 	state = CharField()
 	location = HStoreField(null = True) # For storing latitude and longitude keys.

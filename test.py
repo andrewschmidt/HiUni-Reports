@@ -88,11 +88,6 @@ def get_best_roi_schools_for_cip(cip, how_many, home_state):
 				roi = solver.roi_for_program(program, duration = 4, income_level = "30,001-48,000", home_state = state)
 				if roi:
 					print "        ROI: " + str(roi) + "%"
-				
-				# if program.reportable:
-				# 	print "        Report? Yes"
-				# else:
-				# 	print "        Report? No"
 			
 				print ""
 
@@ -141,22 +136,26 @@ def print_steps():
 
 def create_sample_student():
 	name = "Lindsay Santiago"
+	email = "me@lindsaysantiago.com"
 	career = Career.get(Career.name == "Barista")
 	income = "30,001-48,000"
 	budget = 120000
 	city = "Los Angeles"
 	state = "California"
 
-	create_student(name, career, income, budget, city, state)
+	create_student(name, email, career, income, budget, city, state)
 
 
-def create_student(name, career, income, budget, city, state):
+def create_student(name, email, career, income, budget, city, state):
 	student = Student()
 	
 	student.name = name
+	student.email = email
+	
 	student.career = career
 	student.income = income
 	student.budget = budget
+	
 	student.city = city
 	student.state = state
 
@@ -187,7 +186,7 @@ def repopulate_everything():
 # Local commands:
 
 # print_number_of_schools()
-# print_schools()
+print_schools()
 # print_programs()
 # import_sample_template()
 # create_sample_student()
@@ -196,7 +195,7 @@ def repopulate_everything():
 # print_templates()
 # print_steps()
 
-get_best_roi_schools_for_cip("26.01", how_many = 5, home_state = "California") # Economics = 45.06, Design = 50.04, Biology = 26.01, Drama = 50.05, Journalism = 09.04, Architecture = 04.02
+# get_best_roi_schools_for_cip("26.01", how_many = 5, home_state = "Indiana") # Economics = 45.06, Design = 50.04, Biology = 26.01, Drama = 50.05, Journalism = 09.04, Architecture = 04.02
 # test_roi()
 # swap_cip_for_test_purposes()
 

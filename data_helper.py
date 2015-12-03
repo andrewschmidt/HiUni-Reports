@@ -5,7 +5,6 @@
 
 
 from data_model import * # The data model & the database connection.
-import xlrd # For reading Excel workbooks.
 import csv # For reading CSVs.
 
 
@@ -95,30 +94,11 @@ def get_number_for_nonempty_column(name, for_ipeds_id, from_csv_sheet):
 
 def get_school_ids_from_csv_sheet(sheet):
 	school_ids = []
-	# id_column = get_number_for_column("unitid", from_csv_sheet = sheet)
-
-	# if id_column is None:
-	# 	id_column = get_number_for_column("IPEDS ID", from_csv_sheet = sheet)
 
 	for row in sheet:
 		ipeds_id = get_school_id_for_row(row, from_csv_sheet = sheet)
 		if not ipeds_id is None:
 			school_ids.append(ipeds_id)
-
-	# for row in sheet:
-	# 	if row[id_column] != "unitid":
-	# 		try:
-	# 			ipeds_id = str(int(row[id_column])) # This wasn't working: str(row[id_column]).rstrip(".0")
-				
-	# 			print "SCHOOL_IDS_FROM_CSV_SHEET: Converted cell to integer, then string. Cell contained:", str(row[id_column]) + ", converted to:", ipeds_id
-				
-	# 			if ipeds_id not in school_ids:
-	# 				school_ids.append(ipeds_id)
-
-	# 		except Exception:
-	# 			print "SCHOOL_IDS_FROM_CSV_SHEET: Failed to convert cell to integer, then to string. Cell contains:", str(row[id_column])
-	# 			pass
-		
 
 	return school_ids
 	
@@ -487,8 +467,8 @@ def create_tables():
 	print "\nConnecting to the database..."
 	database.connect()
 	print "\nCreating tables..."
-	database.create_tables([School, Program])
-	database.create_tables([Career, Template, Step])
+	# database.create_tables([School, Program])
+	# database.create_tables([Career, Template, Step])
 	database.create_tables([Student])
 
 
@@ -500,5 +480,6 @@ def populate_tables():
 def drop_tables():
 	# Only do this if you're serious.
 	print "\nDropping tables..."
-	database.drop_tables([School, Program], safe = True)
-	database.drop_tables([Career, Template, Step], safe = True)
+	# database.drop_tables([School, Program], safe = True)
+	# database.drop_tables([Career, Template, Step], safe = True)
+	database.drop_tables([Student], safe = True)
