@@ -92,6 +92,8 @@ def get_best_roi_schools_for_cip(cip, how_many, home_state):
 				print ""
 
 				schools_found += 1
+			else:
+				print "Found unreportable program, shouldn't have."
 
 	else:
 		print "Couldn't find any reportable programs for that CIP."
@@ -195,7 +197,7 @@ def repopulate_everything():
 # print_templates()
 # print_steps()
 
-# get_best_roi_schools_for_cip("26.01", how_many = 5, home_state = "Indiana") # Economics = 45.06, Design = 50.04, Biology = 26.01, Drama = 50.05, Journalism = 09.04, Architecture = 04.02
+get_best_roi_schools_for_cip("26.01", how_many = 5, home_state = "Indiana") # Economics = 45.06, Design = 50.04, Biology = 26.01, Drama = 50.05, Journalism = 09.04, Architecture = 04.02
 # test_roi()
 # swap_cip_for_test_purposes()
 

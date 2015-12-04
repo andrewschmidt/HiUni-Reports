@@ -15,7 +15,7 @@ class BaseModel(Model):
 class School(BaseModel):
 	name = CharField()
 	ipeds_id = CharField()
-	school_type = CharField()
+	kind = CharField()
 	admission_rate = IntegerField(null = True)
 	
 	# Location:
@@ -83,7 +83,7 @@ class Step(BaseModel):
 	title = CharField()
 	description = TextField()
 	
-	school_type = CharField()
+	school_kind = CharField()
 	duration = IntegerField()
 	cips = ArrayField(CharField)
 	sort_by = CharField()

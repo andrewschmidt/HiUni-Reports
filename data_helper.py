@@ -148,7 +148,7 @@ def get_school_info_from_csv_sheet(sheet, for_ipeds_id):
 	# Pluck the appropriate info from the columns in the list -- using a function to safeguard against the columns rearranging.
 	ipeds_id = row[get_number_for_column("unitid", from_csv_sheet = sheet)] # This should always be the same.
 	name = row[get_number_for_column("institution name", from_csv_sheet = sheet)]
-	school_type = row[get_number_for_column("HD2013.Institutional category", from_csv_sheet = sheet)]
+	kind = row[get_number_for_column("HD2013.Institutional category", from_csv_sheet = sheet)]
 	
 	admission_rate = row[get_number_for_column("DRVIC2013_RV.Percent admitted - total", from_csv_sheet = sheet)]
 	if admission_rate == "": admission_rate = None
@@ -163,7 +163,7 @@ def get_school_info_from_csv_sheet(sheet, for_ipeds_id):
 	total_price = get_total_prices_for_school_id(ipeds_id, from_csv_sheet = sheet)
 	net_price = get_net_prices_for_school_id(ipeds_id, from_csv_sheet = sheet)
 	
-	return name, ipeds_id, school_type, admission_rate, city, state, location, total_price, net_price
+	return name, ipeds_id, kind, admission_rate, city, state, location, total_price, net_price
 
 
 def get_template_data_from_csv_sheet(sheet):
@@ -179,7 +179,7 @@ def get_steps_data_from_csv_sheet(sheet):
 	numbers = []
 	titles = []
 	descriptions = []
-	school_types = []
+	school_kinds = []
 	durations = []
 	cips = []
 	sort_bys = []
@@ -188,7 +188,7 @@ def get_steps_data_from_csv_sheet(sheet):
 		numbers.append(int(row[get_number_for_column("Step", from_csv_sheet = sheet)]))
 		titles.append(row[get_number_for_column("Title", from_csv_sheet = sheet)])
 		descriptions.append(row[get_number_for_column("Description", from_csv_sheet = sheet)])
-		school_types.append(row[get_number_for_column("School Type", from_csv_sheet = sheet)])
+		school_kinds.append(row[get_number_for_column("School Kind", from_csv_sheet = sheet)])
 		durations.append(int(row[get_number_for_column("Duration", from_csv_sheet = sheet)]))
 		sort_bys.append(row[get_number_for_column("Sort By", from_csv_sheet = sheet)])
 		
@@ -196,7 +196,7 @@ def get_steps_data_from_csv_sheet(sheet):
 		cips_list = cips_string.split(", ")
 		cips.append(cips_list)
 
-	return numbers, titles, descriptions, school_types, durations, cips, sort_bys
+	return numbers, titles, descriptions, school_kinds, durations, cips, sort_bys
 
 
 def get_school_names_from_csv_sheet(sheet):
@@ -245,7 +245,7 @@ def update_school_with_ipeds_id(ipeds_id, from_cost_sheet):
 	sheet = from_cost_sheet
 
 	# Get all the info on the school from the CSV.
-	name, new_ipeds, school_type, admission_rate, city, state, location, total_price, net_price = get_school_info_from_csv_sheet(sheet, for_ipeds_id = ipeds_id)
+	name, new_ipeds, kind, admission_rate, city, state, location, total_price, net_price = get_school_info_from_csv_sheet(sheet, for_ipeds_id = ipeds_id)
 
 	# Let's figure out if the school is already in the database, or needs creating.
 	try:
@@ -258,7 +258,7 @@ def update_school_with_ipeds_id(ipeds_id, from_cost_sheet):
 	# Then assign the new data. Peewee is smart enough to only make changes if the data actually changed:
 	school.name = name
 	school.ipeds_id = new_ipeds
-	school.school_type = school_type
+	school.kind = kind
 	school.admission_rate = admission_rate
 	school.city = city
 	school.state = state
@@ -368,7 +368,7 @@ def update_template_from_sheet(sheet):
 def update_steps_for_template(template, from_sheet):
 	sheet = from_sheet
 
-	numbers, titles, descriptions, school_types, durations, cips, sort_bys = get_steps_data_from_csv_sheet(sheet)
+	numbers, titles, descriptions, school_kinds, durations, cips, sort_bys = get_steps_data_from_csv_sheet(sheet)
 
 	for i in range(len(titles)):
 		try:
@@ -384,7 +384,7 @@ def update_steps_for_template(template, from_sheet):
 		step.title = titles[i]
 		step.description = descriptions[i]
 		
-		step.school_type = school_types[i]
+		step.school_kind = school_kinds[i]
 		step.duration = durations[i]
 		step.cips = cips[i]
 		step.sort_by = sort_bys[i]

@@ -39,9 +39,30 @@ def programs_by_roi_for_cip(cip, duration, income_level, home_state):
 	programs = []
 	
 	for program in Program.select().where(Program.cip == cip):
-		if program.median_salary is not None:
+		if program.reportable and program.median_salary is not None: # We only want to return programs w/ salary data, and enough of it.
 			programs.append(program)
 	
 	programs.sort(key = lambda p: roi_for_program(p, duration = duration, income_level = income_level, home_state = home_state), reverse = True)
 	
 	return programs
+
+
+def programs_by_roi_for_step(step, student):
+	programs = []
+	
+	for cip in step.cips:
+		p = programs_by_roi_for_cip(cip = cip, duration = step.duration, income_level = student.income, home_state = student.state)
+		
+		for program in p:
+			school = program.school
+			if school.kind == step.school_kind:
+				programs.append(program)
+
+
+
+
+
+
+
+
+
