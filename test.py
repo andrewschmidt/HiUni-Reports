@@ -186,7 +186,7 @@ def repopulate_everything():
 # Local commands:
 
 # print_number_of_schools()
-print_schools()
+# print_schools()
 # print_programs()
 # import_sample_template()
 # create_sample_student()
