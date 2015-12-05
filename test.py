@@ -171,9 +171,12 @@ def print_pathways_for_sample_student():
 		
 		for step in steps:
 			print "\n      Step", str(step.number) + ":"
+			# print "        '" + str(step.step.title) + "'"
 			print "        Study", step.program.name, "at", step.program.school.name
-			print "            Cost: $" + str(step.cost)
-			print "            Duration:", str(step.duration()), "years"
+			print "          Cost: $" + str(step.cost)
+			print "          Duration:", str(step.duration()), "years"
+			# print "            Description:"
+			# print "              " + str(step.step.description)
 
 		i += 1
 
