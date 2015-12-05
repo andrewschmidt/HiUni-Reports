@@ -27,9 +27,6 @@ class School(BaseModel):
 	total_price = HStoreField() # To setup, run "CREATE EXTENSION hstore;" for hiuni_database from psql.
 	net_price = HStoreField() # For public institutions, net price refers to net price for in-state students only.
 
-	def programs(self):
-		return Program.select().where(School == self)
-
 
 class Program(BaseModel):
 	school = ForeignKeyField(School, related_name = "programs")
@@ -43,9 +40,6 @@ class Career(BaseModel):
 	name = CharField()
 	nicknames = ArrayField(CharField, null = True) # Neither of these are being imported yet.
 	description = TextField(null = True)
-
-	def templates(self):
-		return Template.select().where(Career == self)
 
 
 class Student(BaseModel):
@@ -65,13 +59,9 @@ class Template(BaseModel):
 	career = ForeignKeyField(Career, related_name = "templates")
 	number = IntegerField()
 
-	def steps(self):
-		return Step.select().where(Template == self)
-
 	def duration(self):
 		duration = 0
-		steps = Step.select().where(Template == self)
-		for step in steps:
+		for step in self.steps:
 			duration += step.duration
 		return duration
 

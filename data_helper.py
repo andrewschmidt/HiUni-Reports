@@ -468,7 +468,7 @@ def create_tables():
 	database.connect()
 	print "\nCreating tables..."
 	# database.create_tables([School, Program])
-	# database.create_tables([Career, Template, Step])
+	database.create_tables([Career, Template, Step])
 	database.create_tables([Student])
 
 
@@ -481,5 +481,5 @@ def drop_tables():
 	# Only do this if you're serious.
 	print "\nDropping tables..."
 	# database.drop_tables([School, Program], safe = True)
-	# database.drop_tables([Career, Template, Step], safe = True)
 	database.drop_tables([Student], safe = True)
+	database.drop_tables([Career, Template, Step], safe = True)

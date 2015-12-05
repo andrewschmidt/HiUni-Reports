@@ -136,6 +136,11 @@ def print_steps():
 		print step.template.career.name
 
 
+def print_pathways_for_sample_student():
+	student = Student.get(Student.name == "Lindsay Santiago")
+	solver.print_pathways_for_student(student)
+
+
 def create_sample_student():
 	name = "Lindsay Santiago"
 	email = "me@lindsaysantiago.com"
@@ -187,19 +192,20 @@ def repopulate_everything():
 
 # Local commands:
 
-# print_number_of_schools()
+print_number_of_schools()
 # print_schools()
 # print_programs()
 # import_sample_template()
 # create_sample_student()
-# print_students()
-# print_careers()
+print_students()
+print_careers()
 # print_templates()
 # print_steps()
 
 get_best_roi_schools_for_cip("26.01", how_many = 5, home_state = "Indiana") # Economics = 45.06, Design = 50.04, Biology = 26.01, Drama = 50.05, Journalism = 09.04, Architecture = 04.02
 # test_roi()
 # swap_cip_for_test_purposes()
+print_pathways_for_sample_student()
 
 # destroy_and_rebuild_tables()
 # repopulate_everything()
