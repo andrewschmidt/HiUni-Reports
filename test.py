@@ -134,11 +134,48 @@ def print_steps():
 		print step.title
 		print str(step.number)
 		print step.template.career.name
+		print str(step.duration) + "years"
+
+
+def print_fake_pathways_for_sample_student():
+	student = Student.get(Student.name == "Lindsay Santiago")
+	solver.print_pathways_for_student(student)
+
+
+def make_pathways_for_sample_student():
+	student = Student.get(Student.name == "Lindsay Santiago")
+	solver.make_pathways_for_student(student)
+
+	print "Made", str(Pathway.select().where(Pathway.student == student).count()), "pathways for", student.name + "."
 
 
 def print_pathways_for_sample_student():
 	student = Student.get(Student.name == "Lindsay Santiago")
-	solver.print_pathways_for_student(student)
+	pathways = Pathway.select().where(Pathway.student == student)
+
+	print "\nPathways for", student.name + ":"
+
+	i = 1
+	for pathway in pathways:
+		print "\n  PATHWAY #" + str(i)
+		print "\n    Total Cost: $" + str(pathway.cost())
+		print "    Total Duration:", str(pathway.duration()),  "years"
+		print "    20-year Earnings: $" + str(pathway.median_salary()*20)
+		print "    ROI:", str(pathway.roi()) + "%"
+
+		steps = []
+		for step in pathway.pathway_steps:
+			steps.append(step)
+
+		steps.sort(key = lambda s: s.number) # This is a deceptively important line! Must sort steps, they aren't returned in any expected order.
+		
+		for step in steps:
+			print "\n      Step", str(step.number) + ":"
+			print "        Study", step.program.name, "at", step.program.school.name
+			print "            Cost: $" + str(step.cost)
+			print "            Duration:", str(step.duration()), "years"
+
+		i += 1
 
 
 def create_sample_student():
@@ -183,28 +220,29 @@ def repopulate_everything():
 # Commands for data_helper:
 
 # data_helper.drop_tables()
+# data_helper.create_tables()
 # data_helper.delete_all_schools()
 # data_helper.delete_all_careers()
-# data_helper.create_tables()
 # data_helper.import_school_data()
 # import_sample_template()
 
 
 # Local commands:
 
-print_number_of_schools()
+# print_number_of_schools()
 # print_schools()
 # print_programs()
 # import_sample_template()
 # create_sample_student()
-print_students()
-print_careers()
+# print_students()
+# print_careers()
 # print_templates()
 # print_steps()
 
-get_best_roi_schools_for_cip("26.01", how_many = 5, home_state = "Indiana") # Economics = 45.06, Design = 50.04, Biology = 26.01, Drama = 50.05, Journalism = 09.04, Architecture = 04.02
+# get_best_roi_schools_for_cip("26.01", how_many = 5, home_state = "Indiana") # Economics = 45.06, Design = 50.04, Biology = 26.01, Drama = 50.05, Journalism = 09.04, Architecture = 04.02
 # test_roi()
 # swap_cip_for_test_purposes()
+# make_pathways_for_sample_student()
 print_pathways_for_sample_student()
 
 # destroy_and_rebuild_tables()

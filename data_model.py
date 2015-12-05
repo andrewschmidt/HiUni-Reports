@@ -77,3 +77,50 @@ class Step(BaseModel):
 	duration = IntegerField()
 	cips = ArrayField(CharField)
 	sort_by = CharField()
+
+
+class Pathway(BaseModel):
+	student = ForeignKeyField(Student, related_name = "pathways")
+
+	def cost(self):
+		cost = 0
+		for step in self.pathway_steps:
+			cost += step.cost
+
+		return cost
+
+	def duration(self):
+		duration = 0
+		for pathway_step in self.pathway_steps:
+			duration += pathway_step.duration()
+		return duration
+
+	def median_salary(self):
+		index = len(self.pathway_steps)-1 # Replace this when you land (coding at 30,000 ft!)
+		last_pathway_step = self.pathway_steps[index]
+		salary = last_pathway_step.median_salary()
+		return salary
+
+	def roi(self):
+		total_cost = self.cost()
+		gains = self.median_salary()*20
+		roi = (gains-total_cost)/total_cost
+		roi = float("{0:.2f}".format(roi))
+		return roi
+
+
+class Pathway_Step(BaseModel):
+	pathway = ForeignKeyField(Pathway, related_name = "pathway_steps")
+	program = ForeignKeyField(Program)
+	step = ForeignKeyField(Step)
+
+	number = IntegerField()
+	cost = IntegerField()
+
+	def duration(self):
+		return self.step.duration
+
+	def median_salary(self):
+		return self.program.median_salary
+
+

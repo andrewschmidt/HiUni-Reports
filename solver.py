@@ -1,6 +1,7 @@
 # Functions to help build pathways.
 
 from data_model import *
+import data_helper
 
 
 def calculate_roi(cost, gains):
@@ -16,13 +17,15 @@ def calculate_roi(cost, gains):
 def cost_for_school(school, duration, income_level, home_state):
 	if school.state == home_state:
 		try:
-			cost = int(school.net_price[income_level])*duration
+			cost = int(school.net_price[income_level])
 		
 		except Exception:
-			cost = int(school.total_price["in-state students living on campus"])*duration
+			cost = int(school.total_price["in-state students living on campus"])
 	
 	else:
-		cost = int(school.total_price["out-of-state students living on campus"])*duration
+		cost = int(school.total_price["out-of-state students living on campus"])
+
+	cost *= duration
 
 	return cost
 	
@@ -100,52 +103,28 @@ def programs_for_step(step, student):
 	return programs
 
 
-def print_pathways_for_student(student): # I need to create the Pathway class for this to really work. For now, just testing...
-	# First, get the templates for the student's chosen career:
-	try:
-		career = student.career
-		templates = career.templates
+def make_pathways_for_student(student):		
+	career = student.career
+	templates = career.templates
 
-	except Exception:
-		print "Unable to find the career or its templates."
-		return None
+	print "\nFound", len(templates), "templates."
 
-	print "\nPathways for", student.name + ":"
-	
-	i = 1
 	for template in templates:
-		total_cost = 0
+		# Create the pathway:
+		pathway = data_helper.save_pathway(student)
 
-		print "\n  Pathway #" + str(i) + ":"
-		
-		ii = 1
+		# Now create its steps:
 		for step in template.steps:
 			programs = programs_for_step(step, student)
 			program = programs[0]
 
+			number = step.number
+
 			cost = cost_for_school(program.school, duration = step.duration, income_level = student.income, home_state = student.state)
 
-			print "\n      Step", str(ii) + ":"
-			print "        Study", program.name, "at", program.school.name
-			print "            Cost: $" + str(cost)
-			print "            Duration:", str(step.duration), "years"
+			data_helper.save_pathway_step(pathway = pathway, program = program, step = step, number = number, cost = cost)
 
-			total_cost += cost
-
-			ii += 1
-
-		final_salary = program.median_salary # Get the salary of the program chosen for the final step.
-		gains = final_salary*20
-		
-		roi = calculate_roi(cost = total_cost, gains = gains)
-
-		print "\n      Total Cost: $" + str(total_cost)
-		print "  Total Duration:", str(template.duration()),  "years"
-		print "20-year Earnings: $" + str(gains)
-		print "             ROI:", str(roi) + "%"
-
-		i += 1
-
+	print "Finished making pathways for", student.name + "!\n"
 
 
 

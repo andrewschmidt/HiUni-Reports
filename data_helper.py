@@ -393,6 +393,32 @@ def update_steps_for_template(template, from_sheet):
 
 
 
+# ***************** EXTERNAL FUNCTIONS ******************
+
+def save_pathway_step(pathway, program, step, number, cost):
+	pathway_step = Pathway_Step()
+	
+	pathway_step.pathway = pathway
+	pathway_step.program = program
+	pathway_step.step = step
+
+	pathway_step.number = number
+	pathway_step.cost = cost
+
+	pathway_step.save()
+	print "Successfully saved a pathway step."
+
+
+def save_pathway(student):
+	pathway = Pathway()
+	pathway.student = student
+	pathway.save()
+	
+	print "Succesfully saved a pathway."
+	return pathway
+
+
+
 # ***************** DATA IMPORT *****************
 
 def import_template_from_sheet(sheet):
@@ -468,8 +494,9 @@ def create_tables():
 	database.connect()
 	print "\nCreating tables..."
 	# database.create_tables([School, Program])
-	database.create_tables([Career, Template, Step])
-	database.create_tables([Student])
+	# database.create_tables([Career, Template, Step])
+	# database.create_tables([Student])
+	database.create_tables([Pathway, Pathway_Step])
 
 
 def populate_tables():
@@ -481,5 +508,6 @@ def drop_tables():
 	# Only do this if you're serious.
 	print "\nDropping tables..."
 	# database.drop_tables([School, Program], safe = True)
-	database.drop_tables([Student], safe = True)
-	database.drop_tables([Career, Template, Step], safe = True)
+	# database.drop_tables([Student], safe = True)
+	# database.drop_tables([Career, Template, Step], safe = True)
+	database.drop_tables([Pathway, Pathway_Step], safe = True)
