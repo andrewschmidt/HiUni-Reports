@@ -486,6 +486,12 @@ def delete_all_careers():
 		career.delete_instance(recursive = True)
 
 
+def delete_all_pathways():
+	pathways = Pathway.select()
+	for pathway in pathways:
+		pathway.delete_instance(recursive = True)
+
+
 def create_tables():
 	# Only run this once.
 	# Remember, this doesn't create a database. Just the tables.

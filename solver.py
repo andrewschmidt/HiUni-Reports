@@ -103,26 +103,34 @@ def programs_for_step(step, student):
 	return programs
 
 
-def make_pathways_for_student(student):		
+def make_pathways_for_student(student, how_many):
+	pathways_needed = how_many		
 	career = student.career
 	templates = career.templates
 
 	print "\nFound", len(templates), "templates."
 
 	for template in templates:
-		# Create the pathway:
-		pathway = data_helper.save_pathway(student)
+		i = 0
+		while i < pathways_needed:
+			# Create the pathway:
+			pathway = data_helper.save_pathway(student)
 
-		# Now create its steps:
-		for step in template.steps:
-			programs = programs_for_step(step, student)
-			program = programs[0]
+			# Now create its steps:
+			for step in template.steps:
+				programs = programs_for_step(step, student)
+				
+				if len(programs) < pathways_needed:
+					pathways_needed = len(programs)
+					print "Only found enough programs to make", str(pathways_needed), "pathways."
 
-			number = step.number
+				program = programs[i]
+				number = step.number
+				cost = cost_for_school(program.school, duration = step.duration, income_level = student.income, home_state = student.state)
 
-			cost = cost_for_school(program.school, duration = step.duration, income_level = student.income, home_state = student.state)
+				data_helper.save_pathway_step(pathway = pathway, program = program, step = step, number = number, cost = cost)
 
-			data_helper.save_pathway_step(pathway = pathway, program = program, step = step, number = number, cost = cost)
+			i += 1
 
 	print "Finished making pathways for", student.name + "!\n"
 

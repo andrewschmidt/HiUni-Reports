@@ -144,7 +144,7 @@ def print_fake_pathways_for_sample_student():
 
 def make_pathways_for_sample_student():
 	student = Student.get(Student.name == "Lindsay Santiago")
-	solver.make_pathways_for_student(student)
+	solver.make_pathways_for_student(student, how_many = 3)
 
 	print "Made", str(Pathway.select().where(Pathway.student == student).count()), "pathways for", student.name + "."
 
@@ -221,6 +221,7 @@ def repopulate_everything():
 # data_helper.create_tables()
 # data_helper.delete_all_schools()
 # data_helper.delete_all_careers()
+# data_helper.delete_all_pathways()
 # data_helper.import_school_data()
 # import_sample_template()
 
@@ -240,8 +241,8 @@ def repopulate_everything():
 # get_best_roi_schools_for_cip("26.01", how_many = 5, home_state = "Indiana") # Economics = 45.06, Design = 50.04, Biology = 26.01, Drama = 50.05, Journalism = 09.04, Architecture = 04.02
 # test_roi()
 # swap_cip_for_test_purposes()
-# make_pathways_for_sample_student()
-print_pathways_for_sample_student()
+make_pathways_for_sample_student()
+# print_pathways_for_sample_student()
 
 # destroy_and_rebuild_tables()
 # repopulate_everything()
