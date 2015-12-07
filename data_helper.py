@@ -414,7 +414,7 @@ def save_pathway(student):
 	pathway.student = student
 	pathway.save()
 	
-	print "Succesfully saved a pathway."
+	print "\nSuccesfully saved a pathway."
 	return pathway
 
 

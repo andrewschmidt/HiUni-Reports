@@ -132,7 +132,7 @@ def make_pathways_for_student(student, how_many):
 
 			i += 1
 
-	print "Finished making pathways for", student.name + "!\n"
+	print "Made", str(i), "pathways for", student.name + "!\n"
 
 
 

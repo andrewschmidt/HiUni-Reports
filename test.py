@@ -146,8 +146,6 @@ def make_pathways_for_sample_student():
 	student = Student.get(Student.name == "Lindsay Santiago")
 	solver.make_pathways_for_student(student, how_many = 3)
 
-	print "Made", str(Pathway.select().where(Pathway.student == student).count()), "pathways for", student.name + "."
-
 
 def print_pathways_for_sample_student():
 	student = Student.get(Student.name == "Lindsay Santiago")
@@ -157,7 +155,7 @@ def print_pathways_for_sample_student():
 
 	i = 1
 	for pathway in pathways:
-		print "\n  PATHWAY #" + str(i)
+		print "\n\n  PATHWAY #" + str(i)
 		print "\n    Total Cost: $" + str(pathway.cost())
 		print "    Total Duration:", str(pathway.duration()),  "years"
 		print "    20-year Earnings: $" + str(pathway.median_salary()*20)
@@ -241,8 +239,8 @@ def repopulate_everything():
 # get_best_roi_schools_for_cip("26.01", how_many = 5, home_state = "Indiana") # Economics = 45.06, Design = 50.04, Biology = 26.01, Drama = 50.05, Journalism = 09.04, Architecture = 04.02
 # test_roi()
 # swap_cip_for_test_purposes()
-make_pathways_for_sample_student()
-# print_pathways_for_sample_student()
+# make_pathways_for_sample_student()
+print_pathways_for_sample_student()
 
 # destroy_and_rebuild_tables()
 # repopulate_everything()
