@@ -82,11 +82,17 @@ class Step(BaseModel):
 class Pathway(BaseModel):
 	student = ForeignKeyField(Student, related_name = "pathways")
 
+	def sorted_steps(self): # Steps aren't returned in any particular order; this sorts them.
+		steps = []
+		for step in self.pathway_steps:
+			steps.append(step)
+		steps.sort(key = lambda s: s.number)
+		return steps
+
 	def cost(self):
 		cost = 0
 		for step in self.pathway_steps:
 			cost += step.cost
-
 		return cost
 
 	def duration(self):
@@ -117,10 +123,14 @@ class Pathway_Step(BaseModel):
 	number = IntegerField()
 	cost = IntegerField()
 
+	def title(self):
+		return self.step.title
+
+	def description(self):
+		return self.step.description
+
 	def duration(self):
 		return self.step.duration
 
 	def median_salary(self):
 		return self.program.median_salary
-
-

@@ -163,20 +163,15 @@ def print_pathways_for_sample_student():
 		print "    20-year Earnings: $" + str(pathway.median_salary()*20)
 		print "    ROI:", str(pathway.roi()) + "%"
 
-		steps = []
-		for step in pathway.pathway_steps:
-			steps.append(step)
+		pathway_steps = pathway.sorted_steps()
 
-		steps.sort(key = lambda s: s.number) # This is a deceptively important line! Must sort steps, they aren't returned in any expected order.
-		
-		for step in steps:
-			print "\n      Step", str(step.number) + ":"
-			# print "        '" + str(step.step.title) + "'"
+		for step in pathway_steps:
+			print "\n      Step", str(step.number) + ": '" + step.title() + "'"
 			print "        Study", step.program.name, "at", step.program.school.name
 			print "          Cost: $" + str(step.cost)
 			print "          Duration:", str(step.duration()), "years"
-			# print "            Description:"
-			# print "              " + str(step.step.description)
+			# print "          Description:"
+			# print "            " + step.description()
 
 		i += 1
 
