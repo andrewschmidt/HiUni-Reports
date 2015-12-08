@@ -430,6 +430,11 @@ def import_template_from_sheet(sheet):
 	update_steps_for_template(template, from_sheet = sheet)
 
 
+def import_template_from_file(file_name):
+	sheet = get_csv_sheet(file_name)
+	import_template_from_sheet(sheet)
+
+
 def get_ipeds_ids_in_both(cost_sheet, salary_sheet):
 	cost_sheet_ids = get_school_ids_from_csv_sheet(cost_sheet)
 	salary_sheet_ids = get_school_ids_from_csv_sheet(salary_sheet)
@@ -490,6 +495,12 @@ def delete_all_pathways():
 	pathways = Pathway.select()
 	for pathway in pathways:
 		pathway.delete_instance(recursive = True)
+
+
+def delete_all_students():
+	students = Student.select()
+	for student in students:
+		student.delete_instance(recursive = True)
 
 
 def create_tables():

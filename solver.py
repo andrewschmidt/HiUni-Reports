@@ -111,9 +111,12 @@ def make_pathways_for_student(student, how_many):
 	print "\nFound", len(templates), "templates."
 
 	for template in templates:
+		
+		pathways_created = 0
 		i = 0
-		while i < pathways_needed:
-			# Create the pathway:
+
+		while pathways_created < pathways_needed:
+			# Create the pathway first, since the steps have to reference it:
 			pathway = data_helper.save_pathway(student)
 
 			# Now create its steps:
@@ -124,15 +127,28 @@ def make_pathways_for_student(student, how_many):
 					pathways_needed = len(programs)
 					print "Only found enough programs to make", str(pathways_needed), "pathways."
 
-				program = programs[i]
+				try:
+					program = programs[i]
+				except Exception:
+					print "Ran out of programs to make pathways with!"
+					pathway.delete_instance(recursive = True) # No sense having an incomplete pathway.
+					break
+
 				number = step.number
 				cost = cost_for_school(program.school, duration = step.duration, income_level = student.income, home_state = student.state)
 
 				data_helper.save_pathway_step(pathway = pathway, program = program, step = step, number = number, cost = cost)
 
+			if pathway.cost() <= student.budget:
+				pathways_created += 1
+			else:
+				print "Pathway was too expensive! Trying again..."
+				pathway.delete_instance(recursive = True) # No sense having a pathway that's too expensive.
+
 			i += 1
 
-	print "Made", str(i), "pathways for", student.name + "!\n"
+	pathways = Pathway.select().where(Pathway.student == student)
+	print "Made", str(len(pathways)), "pathways for", student.name + "!\n"
 
 
 

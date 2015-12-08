@@ -220,6 +220,7 @@ def repopulate_everything():
 # data_helper.delete_all_schools()
 # data_helper.delete_all_careers()
 # data_helper.delete_all_pathways()
+# data_helper.delete_all_students()
 # data_helper.import_school_data()
 # import_sample_template()
 
