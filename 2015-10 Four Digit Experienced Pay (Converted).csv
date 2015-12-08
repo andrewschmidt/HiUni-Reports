@@ -1,4 +1,9 @@
 IPEDS ID,School,Major,CIP Code,25th Percentile Pay,Median Pay,75th Percentile Pay,Confidence Level on the Median,Report or Don't Report,Lower Bound 90% CI(25th),Upper Bound 90% CI(25th),Lower Bound 90% CI(50th),Upper Bound 90% CI(50th),Lower Bound 90% CI(75th),Upper Bound 90% CI(75th)
+6666666,School of Barista Arts,Latte Making,666.66,,54000,,,Report,,,,,,
+6666666,School of Barista Arts,AeroPress Arts,666.67,,66000,,,Report,,,,,,
+9999999,University of Coffee Mongers,Latte Making,666.66,,72000,,,Report,,,,,,
+9999999,University of Coffee Mongers,Developing your Palate: A Test in Tasting,999.99,,46000,,,Report,,,,,,
+6666666,School of Barista Arts,Basic Barista-ing,666.68,,28000,,,Report,,,,,,
 225511,University of Houston (UH),Nutrition Sciences,30.19,Low Data,122000,Low Data,Low Data,Don't Report,Low Data,Low Data,Low Data,Low Data,Low Data,Low Data
 134130,University of Florida (UF),Nutrition Sciences,30.19,Low Data,72800,Low Data,Low Data,Don't Report,Low Data,Low Data,Low Data,Low Data,Low Data,Low Data
 122755,San Jose State University (SJSU),Nutrition Sciences,30.19,Low Data,31200,Low Data,Low Data,Don't Report,Low Data,Low Data,Low Data,Low Data,Low Data,Low Data

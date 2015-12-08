@@ -114,6 +114,7 @@ def make_pathways_for_student(student, how_many):
 		
 		pathways_created = 0
 		i = 0
+		abort = False
 
 		while pathways_created < pathways_needed:
 			# Create the pathway first, since the steps have to reference it:
@@ -132,6 +133,7 @@ def make_pathways_for_student(student, how_many):
 				except Exception:
 					print "Ran out of programs to make pathways with!"
 					pathway.delete_instance(recursive = True) # No sense having an incomplete pathway.
+					abort = True
 					break
 
 				number = step.number
@@ -139,12 +141,14 @@ def make_pathways_for_student(student, how_many):
 
 				data_helper.save_pathway_step(pathway = pathway, program = program, step = step, number = number, cost = cost)
 
-			if pathway.cost() <= student.budget:
-				pathways_created += 1
-			else:
+			if abort: break
+			
+			if pathway.cost() > student.budget:
 				print "Pathway was too expensive! Trying again..."
 				pathway.delete_instance(recursive = True) # No sense having a pathway that's too expensive.
-
+			else:
+				pathways_created += 1
+			
 			i += 1
 
 	print "Made", str(pathways_created), "pathways for", student.name + "!\n"

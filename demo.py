@@ -150,7 +150,7 @@ def import_templates_for_career_named(name):
 def make_career():
 	clear()
 	print "\nADD CAREER"
-	print "-----------"
+	print "----------"
 
 	career_name = raw_input("\nCareer name? ")
 
@@ -184,12 +184,12 @@ def make_pathways():
 	except Exception:
 		menu()
 
-	pathways_needed = int(raw_input("\nAnd how many pathways would you like to make (per template)?"))
+	pathways_needed = int(raw_input("\nAnd how many pathways would you like to make (per template)? "))
 
 	print "\nOK! Generating pathways for", student.name + "."
 	schools = School.select()
 	programs = Program.select()
-	print "Searching", str(len(schools)), "schools offering", str(len(programs)), "programs..."
+	print "\nSearching", str(len(schools)), "schools offering", str(len(programs)), "programs..."
 
 	try:
 		solver.make_pathways_for_student(student, how_many = pathways_needed)
@@ -203,7 +203,7 @@ def make_pathways():
 def show_pathways():
 	clear()
 	print "\nSHOW PATHWAYS"
-	print "---------------"
+	print "-------------"
 
 	print "\nChoose a student:"
 	students = Student.select()
@@ -219,7 +219,7 @@ def show_pathways():
 
 	clear()
 	print "\nSHOW PATHWAYS"
-	print "---------------"
+	print "-------------"
 	print_student_info(student)
 	print ""
 
@@ -250,6 +250,20 @@ def show_pathways():
 
 		i += 1
 
+	raw_input("\nPress enter to return to the menu.")
+	menu()
+
+
+def import_schools():
+	clear()
+	print "\nIMPORT SCHOOLS"
+	print "--------------"
+
+	choice = raw_input("\nThis takes a while. Are you ready to wait? Y/N: ")
+	
+	if choice == "y" or choice == "Y":
+		raw_input("\nPress enter to begin.")
+		data_helper.import_school_data()
 
 	raw_input("\nPress enter to return to the menu.")
 	menu()
@@ -288,7 +302,7 @@ def delete_pathways():
 def delete_careers():
 	clear()
 	print "\nDELETE ALL CAREERS"
-	print "-------------------"
+	print "------------------"
 
 	choice = raw_input("\nAre you sure you want to delete all careers? Y/N: ")
 	
@@ -300,10 +314,25 @@ def delete_careers():
 	menu()
 
 
+def delete_schools():
+	clear()
+	print "\nDELETE ALL SCHOOLS"
+	print "------------------"
+
+	choice = raw_input("\nAre you sure you want to delete all schools? Y/N: ")
+	
+	if choice == "y" or choice == "Y":
+		data_helper.delete_all_schools()
+		print "\nAll schools deleted."
+
+	raw_input("\nPress enter to return to the menu.")
+	menu()
+
+
 def delete():
 	clear()
 	print "\nDELETE"
-	print "-------"
+	print "------"
 
 	print "\nWhat would you like to delete?"
 	choices = ["Students", "Pathways", "Careers"]
@@ -321,6 +350,29 @@ def delete():
 	if choice == "Students": delete_students()
 	if choice == "Pathways": delete_pathways()
 	if choice == "Careers": delete_careers()
+
+
+def hidden_menu():
+	clear()
+	print "\nHIDDEN MENU"
+	print "-----------"
+
+	print "\nWhat would you like to do?"
+
+	choices = ["Import schools", "Delete all schools"]
+	i = 1
+	for c in choices:
+		print "  " + str(i) + ".", c
+		i += 1
+	
+	try: 
+		choice_number = int(raw_input("\n  "))-1
+		choice = choices[choice_number]
+	except Exception:
+		menu()
+
+	if choice == "Import schools": import_schools()
+	if choice == "Delete all schools": delete_schools()
 
 
 def menu():
@@ -342,8 +394,12 @@ def menu():
 		print "  " + str(i) + ".", c
 		i += 1
 	
+	selection = raw_input("\n  ")
+
+	if selection == "hidden": hidden_menu() # This menu's hidden because it's dangerous.
+
 	try: 
-		choice_number = int(raw_input("\n  "))-1
+		choice_number = int(selection)-1
 		choice = choices[choice_number]
 	except Exception:
 		menu()
