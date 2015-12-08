@@ -1,6 +1,7 @@
 # A text-based demo of the HiUni Reports backend.
 
 import os
+import textwrap
 
 from data_model import *
 import data_helper
@@ -237,10 +238,14 @@ def show_pathways():
 
 		for step in pathway_steps:
 			print "\n      STEP", str(step.number) + ": '" + step.title() + "'"
-			print "        Study", step.program.name, "at", step.program.school.name
+			# print "        Study", step.program.name, "at", step.program.school.name
+			print "          Major:", step.program.name
+			print "          School:", step.program.school.name
 			print "          Cost: $" + str(step.cost)
 			print "          Duration:", str(step.duration()), "years"
-			# print "          Description:"
+			print "          Description:"
+			description = step.description()
+			print textwrap.fill(description, width = 80, initial_indent = "            ", subsequent_indent = "            ")
 			# print "            " + step.description()
 
 		if len(pathways) > 1:
