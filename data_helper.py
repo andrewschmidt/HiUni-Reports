@@ -5,14 +5,11 @@
 
 
 from data_model import * # The data model & the database connection.
-import xlrd # For reading Excel workbooks.
 import csv # For reading CSVs.
 
 
-
-csv_file = "IPEDS data (altered).csv" # The CSV file w/ data from IPEDS.
-xls_file = "PayScale Sample (altered).xlsx" # The current Excel file w/ data from PayScale.
-
+ipeds_file = "IPEDS data (altered).csv" # The CSV file w/ data from IPEDS.
+payscale_file = "2015-10 Four Digit Experienced Pay (Converted).csv" # The CSV file w/ data from PayScale.
 
 
 # ***************** CSV FUNCTIONS *****************
@@ -21,7 +18,7 @@ def get_csv_sheet(name):
 	# Load the CSV sheet:
 	sheet = []
 
-	with open(csv_file, 'rb') as f:
+	with open(name, 'rb') as f:
 		reader = csv.reader(f)
 	
 		for row in reader:
@@ -34,6 +31,9 @@ def get_number_for_column(name, from_csv_sheet):
 	sheet = from_csv_sheet
 	header_row = sheet[0] # does this return the first row? Hope so.
 
+	if header_row[0] == name:
+		return 0
+
 	for number, column in enumerate(header_row):
 		if name in column:
 			return number
@@ -41,7 +41,7 @@ def get_number_for_column(name, from_csv_sheet):
 
 def get_numbers_for_columns(name, from_csv_sheet):
 	sheet = from_csv_sheet
-	header_row = sheet[0] # does this return the first row? Hope so.
+	header_row = sheet[0]
 
 	column_numbers = []
 
@@ -54,9 +54,19 @@ def get_numbers_for_columns(name, from_csv_sheet):
 		
 def get_school_id_for_row(row, from_csv_sheet):
 	sheet = from_csv_sheet
+
 	id_column = get_number_for_column("unitid", from_csv_sheet = sheet)
-	school_id = str(row[id_column]).rstrip(".0")
-	return school_id
+	if id_column is None:
+		id_column = get_number_for_column("IPEDS ID", from_csv_sheet = sheet)
+
+	try:
+		school_id = str(int(row[id_column])) # This wasn't working: str(row[id_column]).rstrip(".0")
+		# print "SCHOOL_ID_FOR_ROW: Converted cell to integer, then string. Cell contained:", str(row[id_column]) + ", converted to:", school_id
+		return school_id
+
+	except Exception:
+		# print "SCHOOL_ID_FOR_ROW: Failed to convert cell to integer, then to string. Cell contains:", str(row[id_column])
+		return None
 	
 
 def get_row_for_school_id(ipeds_id, from_csv_sheet):
@@ -84,12 +94,10 @@ def get_number_for_nonempty_column(name, for_ipeds_id, from_csv_sheet):
 
 def get_school_ids_from_csv_sheet(sheet):
 	school_ids = []
-	id_column = get_number_for_column("unitid", from_csv_sheet = sheet)
 
 	for row in sheet:
-		ipeds_id = str(row[id_column]).rstrip(".0")
-		
-		if ipeds_id not in school_ids:
+		ipeds_id = get_school_id_for_row(row, from_csv_sheet = sheet)
+		if not ipeds_id is None:
 			school_ids.append(ipeds_id)
 
 	return school_ids
@@ -140,7 +148,7 @@ def get_school_info_from_csv_sheet(sheet, for_ipeds_id):
 	# Pluck the appropriate info from the columns in the list -- using a function to safeguard against the columns rearranging.
 	ipeds_id = row[get_number_for_column("unitid", from_csv_sheet = sheet)] # This should always be the same.
 	name = row[get_number_for_column("institution name", from_csv_sheet = sheet)]
-	school_type = row[get_number_for_column("HD2013.Institutional category", from_csv_sheet = sheet)]
+	kind = row[get_number_for_column("HD2013.Institutional category", from_csv_sheet = sheet)]
 	
 	admission_rate = row[get_number_for_column("DRVIC2013_RV.Percent admitted - total", from_csv_sheet = sheet)]
 	if admission_rate == "": admission_rate = None
@@ -155,68 +163,79 @@ def get_school_info_from_csv_sheet(sheet, for_ipeds_id):
 	total_price = get_total_prices_for_school_id(ipeds_id, from_csv_sheet = sheet)
 	net_price = get_net_prices_for_school_id(ipeds_id, from_csv_sheet = sheet)
 	
-	return name, ipeds_id, school_type, admission_rate, city, state, location, total_price, net_price
+	return name, ipeds_id, kind, admission_rate, city, state, location, total_price, net_price
 
 
+def get_template_data_from_csv_sheet(sheet):
+	row = sheet[1]
 
-# ***************** XLS FUNCTIONS *****************
+	career_name = row[get_number_for_column("Career", from_csv_sheet = sheet)]
+	template_number = int(row[get_number_for_column("Template Number", from_csv_sheet = sheet)])
 
-def get_xls_sheet(name):
-	# Load the workbook & sheet:
-	book = xlrd.open_workbook(name)
-	sheet = book.sheet_by_name("4-Digit CIP - Experienced Pay")
-
-	return sheet
+	return career_name, template_number
 
 
-def get_school_names_from_xls_sheet(sheet):
+def get_steps_data_from_csv_sheet(sheet):
+	numbers = []
+	titles = []
+	descriptions = []
+	school_kinds = []
+	durations = []
+	cips = []
+	sort_bys = []
+
+	for row in sheet[1:]: # Skips the first row, which is the header row.
+		numbers.append(int(row[get_number_for_column("Step", from_csv_sheet = sheet)]))
+		titles.append(row[get_number_for_column("Title", from_csv_sheet = sheet)])
+		descriptions.append(row[get_number_for_column("Description", from_csv_sheet = sheet)])
+		school_kinds.append(row[get_number_for_column("School Kind", from_csv_sheet = sheet)])
+		durations.append(int(row[get_number_for_column("Duration", from_csv_sheet = sheet)]))
+		sort_bys.append(row[get_number_for_column("Sort By", from_csv_sheet = sheet)])
+		
+		cips_string = str(row[get_number_for_column("CIP", from_csv_sheet = sheet)])
+		cips_list = cips_string.split(", ")
+		cips.append(cips_list)
+
+	return numbers, titles, descriptions, school_kinds, durations, cips, sort_bys
+
+
+def get_school_names_from_csv_sheet(sheet):
 	school_names = []
-	
-	number_of_rows = sheet.nrows - 1
+	name_column = get_number_for_column("School", from_csv_sheet = sheet)
 
-	cell_values = sheet.col_values(1, start_rowx = 1, end_rowx = None)
-
-	for value in cell_values:
-		if not value in school_names:
-			school_names.append(value)
+	for row in sheet:
+		if not row[name_column] in school_names:
+			school_names.append(row[name_column])
 
 	return school_names
 
 
-def get_school_ids_from_xls_sheet(sheet):
-	school_ids = []
-	
-	number_of_rows = sheet.nrows - 1
-
-	cell_values = sheet.col_values(0, start_rowx = 1, end_rowx = None)
-
-	for value in cell_values:
-		value = str(value).rstrip(".0") # Convert to string, drop any trailing zero.
-
-		if not value in school_ids:
-			school_ids.append(value)
-
-	return school_ids
-
-
-def get_programs_data_from_xls_sheet(sheet, for_school):
+def get_programs_data_from_csv_sheet(sheet, for_school):
 	school = for_school
-	number_of_rows = sheet.nrows
 	
+	id_column = get_number_for_column("IPEDS ID", from_csv_sheet = sheet)
+	name_column = get_number_for_column("Major", from_csv_sheet = sheet)
+	cip_column = get_number_for_column("CIP Code", from_csv_sheet = sheet)
+	median_salary_column = get_number_for_column("Median Pay", from_csv_sheet = sheet)
+	reportable_column = get_number_for_column("Report or Don't Report", from_csv_sheet = sheet)
+
 	# Let's search the sheet for programs for our school, and return the basic data about them:
 	names = []
 	cips = []
 	median_salaries = []
+	reportables = []
 
-	for row in range(number_of_rows):
-		row_id = str(sheet.cell_value(rowx = row, colx = 0)).rstrip(".0")
-		
-		if row_id == school.ipeds_id:
-			cips.append(sheet.cell_value(rowx = row, colx = 3))
-			names.append(sheet.cell_value(rowx = row, colx = 2))
-			median_salaries.append(sheet.cell_value(rowx = row, colx = 5))
+	for row in sheet:
+		if row[id_column] == school.ipeds_id:
+			names.append(row[name_column])
+			cips.append(row[cip_column])
+			median_salaries.append(row[median_salary_column])
+			if row[reportable_column] == "Don't Report":
+				reportables.append(False)
+			else:
+				reportables.append(True)
 
-	return names, cips, median_salaries
+	return names, cips, median_salaries, reportables
 
 
 
@@ -226,7 +245,7 @@ def update_school_with_ipeds_id(ipeds_id, from_cost_sheet):
 	sheet = from_cost_sheet
 
 	# Get all the info on the school from the CSV.
-	name, new_ipeds, school_type, admission_rate, city, state, location, total_price, net_price = get_school_info_from_csv_sheet(sheet, for_ipeds_id = ipeds_id)
+	name, new_ipeds, kind, admission_rate, city, state, location, total_price, net_price = get_school_info_from_csv_sheet(sheet, for_ipeds_id = ipeds_id)
 
 	# Let's figure out if the school is already in the database, or needs creating.
 	try:
@@ -239,7 +258,7 @@ def update_school_with_ipeds_id(ipeds_id, from_cost_sheet):
 	# Then assign the new data. Peewee is smart enough to only make changes if the data actually changed:
 	school.name = name
 	school.ipeds_id = new_ipeds
-	school.school_type = school_type
+	school.kind = kind
 	school.admission_rate = admission_rate
 	school.city = city
 	school.state = state
@@ -253,9 +272,8 @@ def update_school_with_ipeds_id(ipeds_id, from_cost_sheet):
 
 def update_programs_for_school(school, from_salary_sheet):
 	sheet = from_salary_sheet
-	number_of_rows = sheet.nrows
 
-	names, cips, median_salaries = get_programs_data_from_xls_sheet(sheet, for_school = school)
+	names, cips, median_salaries, reportables = get_programs_data_from_csv_sheet(sheet, for_school = school)
 	
 	# Now let's add the new programs, and update the existing ones.
 	updated = []
@@ -269,7 +287,7 @@ def update_programs_for_school(school, from_salary_sheet):
 			p = query.where(query_filter).get()
 			
 			# Only update the program if something's changed:
-			if p.name != names[i] or p.median_salary != median_salaries[i]:
+			if p.name != names[i] or p.median_salary != median_salaries[i] or p.reportable != reportables[i]:
 				p.name = names[i]
 				p.median_salary = median_salaries[i]
 				
@@ -284,6 +302,7 @@ def update_programs_for_school(school, from_salary_sheet):
 			p.name = names[i]
 			p.cip = cips[i]
 			p.median_salary = median_salaries[i]
+			p.reportable = reportables[i]
 
 			p.save()
 			
@@ -304,12 +323,121 @@ def update_programs_for_school(school, from_salary_sheet):
 			print "        -", program.name
 
 
+def update_career(name, nicknames, description):
+	try:
+		career = Career.get(Career.name == name)
+		print "\nUpdating info for the career '" + career.name + "'."
+	except Exception:
+		career = Career()
+		print "\nAdding a career to the database:", name + "."
+
+	career.name = name
+	
+	if nicknames is not None and nicknames is not "":
+		print "Nicknames for the career were not None OR:"
+		for name in nicknames:
+			career.nicknames.append(name)
+
+	if description is not None and description is not "":		
+		career.description = description
+	
+	career.save()
+
+
+def update_template_from_sheet(sheet):
+	career_name, template_number = get_template_data_from_csv_sheet(sheet)
+
+	# First let's fetch the career, creating it if necessary in the process:
+	update_career(career_name, nicknames = None, description = None)
+	career = Career.get(Career.name == career_name)
+
+	# Next either update the info for an existing template, or create a new one. This is based on the "template number":
+	try:
+		template = Template.select().join(Career).where((Template.number == template_number) & (Template.career == career)).get()
+		print "\nUpdating info for the template number", template.number, "for the career '" + career.name + ".'"
+	except Exception:
+		template = Template()
+		print "\nAdding template number", str(template_number) + ", for the career '" + career.name + ".'"
+
+	template.career = career
+	template.number = template_number
+
+	template.save()
+
+
+def update_steps_for_template(template, from_sheet):
+	sheet = from_sheet
+
+	numbers, titles, descriptions, school_kinds, durations, cips, sort_bys = get_steps_data_from_csv_sheet(sheet)
+
+	for i in range(len(titles)):
+		try:
+			step = Step.select().join(Template).where((Step.number == numbers[i]) & (Step.template == template)).get()
+			print "    - Updating info for step #" + str(step.number) + "."
+		except Exception:
+			step = Step()
+			print "    - Adding a step, titled '" + titles[i] + "'"
+
+		step.template = template
+
+		step.number = numbers[i]
+		step.title = titles[i]
+		step.description = descriptions[i]
+		
+		step.school_kind = school_kinds[i]
+		step.duration = durations[i]
+		step.cips = cips[i]
+		step.sort_by = sort_bys[i]
+
+		step.save()
+
+
+
+# ***************** EXTERNAL FUNCTIONS ******************
+
+def save_pathway_step(pathway, program, step, number, cost):
+	pathway_step = Pathway_Step()
+	
+	pathway_step.pathway = pathway
+	pathway_step.program = program
+	pathway_step.step = step
+
+	pathway_step.number = number
+	pathway_step.cost = cost
+
+	pathway_step.save()
+	print "Successfully saved a pathway step."
+
+
+def save_pathway(student):
+	pathway = Pathway()
+	pathway.student = student
+	pathway.save()
+	
+	print "\nSuccesfully saved a pathway."
+	return pathway
+
+
 
 # ***************** DATA IMPORT *****************
 
+def import_template_from_sheet(sheet):
+	update_template_from_sheet(sheet)
+
+	career_name, template_number = get_template_data_from_csv_sheet(sheet)
+	template = Template.select().join(Career).where((Template.number == template_number) & (Career.name == career_name)).get()
+
+	update_steps_for_template(template, from_sheet = sheet)
+
+
+def import_template_from_file(file_name):
+	sheet = get_csv_sheet(file_name)
+	import_template_from_sheet(sheet)
+
+
 def get_ipeds_ids_in_both(cost_sheet, salary_sheet):
 	cost_sheet_ids = get_school_ids_from_csv_sheet(cost_sheet)
-	salary_sheet_ids = get_school_ids_from_xls_sheet(salary_sheet)
+	salary_sheet_ids = get_school_ids_from_csv_sheet(salary_sheet)
 
 	ids_in_both = []
 
@@ -320,39 +448,30 @@ def get_ipeds_ids_in_both(cost_sheet, salary_sheet):
 	return ids_in_both
 
 
-def import_data_from_sheets(cost_sheet, salary_sheet):
+def import_school_data_from_sheets(cost_sheet, salary_sheet):
 	# Find out which IPEDS IDs are in both sheets:	
 	ids_from_sheets = get_ipeds_ids_in_both(cost_sheet, salary_sheet)
 
-	schools_to_update = []
-	ids_of_schools_to_add = []
+	schools_done = 0
+	total_schools = len(ids_from_sheets)
 
 	for ipeds_id in ids_from_sheets:
-		try:
-			school = School.get(School.ipeds_id == ipeds_id)
-			schools_to_update.append(school)
-
-		except Exception:
-			ids_of_schools_to_add.append(ipeds_id)
-
-	for school in schools_to_update:
-		update_school_with_ipeds_id(school.ipeds_id, from_cost_sheet = cost_sheet)
-		update_programs_for_school(school, from_salary_sheet = salary_sheet)
-
-	for ipeds_id in ids_of_schools_to_add:
-		# Make a new school:
+		# Make or update the school for the ID:
 		update_school_with_ipeds_id(ipeds_id, from_cost_sheet = cost_sheet)
-		# Get the new school:
+		# Get the school:
 		school = School.get(School.ipeds_id == ipeds_id)
-		# Make its programs:
+		# Make or update its programs:
 		update_programs_for_school(school, from_salary_sheet = salary_sheet)
 
+		schools_done += 1
+		print "\nUpdated/created", str(schools_done) + "/" + str(total_schools), "schools"
 
-def import_data(): # A hands-off version of import_data_from_sheets().
-	cost_sheet = get_csv_sheet(csv_file)
-	salary_sheet = get_xls_sheet(xls_file)
+
+def import_school_data(): # A hands-off version of import_school_data_from_sheets().
+	cost_sheet = get_csv_sheet(ipeds_file)
+	salary_sheet = get_csv_sheet(payscale_file)
 	print "\nLet's import!"
-	import_data_from_sheets(cost_sheet, salary_sheet = salary_sheet)
+	import_school_data_from_sheets(cost_sheet, salary_sheet = salary_sheet)
 
 
 
@@ -365,6 +484,25 @@ def delete_all_schools():
 		school.delete_instance(recursive = True)
 
 
+def delete_all_careers():
+	# This should also remove related templates and steps.
+	careers = Career.select()
+	for career in careers:
+		career.delete_instance(recursive = True)
+
+
+def delete_all_pathways():
+	pathways = Pathway.select()
+	for pathway in pathways:
+		pathway.delete_instance(recursive = True)
+
+
+def delete_all_students():
+	students = Student.select()
+	for student in students:
+		student.delete_instance(recursive = True)
+
+
 def create_tables():
 	# Only run this once.
 	# Remember, this doesn't create a database. Just the tables.
@@ -372,15 +510,21 @@ def create_tables():
 	print "\nConnecting to the database..."
 	database.connect()
 	print "\nCreating tables..."
-	database.create_tables([School, Program])
+	# database.create_tables([School, Program])
+	# database.create_tables([Career, Template, Step])
+	# database.create_tables([Student])
+	database.create_tables([Pathway, Pathway_Step])
 
 
 def populate_tables():
 	print "\nAttempting to import schools & programs data..."
-	import_data()
+	import_school_data()
 
 
 def drop_tables():
 	# Only do this if you're serious.
 	print "\nDropping tables..."
-	database.drop_tables([School, Program], safe = True)
+	# database.drop_tables([School, Program], safe = True)
+	# database.drop_tables([Student], safe = True)
+	# database.drop_tables([Career, Template, Step], safe = True)
+	database.drop_tables([Pathway, Pathway_Step], safe = True)
