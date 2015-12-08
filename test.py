@@ -100,8 +100,9 @@ def get_best_roi_schools_for_cip(cip, how_many, home_state):
 
 
 def import_sample_template():
-	sheet = data_helper.get_csv_sheet("Sample Template.csv")
-	data_helper.import_template_from_sheet(sheet)
+	# sheet = data_helper.get_csv_sheet("Sample Template.csv")
+	# data_helper.import_template_from_sheet(sheet)
+	data_helper.import_template_from_file("Sample Template.csv")
 
 
 def print_careers():
@@ -220,7 +221,7 @@ def repopulate_everything():
 # data_helper.delete_all_schools()
 # data_helper.delete_all_careers()
 # data_helper.delete_all_pathways()
-# data_helper.delete_all_students()
+data_helper.delete_all_students()
 # data_helper.import_school_data()
 # import_sample_template()
 
@@ -231,7 +232,7 @@ def repopulate_everything():
 # print_schools()
 # print_programs()
 # import_sample_template()
-# create_sample_student()
+create_sample_student()
 # print_students()
 # print_careers()
 # print_templates()
@@ -241,7 +242,7 @@ def repopulate_everything():
 # test_roi()
 # swap_cip_for_test_purposes()
 # make_pathways_for_sample_student()
-print_pathways_for_sample_student()
+# print_pathways_for_sample_student()
 
 # destroy_and_rebuild_tables()
 # repopulate_everything()

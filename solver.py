@@ -125,7 +125,7 @@ def make_pathways_for_student(student, how_many):
 				
 				if len(programs) < pathways_needed:
 					pathways_needed = len(programs)
-					print "Only found enough programs to make", str(pathways_needed), "pathways."
+					print "Only found enough programs to make", str(pathways_needed), "pathway(s)."
 
 				try:
 					program = programs[i]
@@ -147,9 +147,4 @@ def make_pathways_for_student(student, how_many):
 
 			i += 1
 
-	pathways = Pathway.select().where(Pathway.student == student)
-	print "Made", str(len(pathways)), "pathways for", student.name + "!\n"
-
-
-
-
+	print "Made", str(pathways_created), "pathways for", student.name + "!\n"

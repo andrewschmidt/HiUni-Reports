@@ -334,7 +334,6 @@ def update_career(name, nicknames, description):
 	career.name = name
 	
 	if nicknames is not None and nicknames is not "":
-		print "Nicknames for the career were not None OR:"
 		for name in nicknames:
 			career.nicknames.append(name)
 
@@ -354,7 +353,7 @@ def update_template_from_sheet(sheet):
 	# Next either update the info for an existing template, or create a new one. This is based on the "template number":
 	try:
 		template = Template.select().join(Career).where((Template.number == template_number) & (Template.career == career)).get()
-		print "\nUpdating info for the template number", template.number, "for the career '" + career.name + ".'"
+		print "\nUpdating info for template #" + str(template.number), "for the career '" + career.name + ".'"
 	except Exception:
 		template = Template()
 		print "\nAdding template number", str(template_number) + ", for the career '" + career.name + ".'"
@@ -406,7 +405,6 @@ def save_pathway_step(pathway, program, step, number, cost):
 	pathway_step.cost = cost
 
 	pathway_step.save()
-	print "Successfully saved a pathway step."
 
 
 def save_pathway(student):
@@ -414,7 +412,6 @@ def save_pathway(student):
 	pathway.student = student
 	pathway.save()
 	
-	print "\nSuccesfully saved a pathway."
 	return pathway
 
 
@@ -431,6 +428,9 @@ def import_template_from_sheet(sheet):
 
 
 def import_template_from_file(file_name):
+	if ".csv" not in file_name:
+		file_name += ".csv"
+
 	sheet = get_csv_sheet(file_name)
 	import_template_from_sheet(sheet)
 
