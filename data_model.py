@@ -46,7 +46,7 @@ class Student(BaseModel):
 	name = CharField()
 	email = CharField()
 	
-	career = ForeignKeyField(Career)
+	career = ForeignKeyField(Career, null = True)
 	income = CharField()
 	budget = IntegerField()
 	

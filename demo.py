@@ -17,7 +17,8 @@ def clear():
 def print_student_info(student):
 	print ""
 	print Style.BRIGHT + student.name, "in", student.city + ",", student.state
-	print Style.DIM + "  Career:", student.career.name
+	if student.career is not None:
+		print Style.DIM + "  Career:", student.career.name
 	if student.income != "over 110,000":
 		income_string = "$" + student.income
 	else:
@@ -448,7 +449,7 @@ def delete_careers():
 	
 	count = len(to_delete)	
 	for item in to_delete:
-		item.delete_instance(recursive = True)
+		item.delete_instance(recursive = True, delete_nullable = False)
 
 	print "Deleted", count, "careers."
 
