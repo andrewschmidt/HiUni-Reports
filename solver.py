@@ -108,7 +108,7 @@ def make_pathways_for_student(student, how_many):
 	career = student.career
 	templates = career.templates
 
-	print "\nFound", len(templates), "templates."
+	# print "\nFound", len(templates), "templates."
 
 	for template in templates:
 		

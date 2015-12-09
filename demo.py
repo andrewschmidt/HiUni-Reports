@@ -1,11 +1,13 @@
 # A text-based demo of the HiUni Reports backend.
 
-import os
-import textwrap
-
 from data_model import *
 import data_helper
 import solver
+
+import os
+import textwrap
+from colorama import init, Fore, Back, Style
+init(autoreset = True)
 
 
 def clear():
@@ -14,20 +16,20 @@ def clear():
 
 def print_student_info(student):
 	print ""
-	print student.name, "in", student.city + ",", student.state
-	print "  Career:", student.career.name
+	print Style.BRIGHT + student.name, "in", student.city + ",", student.state
+	print Style.DIM + "  Career:", student.career.name
 	if student.income != "over 110,000":
 		income_string = "$" + student.income
 	else:
 		income_string = student.income
-	print "  Income:", income_string
-	print "  Budget: $" + str(student.budget)
+	print Style.DIM + "  Income:", income_string
+	print Style.DIM + "  Budget: ", "$" + str(student.budget)
 	print ""
 
 
 def show_students():
 	clear()
-	print "\nSTUDENTS"
+	print Style.BRIGHT + Fore.CYAN + "\nSTUDENTS"
 	print "--------"
 
 	students = Student.select()
@@ -41,7 +43,7 @@ def show_students():
 
 def show_careers():
 	clear()
-	print "\nCAREERS"
+	print Style.BRIGHT + Fore.CYAN + "\nCAREERS"
 	print "-------\n"
 
 	careers = Career.select()
@@ -55,7 +57,7 @@ def show_careers():
 
 def make_student():
 	clear()
-	print "\nADD STUDENT"
+	print Style.BRIGHT + Fore.GREEN + "\nADD STUDENT"
 	print "-----------"
 	
 	# First the easy stuff:
@@ -150,7 +152,7 @@ def import_templates_for_career_named(name):
 
 def make_career():
 	clear()
-	print "\nADD CAREER"
+	print Style.BRIGHT + Fore.GREEN + "\nADD CAREER"
 	print "----------"
 
 	career_name = raw_input("\nCareer name? ")
@@ -170,14 +172,15 @@ def make_career():
 
 def make_pathways():
 	clear()
-	print "\nGENERATE PATHWAYS"
+	print Style.BRIGHT + Fore.GREEN + "\nGENERATE PATHWAYS"
 	print "-----------------"
 
 	print "\nChoose a student:"
 	students = Student.select()
 	i = 1
 	for student in students:
-		print "  " + str(i) + ".", student.name
+		print Style.BRIGHT + "  " + str(i) + ". " + student.name
+		i += 1
 	
 	try:
 		student_number = int(raw_input("  "))
@@ -188,9 +191,7 @@ def make_pathways():
 	pathways_needed = int(raw_input("\nAnd how many pathways would you like to make (per template)? "))
 
 	print "\nOK! Generating pathways for", student.name + "."
-	schools = School.select()
-	programs = Program.select()
-	print "\nSearching", str(len(schools)), "schools offering", str(len(programs)), "programs..."
+	print "\nSearching", str(School.select().count()), "schools offering", str(Program.select().count()), "programs...\n"
 
 	try:
 		solver.make_pathways_for_student(student, how_many = pathways_needed)
@@ -203,14 +204,15 @@ def make_pathways():
 
 def show_pathways():
 	clear()
-	print "\nSHOW PATHWAYS"
+	print Style.BRIGHT + Fore.CYAN + "\nSHOW PATHWAYS"
 	print "-------------"
 
 	print "\nChoose a student:"
 	students = Student.select()
 	i = 1
 	for student in students:
-		print "  " + str(i) + ".", student.name
+		print Style.BRIGHT + "  " + str(i) + ". " + student.name
+		i += 1
 	
 	try:
 		student_number = int(raw_input("  "))
@@ -219,7 +221,7 @@ def show_pathways():
 		menu()
 
 	clear()
-	print "\nSHOW PATHWAYS"
+	print Style.BRIGHT + Fore.CYAN + "\nSHOW PATHWAYS"
 	print "-------------"
 	print_student_info(student)
 	print ""
@@ -228,25 +230,24 @@ def show_pathways():
 
 	i = 1
 	for pathway in pathways:
-		print "  PATHWAY #" + str(i)
-		print "\n    Total Cost: $" + str(pathway.cost())
-		print "    Total Duration:", str(pathway.duration()),  "years"
-		print "    20-year Earnings: $" + str(pathway.median_salary()*20)
-		print "    ROI:", str(pathway.roi()) + "%"
+		print Style.BRIGHT + "  PATHWAY #" + str(i)
+		print "\n    Total Cost:", "$" + Style.BRIGHT + str(pathway.cost())
+		print "    Total Duration:", Style.BRIGHT + str(pathway.duration()) + " years"
+		print "    20-year Earnings:", "$" + Style.BRIGHT + str(pathway.median_salary()*20)
+		print "    ROI:", Style.BRIGHT + str(pathway.roi()) + "%"
 
 		pathway_steps = pathway.sorted_steps()
 
 		for step in pathway_steps:
-			print "\n      STEP", str(step.number) + ": '" + step.title() + "'"
-			# print "        Study", step.program.name, "at", step.program.school.name
-			print "          Major:", step.program.name
-			print "          School:", step.program.school.name
-			print "          Cost: $" + str(step.cost)
-			print "          Duration:", str(step.duration()), "years"
-			print "          Description:"
+			print "\n      " + Style.BRIGHT + "STEP " + str(step.number) + ": '" + step.title() + "'", ""
+			print Style.NORMAL + "        Study " + step.program.name + " at " + step.program.school.name
+			# print "          Major:", Style.BRIGHT + step.program.name
+			# print "          School:", Style.BRIGHT + step.program.school.name
+			print Style.DIM + "          Cost:", Style.NORMAL + "$" + str(step.cost)
+			print Style.DIM + "          Duration:", Style.NORMAL + str(step.duration()) + " years"
 			description = step.description()
-			print textwrap.fill(description, width = 80, initial_indent = "            ", subsequent_indent = "            ")
-			# print "            " + step.description()
+			print Style.DIM + "          Description: " + Style.NORMAL + textwrap.fill(description, width = 80, initial_indent = "", subsequent_indent = "                       ")
+			# print Style.NORMAL + textwrap.fill(description, width = 80, initial_indent = "            ", subsequent_indent = "            ")
 
 		if len(pathways) > 1:
 			raw_input("")
@@ -261,7 +262,7 @@ def show_pathways():
 
 def import_schools():
 	clear()
-	print "\nIMPORT SCHOOLS"
+	print Style.BRIGHT + Fore.GREEN + "\nIMPORT SCHOOLS"
 	print "--------------"
 
 	choice = raw_input("\nThis takes a while. Are you ready to wait? Y/N: ")
@@ -276,7 +277,7 @@ def import_schools():
 
 def delete_students():
 	clear()
-	print "\nDELETE ALL STUDENTS"
+	print Style.BRIGHT + Fore.RED + "\nDELETE ALL STUDENTS"
 	print "-------------------"
 
 	choice = raw_input("\nAre you sure you want to delete all students? Y/N: ")
@@ -291,10 +292,10 @@ def delete_students():
 
 def delete_pathways():
 	clear()
-	print "\nDELETE ALL PATHWAYS"
+	print Style.BRIGHT + Fore.RED + "\nDELETE ALL PATHWAYS"
 	print "-------------------"
 
-	choice = raw_input("\nAre you sure you want to delete all pathways? Y/N: ")
+	choice = raw_input(Style.BRIGHT + Fore.RED + "\nAre you sure you want to delete all pathways? Y/N: ")
 	
 	if choice == "y" or choice == "Y":
 		data_helper.delete_all_pathways()
@@ -306,10 +307,10 @@ def delete_pathways():
 
 def delete_careers():
 	clear()
-	print "\nDELETE ALL CAREERS"
+	print Style.BRIGHT + Fore.RED + "\nDELETE ALL CAREERS"
 	print "------------------"
 
-	choice = raw_input("\nAre you sure you want to delete all careers? Y/N: ")
+	choice = raw_input(Style.BRIGHT + Fore.RED + "\nAre you sure you want to delete all careers? Y/N: ")
 	
 	if choice == "y" or choice == "Y":
 		data_helper.delete_all_careers()
@@ -321,10 +322,10 @@ def delete_careers():
 
 def delete_schools():
 	clear()
-	print "\nDELETE ALL SCHOOLS"
+	print Style.BRIGHT + Fore.RED + "\nDELETE ALL SCHOOLS"
 	print "------------------"
 
-	choice = raw_input("\nAre you sure you want to delete all schools? Y/N: ")
+	choice = raw_input(Style.BRIGHT + Fore.RED + "\nAre you sure you want to delete all schools? Y/N: ")
 	
 	if choice == "y" or choice == "Y":
 		data_helper.delete_all_schools()
@@ -336,14 +337,19 @@ def delete_schools():
 
 def delete():
 	clear()
-	print "\nDELETE"
+	print Style.BRIGHT + Fore.RED + "\nDELETE"
 	print "------"
 
 	print "\nWhat would you like to delete?"
-	choices = ["Students", "Pathways", "Careers"]
+	choices = ["Students", "Pathways", "Careers", "Exit"]
 	i = 1
 	for c in choices:
-		print "  " + str(i) + ".", c
+		if "Exit" in c: 
+			text_style = Style.BRIGHT
+		else:
+			text_style = Fore.RED
+
+		print Style.BRIGHT + "  " + str(i) + ". " + text_style + c
 		i += 1
 	
 	try: 
@@ -355,19 +361,27 @@ def delete():
 	if choice == "Students": delete_students()
 	if choice == "Pathways": delete_pathways()
 	if choice == "Careers": delete_careers()
+	if choice == "Exit": menu()
 
 
 def hidden_menu():
 	clear()
-	print "\nHIDDEN MENU"
+	print Style.BRIGHT + "\nHIDDEN MENU"
 	print "-----------"
 
 	print "\nWhat would you like to do?"
 
-	choices = ["Import schools", "Delete all schools"]
+	choices = ["Import schools", "Delete all schools", "Exit"]
 	i = 1
 	for c in choices:
-		print "  " + str(i) + ".", c
+		if "Import" in c: 
+			text_style = Fore.GREEN
+		elif "Delete" in c:
+			text_style = Fore.RED
+		else:
+			text_style = Style.BRIGHT
+		
+		print Style.BRIGHT + "  " + str(i) + ". " + text_style + c
 		i += 1
 	
 	try: 
@@ -378,25 +392,36 @@ def hidden_menu():
 
 	if choice == "Import schools": import_schools()
 	if choice == "Delete all schools": delete_schools()
+	if choice == "Exit": menu()
 
 
 def menu():
 	clear()
-	print "\nHIUNI REPORTS"
+	print Style.BRIGHT + "\nHIUNI REPORTS"
 	print "-------------"
 
-	number_schools = str(len(School.select()))
-	number_careers = str(len(Career.select()))
-	number_students = str(len(Student.select()))
+	number_schools = str(School.select().count())
+	number_careers = str(Career.select().count())
+	number_students = str(Student.select().count())
 
-	print "\nCurrently: ", number_schools,"schools,", number_careers, "careers, and", number_students, "students."
+	print "\nCurrently: ", Style.BRIGHT + number_schools, "schools,", Style.BRIGHT + number_careers, "careers, and", Style.BRIGHT + number_students, "students."
 
 	print "\nWhat would you like to do?"
 
-	choices = ["Add a career", "Show all careers", "Add a student", "Show all students", "Generate pathways", "Show pathways", "Delete", "Quit"]
+	choices = ["Add a career", "Add a student", "Generate pathways", "Show all careers", "Show all students", "Show pathways", "Delete", "Quit"]
+	
 	i = 1
 	for c in choices:
-		print "  " + str(i) + ".", c
+		if "Add" in c or "Generate" in c: 
+			text_style = Fore.GREEN
+		elif "Show" in c:
+			text_style = Fore.CYAN
+		elif "Delete" in c:
+			text_style = Fore.RED
+		else:
+			text_style = Style.BRIGHT
+
+		print Style.BRIGHT + "  " + str(i) + ". " + text_style + c
 		i += 1
 	
 	selection = raw_input("\n  ")
