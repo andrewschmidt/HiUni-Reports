@@ -49,7 +49,7 @@ def show_careers():
 	careers = Career.select()
 
 	for career in careers:
-		print "-", career.name
+		print "-", Style.BRIGHT + career.name, "with", Style.BRIGHT + str(career.templates.count()), "templates."
 
 	raw_input("\nPress enter return to the menu.")
 	menu()
@@ -188,7 +188,11 @@ def make_pathways():
 	except Exception:
 		menu()
 
-	pathways_needed = int(raw_input("\nAnd how many pathways would you like to make (per template)? "))
+	pathways_needed_string = raw_input("\nAnd how many pathways would you like to make (per template)? ")
+	try: 
+		pathways_needed = int(pathways_needed_string)
+	except Exception: 
+		menu()
 
 	print "\nOK! Generating pathways for", student.name + "."
 	print "\nSearching", str(School.select().count()), "schools offering", str(Program.select().count()), "programs...\n"
@@ -196,9 +200,13 @@ def make_pathways():
 	try:
 		solver.make_pathways_for_student(student, how_many = pathways_needed)
 	except Exception:
-		print "\nFailed to make pathways.\n"
+		print "\nFailed to make pathways."
 
-	raw_input("Press enter to return to the menu.")
+	choice = raw_input("Do you want to see the pathways now? Y/N: ")
+	if choice == "y" or choice == "Y":
+		show_pathways_for_student(student)
+
+	raw_input("\nPress enter to return to the menu.")
 	menu()
 
 
@@ -220,6 +228,10 @@ def show_pathways():
 	except Exception:
 		menu()
 
+	show_pathways_for_student(student)
+
+
+def show_pathways_for_student(student):
 	clear()
 	print Style.BRIGHT + Fore.CYAN + "\nSHOW PATHWAYS"
 	print "-------------"
@@ -240,14 +252,13 @@ def show_pathways():
 
 		for step in pathway_steps:
 			print "\n      " + Style.BRIGHT + "STEP " + str(step.number) + ": '" + step.title() + "'", ""
-			print Style.NORMAL + "        Study " + step.program.name + " at " + step.program.school.name
-			# print "          Major:", Style.BRIGHT + step.program.name
-			# print "          School:", Style.BRIGHT + step.program.school.name
+			# print Style.NORMAL + "        Study " + step.program.name + " at " + step.program.school.name
+			print Style.DIM + "          Major:", Style.NORMAL + step.program.name
+			print Style.DIM + "          School:", Style.NORMAL + step.program.school.name
 			print Style.DIM + "          Cost:", Style.NORMAL + "$" + str(step.cost)
 			print Style.DIM + "          Duration:", Style.NORMAL + str(step.duration()) + " years"
 			description = step.description()
 			print Style.DIM + "          Description: " + Style.NORMAL + textwrap.fill(description, width = 80, initial_indent = "", subsequent_indent = "                       ")
-			# print Style.NORMAL + textwrap.fill(description, width = 80, initial_indent = "            ", subsequent_indent = "            ")
 
 		if len(pathways) > 1:
 			raw_input("")
@@ -277,14 +288,55 @@ def import_schools():
 
 def delete_students():
 	clear()
-	print Style.BRIGHT + Fore.RED + "\nDELETE ALL STUDENTS"
-	print "-------------------"
+	print Style.BRIGHT + Fore.RED + "\nDELETE STUDENTS"
+	print "---------------"
 
-	choice = raw_input("\nAre you sure you want to delete all students? Y/N: ")
+	print "\nDelete which student?"
+	students = Student.select()
+	i = 1
+	for student in students:
+		print Style.BRIGHT + "  " + str(i) + ". " + Fore.RED + student.name
+		i += 1
+	print Style.BRIGHT + "  " + str(i) + ". " + Fore.RED + "Delete all"
+	print Style.BRIGHT + "  " + str(i+1) + ". Exit"
 	
-	if choice == "y" or choice == "Y":
-		data_helper.delete_all_students()
-		print "\nAll students deleted."
+	choice = raw_input("  ")
+	try:
+		number = int(choice)
+	except Exception:
+		menu()
+
+	if number == i+1:
+		menu()
+	
+	elif number == i:
+		confirm = raw_input(Style.BRIGHT + "\nAre you sure you want to delete all students? Y/N: ")
+		if confirm == "y" or confirm == "Y":
+			to_delete = Student.select()
+		else:
+			raw_input("\nPress enter to return to the menu.")
+			menu()
+
+	else:
+		try:
+			student = students[number-1]
+		except Exception:
+			print "\nGot the input:", str(number) + ", didn't know what to do with it."
+			raw_input("\nPress enter to return to the menu.")
+			menu()
+		
+		confirm = raw_input(Style.BRIGHT + "\nAre you sure you want to delete " + student.name + "? Y/N: ")
+		if confirm == "y" or confirm == "Y":
+			to_delete = [student]
+		else:
+			raw_input("\nPress enter to return to the menu.")
+			menu()
+	
+	count = len(to_delete)	
+	for item in to_delete:
+		item.delete_instance(recursive = True)
+
+	print "Deleted", count, "students."
 
 	raw_input("\nPress enter to return to the menu.")
 	menu()
@@ -295,11 +347,54 @@ def delete_pathways():
 	print Style.BRIGHT + Fore.RED + "\nDELETE ALL PATHWAYS"
 	print "-------------------"
 
-	choice = raw_input(Style.BRIGHT + Fore.RED + "\nAre you sure you want to delete all pathways? Y/N: ")
+	print "\nDelete pathways for which student?"
+	students = Student.select()
+	i = 1
+	for student in students:
+		print Style.BRIGHT + "  " + str(i) + ". " + Fore.RED + student.name
+		i += 1
+	print Style.BRIGHT + "  " + str(i) + ". " + Fore.RED + "Delete all"
+	print Style.BRIGHT + "  " + str(i+1) + ". Exit"
 	
-	if choice == "y" or choice == "Y":
-		data_helper.delete_all_pathways()
-		print "\nAll pathways deleted."
+	choice = raw_input("  ")
+	try:
+		number = int(choice)
+	except Exception:
+		menu()
+
+	if number == i+1:
+		menu()
+	
+	elif number == i:
+		confirm = raw_input(Style.BRIGHT + "\nAre you sure you want to delete all pathways? Y/N: ")
+		if confirm == "y" or confirm == "Y":
+			to_delete = Pathway.select()
+		else:
+			raw_input("\nPress enter to return to the menu.")
+			menu()
+
+	else:
+		try:
+			student = students[number-1]
+		except Exception:
+			print "\nGot the input:", str(number) + ", didn't know what to do with it."
+			raw_input("\nPress enter to return to the menu.")
+			menu()
+		
+		confirm = raw_input(Style.BRIGHT + "\nAre you sure you want to delete " + student.name + "'s pathways? Y/N: ")
+		if confirm == "y" or confirm == "Y":
+			to_delete = []
+			for pathway in student.pathways:
+				to_delete.append(pathway)
+		else:
+			raw_input("\nPress enter to return to the menu.")
+			menu()
+	
+	count = len(to_delete)	
+	for item in to_delete:
+		item.delete_instance(recursive = True)
+
+	print "Deleted", count, "pathways."
 
 	raw_input("\nPress enter to return to the menu.")
 	menu()
@@ -307,14 +402,55 @@ def delete_pathways():
 
 def delete_careers():
 	clear()
-	print Style.BRIGHT + Fore.RED + "\nDELETE ALL CAREERS"
+	print Style.BRIGHT + Fore.RED + "\nDELETE CAREERS"
 	print "------------------"
 
-	choice = raw_input(Style.BRIGHT + Fore.RED + "\nAre you sure you want to delete all careers? Y/N: ")
+	print "\nDelete which career?"
+	careers = Career.select()
+	i = 1
+	for career in careers:
+		print Style.BRIGHT + "  " + str(i) + ". " + Fore.RED + career.name
+		i += 1
+	print Style.BRIGHT + "  " + str(i) + ". " + Fore.RED + "Delete all"
+	print Style.BRIGHT + "  " + str(i+1) + ". Exit"
 	
-	if choice == "y" or choice == "Y":
-		data_helper.delete_all_careers()
-		print "\nAll careers deleted."
+	choice = raw_input("  ")
+	try:
+		number = int(choice)
+	except Exception:
+		menu()
+
+	if number == i+1:
+		menu()
+	
+	elif number == i:
+		confirm = raw_input(Style.BRIGHT + "\nAre you sure you want to delete all careers? Y/N: ")
+		if confirm == "y" or confirm == "Y":
+			to_delete = Career.select()
+		else:
+			raw_input("\nPress enter to return to the menu.")
+			menu()
+
+	else:
+		try:
+			career = careers[number-1]
+		except Exception:
+			print "\nGot the input:", str(number) + ", didn't know what to do with it."
+			raw_input("\nPress enter to return to the menu.")
+			menu()
+		
+		confirm = raw_input(Style.BRIGHT + "\nAre you sure you want to delete " + career.name + "? Y/N: ")
+		if confirm == "y" or confirm == "Y":
+			to_delete = [career]
+		else:
+			raw_input("\nPress enter to return to the menu.")
+			menu()
+	
+	count = len(to_delete)	
+	for item in to_delete:
+		item.delete_instance(recursive = True)
+
+	print "Deleted", count, "careers."
 
 	raw_input("\nPress enter to return to the menu.")
 	menu()
