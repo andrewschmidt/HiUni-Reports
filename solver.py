@@ -192,8 +192,8 @@ def pathway_complete(pathway, template):
 	# Check if we made enough pathway steps:
 	if len(pathway.pathway_steps) != len(template.steps):
 		print "Oh no! The pathway didn't have enough steps :("
-		print "Deleting it..."
-		pathway.delete_instance(recursive = True)
+		# print "Deleting it..."
+		# pathway.delete_instance(recursive = True)
 		return False
 	else:
 		return True
@@ -223,7 +223,6 @@ def make_pathway_from_template(template, student):
 
 	# Make as many pathway steps as we can:
 	for step in template.steps:
-		
 		# Get all applicable programs:
 		programs = programs_for_step(step, student)
 
@@ -237,9 +236,11 @@ def make_pathway_from_template(template, student):
 			if not program in excluded_programs(student):	
 				try:
 					cost = cost_for_school(program.school, duration = step.duration, income_level = student.income, home_state = student.state)
+					
+					# if pathway.cost() + cost <= student.budget: # I'm not entirely sure if I need this. Worth checking.
 					program_found = True
 					print program.name, "at", program.school.name, "works for step", step.number
-				
+					
 				except Exception:
 					print program.name, "at", program.school.name, "didn't work out :("
 
@@ -282,10 +283,17 @@ def make_pathways_for_student(student, how_many):
 		good_pathways += make_pathways(student)
 
 	# Now clean up the leftovers --
-	# Starting with pathways that were too expensive:
+	# Starting with pathways that were too expensive or incomplete:
 	for p in student.pathways:
-			if not within_budget(p, student):
-				p.delete_instance(recursive = True)	
+		if not within_budget(p, student):
+			p.delete_instance(recursive = True)
+		
+		s = p.pathway_steps
+		for pathway_step in s:
+			template = pathway_step.step.template
+
+		if not pathway_complete(p, template):
+			p.delete_instance(recursive = True)
 
 	# And any extra ones:
 	if len(student.pathways) > how_many:
