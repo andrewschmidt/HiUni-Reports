@@ -373,9 +373,18 @@ def update_steps_for_template(template, from_sheet):
 		try:
 			step = Step.select().join(Template).where((Step.number == numbers[i]) & (Step.template == template)).get()
 			print "    - Updating info for step #" + str(step.number) + "."
+			print "        School kind:", school_kinds[i]
+			print "        Duration:", str(durations[i])
+			print "        CIP:", str(cips[i])
+			print "        Sort by:", sort_bys[i]
+
 		except Exception:
 			step = Step()
-			print "    - Adding a step, titled '" + titles[i] + "'"
+			print "\n    - Adding step #" + str(numbers[i]) + ", titled '" + titles[i] + "'"
+			print "        School kind:", school_kinds[i]
+			print "        Duration:", str(durations[i])
+			print "        CIP:", str(cips[i])
+			print "        Sort by:", sort_bys[i]
 
 		step.template = template
 
@@ -448,9 +457,30 @@ def get_ipeds_ids_in_both(cost_sheet, salary_sheet):
 	return ids_in_both
 
 
+def get_ipeds_ids_of_community_colleges(cost_sheet):
+	cost_sheet_ids = get_school_ids_from_csv_sheet(cost_sheet)
+
+	community_college_ids = []
+
+	for ipeds_id in cost_sheet_ids:
+		name, ipeds_id, kind, admission_rate, city, state, location, total_price, net_price = get_school_info_from_csv_sheet(cost_sheet, for_ipeds_id = ipeds_id)
+		if kind == "Degree-granting, associate's and certificates":
+			community_college_ids.append(ipeds_id)
+
+	return community_college_ids
+
+
 def import_school_data_from_sheets(cost_sheet, salary_sheet):
+	print "Fetching school ids from the CSV sheets..."
+
 	# Find out which IPEDS IDs are in both sheets:	
-	ids_from_sheets = get_ipeds_ids_in_both(cost_sheet, salary_sheet)
+	ids_in_both_sheets = get_ipeds_ids_in_both(cost_sheet, salary_sheet)
+	
+	# And which community colleges are in the cost sheet:
+	ids_of_community_colleges = get_ipeds_ids_of_community_colleges(cost_sheet)
+
+	# Add them together:
+	ids_from_sheets = ids_in_both_sheets + ids_of_community_colleges
 
 	schools_done = 0
 	total_schools = len(ids_from_sheets)

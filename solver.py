@@ -42,87 +42,143 @@ def roi_for_program(program, duration, income_level, home_state):
 		return roi
 	
 	except Exception:
- 		print "Error getting ROI for", program.name, "at", school.name + "."
+ 		# print "Error getting ROI for", program.name, "at", school.name + "." # Activate this only to debug.
 		return None
 		
 		
-def programs_by_roi_for_cip(cip, duration, income_level, home_state):
+def programs_by_roi_for_cip(cip, duration, income_level, home_state, only_reportable):
+	if only_reportable: 
+		query = (
+			(Program.cip == cip) & 
+			(Program.reportable == True) & 
+			(Program.median_salary.is_null(False)))
+	else:
+		query = (
+			(Program.cip == cip) & 
+			(Program.median_salary.is_null(False)))
+
 	programs = []
 	
-	for program in Program.select().where(Program.cip == cip):
-		if program.reportable and program.median_salary is not None: # We only want to return programs w/ salary data, and enough of it.
-			programs.append(program)
+	for program in Program.select().where(query):
+		programs.append(program)
 	
 	programs.sort(key = lambda p: roi_for_program(p, duration = duration, income_level = income_level, home_state = home_state), reverse = True)
 	
 	return programs
 
 
-def programs_by_roi_for_step(step, student):
-	programs = []
-	
-	for cip in step.cips:
-		p = programs_by_roi_for_cip(cip = cip, duration = step.duration, income_level = student.income, home_state = student.state)
-		
-		if len(p) > 0:
-			for program in p:
-				school = program.school
-				if school.kind == step.school_kind:
-					programs.append(program)
-				else:
-					print "School kind '" + school.kind + "' does not match kind called for:", step.school_kind + "."
-
-	# The function we used to fetch programs sorts them by ROI.
-	# But if we called it multiple times, our array isn't properly sorted.
-	# Let's fix that:
-	if len(step.cips) > 1:
-		programs.sort(key = lambda p: roi_for_program(p, duration = duration, income_level = income_level, home_state = home_state), reverse = True)
-
-	return programs
+def check_school_kind(program, step):
+	school = program.school
+	if school.kind == step.school_kind:
+		print "School kind '" + school.kind + "' DOES mach the kind called for:", step.school_kind + "."
+		return True
+	else:
+		# print "School kind '" + school.kind + "' does not match kind called for:", step.school_kind + "."
+		return False
 
 
 def programs_by_city_for_step(step, student):
 	# This is hacky right now. It returns all schools in the same city, instead of finding them by distance.
 	# And it should be making its own database calls, taking into account location.
 	programs = []
+	
+	query = (
+		(School.city == student.city) & 
+		(School.state == student.state) & 
+		(School.kind == step.school_kind))
 
-	for p in programs_by_roi_for_step(step, student):
-		school = p.school
-		if school.city == student.city and school.state == student.state:
-			programs.append(p)
+	for p in Program.select().join(School).where(query): # THIS IS THE PROBLEM. No community college has a single program. I need to make null programs (or general ed) for them!
+		programs.append(p)
+
+	# programs = []
+
+	# for p in nearby_programs:
+	# 	# print "School nearby! Checking kind..."
+	# 	if check_school_kind(p, step):
+	# 		# print "And it's the correct kind!"
+	# 		programs.append(p)
+	# 	# else:
+	# 	# 	"It's the wrong kind:", p.school.kind
+
+	# print "Found", str(len(programs)), "parsing by school type."
+	# for p in programs:
+	# 	school = p.school
+	# 	if school.city == student.city and school.state == student.state and check_school_kind(p, step) is True:
+	# 		print "\nFound some matching programs by city..."
+	# 		if check_school_kind(program, step) is True:
+	# 			print "And some with the correct school kind..."
+	# 			programs.append(p)
 
 	return programs
 
 
+def programs_by_roi_for_step(step, student):
+	safe_search = True
+
+	programs = []
+
+	for cip in step.cips:
+		p = programs_by_roi_for_cip(cip = cip, duration = step.duration, income_level = student.income, home_state = student.state, only_reportable = True)
+		
+		if len(p) == 0:
+			p = programs_by_roi_for_cip(cip = cip, duration = step.duration, income_level = student.income, home_state = student.state, only_reportable = False)
+			safe_search = False
+		
+		if len(p) > 0:
+			for program in p:
+				if check_school_kind(program, step) is True:
+					programs.append(program)
+
+	# The function we used to fetch programs sorts them by ROI.
+	# But if we called it multiple times, our array isn't properly sorted.
+	# Let's fix that:
+	if len(step.cips) > 1:
+		programs.sort(key = lambda p: roi_for_program(p, duration = step.duration, income_level = student.income, home_state = student.state), reverse = True)
+
+	return programs, safe_search
+
+
 def programs_for_step(step, student):
 	if step.sort_by == "ROI":
-		programs = programs_by_roi_for_step(step, student)
-	else:
+		programs, safe_search = programs_by_roi_for_step(step, student)
+
+		if not safe_search:
+			print "Couldn't find any reportable programs, had to remove that restriction..."
+
+	elif step.sort_by == "Location":
 		programs = programs_by_city_for_step(step, student)
+		
+		if len(programs) == 0:
+			print "Couldn't find any nearby programs."
+		else:
+			print "Found", str(len(programs)), "programs nearby."
+
 
 	return programs
 
 
 def make_pathways_for_student(student, how_many):
-	pathways_needed = how_many		
 	career = student.career
 	templates = career.templates
 
-	# print "\nFound", len(templates), "templates."
-
 	for template in templates:
-		
+		pathways_needed = how_many		
 		pathways_created = 0
-		i = 0
 		abort = False
 
+		print "\nWorking on template #" + str(template.number)
+		print "Pathways needed: ", pathways_needed
 		while pathways_created < pathways_needed:
 			# Create the pathway first, since the steps have to reference it:
+			print "\nTrying to make a pathway...\n"
 			pathway = data_helper.save_pathway(student)
 
 			# Now create its steps:
+			i = 0
 			for step in template.steps:
 				programs = programs_for_step(step, student)
+
+				print "Found", str(len(programs)), "possible programs for step #" + str(step.number) + "."
 				
 				if len(programs) < pathways_needed:
 					pathways_needed = len(programs)
@@ -151,4 +207,4 @@ def make_pathways_for_student(student, how_many):
 			
 			i += 1
 
-	print "Made", str(pathways_created), "pathways for", student.name + "!\n"
+		print "\nMade " + str(pathways_created) + " pathways from template #" + str(template.number) + ".\n"

@@ -32,7 +32,7 @@ class Program(BaseModel):
 	school = ForeignKeyField(School, related_name = "programs")
 	name = CharField()
 	cip = CharField()
-	median_salary = IntegerField()
+	median_salary = IntegerField(null = True)
 	reportable = BooleanField()
 
 
@@ -102,8 +102,10 @@ class Pathway(BaseModel):
 		return duration
 
 	def median_salary(self):
-		index = len(self.pathway_steps)-1 # Replace this when you land (coding at 30,000 ft!)
-		last_pathway_step = self.pathway_steps[index]
+		if len(self.pathway_steps) > 1:
+			last_pathway_step = self.pathway_steps[len(self.pathway_steps)-1]
+		else:
+			last_pathway_step = self.pathway_steps[0]
 		salary = last_pathway_step.median_salary()
 		return salary
 

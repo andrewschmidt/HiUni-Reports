@@ -68,8 +68,12 @@ def get_best_roi_schools_for_cip(cip, how_many, home_state):
 	print ""
 	state = home_state
 
-	programs = solver.programs_by_roi_for_cip(cip, duration = 4, income_level = "30,001-48,000", home_state = state)
-
+	programs = solver.programs_by_roi_for_cip(cip, duration = 4, income_level = "30,001-48,000", home_state = state, only_reportable = True)
+	
+	if len(programs) == 0:
+		print "\nCouldn't find 'reportable' programs, trying without that restriction..."
+		programs = solver.programs_by_roi_for_cip(cip, duration = 4, income_level = "30,001-48,000", home_state = state, only_reportable = False)
+	
 	if len(programs) > 0:
 
 		print "\nTop", str(how_many), "schools for CIP:", cip + ", sorted by ROI:\n"
@@ -81,19 +85,19 @@ def get_best_roi_schools_for_cip(cip, how_many, home_state):
 			program = programs[i]
 			i += 1
 
-			if program.reportable:
-				print "   #" + str(schools_found+1) + ":", program.name, "at", program.school.name
-				print "        Median Salary: $" + str(program.median_salary)
-				
-				roi = solver.roi_for_program(program, duration = 4, income_level = "30,001-48,000", home_state = state)
-				if roi:
-					print "        ROI: " + str(roi) + "%"
+			# if program.reportable:
+			print "   #" + str(schools_found+1) + ":", program.name, "at", program.school.name
+			print "        Median Salary: $" + str(program.median_salary)
 			
-				print ""
+			roi = solver.roi_for_program(program, duration = 4, income_level = "30,001-48,000", home_state = state)
+			if roi:
+				print "        ROI: " + str(roi) + "%"
+		
+			print ""
 
-				schools_found += 1
-			else:
-				print "Found unreportable program, shouldn't have."
+			schools_found += 1
+			# else:
+				# print "Found unreportable program, shouldn't have."
 
 	else:
 		print "Couldn't find any reportable programs for that CIP."
@@ -213,6 +217,15 @@ def repopulate_everything():
 	import_sample_template()
 
 
+def print_community_colleges(city, state):
+	community_colleges = School.select().where((School.kind == "Degree-granting, associate's and certificates") & (School.city == city) & (School.state == state))
+	
+	print "\nThere are", len(community_colleges), "community colleges in", city + ",", state + ":"
+
+	for college in community_colleges:
+		print "  -", college.name
+
+
 
 # Commands for data_helper:
 
@@ -237,8 +250,9 @@ def repopulate_everything():
 # print_careers()
 # print_templates()
 # print_steps()
+print_community_colleges(city = "Indianapolis", state = "Indiana")
 
-# get_best_roi_schools_for_cip("26.01", how_many = 5, home_state = "Indiana") # Economics = 45.06, Design = 50.04, Biology = 26.01, Drama = 50.05, Journalism = 09.04, Architecture = 04.02
+# get_best_roi_schools_for_cip("11.02", how_many = 5, home_state = "Indiana") # Economics = 45.06, Design = 50.04, Biology = 26.01, Drama = 50.05, Journalism = 09.04, Architecture = 04.02
 # test_roi()
 # swap_cip_for_test_purposes()
 # make_pathways_for_sample_student()

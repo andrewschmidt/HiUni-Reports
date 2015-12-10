@@ -158,7 +158,7 @@ def make_career():
 
 	career_name = raw_input("\nCareer name? ")
 
-	print "\nSearching for templates for", career_name + "s..."
+	print "\nSearching for templates for '", career_name + "'..."
 	
 	templates_found = import_templates_for_career_named(career_name)
 
@@ -198,10 +198,10 @@ def make_pathways():
 	print "\nOK! Generating pathways for", student.name + "."
 	print "\nSearching", str(School.select().count()), "schools offering", str(Program.select().count()), "programs...\n"
 
-	try:
-		solver.make_pathways_for_student(student, how_many = pathways_needed)
-	except Exception:
-		print "\nFailed to make pathways."
+	# try:
+	solver.make_pathways_for_student(student, how_many = pathways_needed)
+	# except Exception:
+	# 	print "\nFailed to make pathways, error in solver.make_pathways_for_student()."
 
 	choice = raw_input("Do you want to see the pathways now? Y/N: ")
 	if choice == "y" or choice == "Y":
@@ -591,5 +591,3 @@ def menu():
 
 # Running the demo:
 menu()
-
-
