@@ -189,7 +189,7 @@ def make_pathways():
 	except Exception:
 		menu()
 
-	pathways_needed_string = raw_input("\nAnd how many pathways would you like to make (per template)? ")
+	pathways_needed_string = raw_input("\nHow many pathways would you like to make? ")
 	try: 
 		pathways_needed = int(pathways_needed_string)
 	except Exception: 
@@ -237,13 +237,12 @@ def show_pathways_for_student(student):
 	print Style.BRIGHT + Fore.CYAN + "\nSHOW PATHWAYS"
 	print "-------------"
 	print_student_info(student)
-	print ""
 
 	pathways = student.sorted_pathways()
 
 	i = 1
 	for pathway in pathways:
-		print Style.BRIGHT + "  PATHWAY #" + str(i)
+		print Style.BRIGHT + "\n  PATHWAY #" + str(i)
 		print "\n    Total Cost:", "$" + Style.BRIGHT + str(pathway.cost())
 		print "    Total Duration:", Style.BRIGHT + str(pathway.duration()) + " years"
 		print "    20-year Earnings:", "$" + Style.BRIGHT + str(pathway.median_salary()*20)
@@ -259,7 +258,9 @@ def show_pathways_for_student(student):
 			print Style.DIM + "          Cost:", Style.NORMAL + "$" + str(step.cost)
 			print Style.DIM + "          Duration:", Style.NORMAL + str(step.duration()) + " years"
 			description = step.description()
-			print Style.DIM + "          Description: " + Style.NORMAL + textwrap.fill(description, width = 80, initial_indent = "", subsequent_indent = "                       ")
+			print Style.DIM + "          Description: "
+			print Style.NORMAL + textwrap.fill(description, width = 120, initial_indent = "                ", subsequent_indent = "             ")
+			print ""
 
 		if len(pathways) > 1:
 			raw_input("")

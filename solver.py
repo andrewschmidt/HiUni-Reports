@@ -180,14 +180,8 @@ def programs_by_distance_for_step(step, student):
 def programs_for_step(step, student):
 	if step.sort_by == "ROI":
 		programs, safe_search = programs_by_roi_for_step(step, student)
-	
 	elif step.sort_by == "Location":
 		programs, safe_search = programs_by_distance_for_step(step, student)
-		
-		# if len(programs) == 0:
-		# 	print "Couldn't find any nearby programs."
-		# else:
-		# 	print "Found", str(len(programs)), "programs nearby."
 
 	if not safe_search:
 		print "Had to use programs with low data."
@@ -195,12 +189,22 @@ def programs_for_step(step, student):
 	return programs
 
 
-def check_pathway(pathway, template):
+def pathway_complete(pathway, template):
 	# Check if we made enough pathway steps:
 	if len(pathway.pathway_steps) != len(template.steps):
 		print "Oh no! The pathway didn't have enough steps :("
 		print "Deleting it..."
 		pathway.delete_instance(recursive = True)
+		return False
+	else:
+		return True
+
+
+def within_budget(pathway, student):
+	if pathway.cost() <= student.budget:
+		return True
+	else:
+		return False
 
 
 def excluded_programs(student):
@@ -209,7 +213,7 @@ def excluded_programs(student):
 	for pathway in student.pathways:
 		for step in pathway.pathway_steps:
 			school = step.program.school
-			if school.kind != "": # It's OK to reuse community colleges.
+			if school.kind != "Degree-granting, associate's and certificates": # It's OK to reuse community colleges.
 				programs.append(step.program)
 
 	return programs
@@ -252,20 +256,40 @@ def make_pathway_from_template(template, student):
 def make_pathways(student):
 	career = student.career
 	templates = career.templates
+	good_pathways = []
 		
 	for template in templates:
 		print "\nMaking a pathway."
 		print "  Career:", career.name
 		print "  Template:", template.number, "\n"
 		pathway = make_pathway_from_template(template, student)
+		
 		print "\nChecking the pathway..."
-		check_pathway(pathway, template)
+
+		if pathway_complete(pathway, template) and within_budget(pathway, student):
+			good_pathways.append(pathway)
+			print "Made a pathway."
+		else:
+			print "Pathway is too expensive or incomplete."
+
+	return good_pathways
+
 
 
 def make_pathways_for_student(student, how_many):	
-	while len(student.pathways) < how_many:
-		make_pathways(student)
+	good_pathways = []
 
+	# First make tons of pathways:
+	while len(good_pathways) < how_many:
+		good_pathways += make_pathways(student)
+
+	# Now clean up the leftovers --
+	# Starting with pathways that were too expensive:
+	for p in student.pathways:
+			if not within_budget(p, student):
+				p.delete_instance(recursive = True)	
+
+	# And any extra ones:
 	if len(student.pathways) > how_many:
 		pathways = []
 		for pathway in student.sorted_pathways():
@@ -277,4 +301,4 @@ def make_pathways_for_student(student, how_many):
 			print "Deleting a pathway with an ROI of", str(p.roi())
 			p.delete_instance(recursive = True)
 			index -= 1
-			
+
