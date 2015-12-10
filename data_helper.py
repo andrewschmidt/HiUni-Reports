@@ -235,6 +235,14 @@ def get_programs_data_from_csv_sheet(sheet, for_school):
 			else:
 				reportables.append(True)
 
+	if school.kind == "Degree-granting, associate's and certificates" and len(cips) == 0:
+		# Currently we don't have any salary info for community colleges, but we do need them in the database.
+		# Let's give community colleges a General Studies program, with no salary info.
+		names.append("General Studies")
+		cips.append("24.0102")
+		median_salaries.append(None)
+		reportables.append(False)
+
 	return names, cips, median_salaries, reportables
 
 
