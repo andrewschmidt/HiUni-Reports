@@ -239,7 +239,7 @@ def show_pathways_for_student(student):
 	print_student_info(student)
 	print ""
 
-	pathways = Pathway.select().where(Pathway.student == student)
+	pathways = student.sorted_pathways()
 
 	i = 1
 	for pathway in pathways:

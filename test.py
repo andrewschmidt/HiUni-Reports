@@ -224,6 +224,8 @@ def print_community_colleges(city, state):
 
 	for college in community_colleges:
 		print "  -", college.name
+		print "      Total Prices:", str(college.total_price)
+		print "      Net Price:", str(college.net_price)
 
 
 
@@ -250,7 +252,7 @@ def print_community_colleges(city, state):
 # print_careers()
 # print_templates()
 # print_steps()
-print_community_colleges(city = "Indianapolis", state = "Indiana")
+print_community_colleges(city = "Los Angeles", state = "California")
 
 # get_best_roi_schools_for_cip("11.02", how_many = 5, home_state = "Indiana") # Economics = 45.06, Design = 50.04, Biology = 26.01, Drama = 50.05, Journalism = 09.04, Architecture = 04.02
 # test_roi()

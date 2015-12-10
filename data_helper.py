@@ -8,7 +8,7 @@ from data_model import * # The data model & the database connection.
 import csv # For reading CSVs.
 
 
-ipeds_file = "IPEDS data (altered).csv" # The CSV file w/ data from IPEDS.
+ipeds_file = "IPEDS data.csv" # The CSV file w/ data from IPEDS.
 payscale_file = "2015-10 Four Digit Experienced Pay (Converted).csv" # The CSV file w/ data from PayScale.
 
 
@@ -114,6 +114,7 @@ def get_total_prices_for_school_id(ipeds_id, from_csv_sheet):
 		try:
 			total_price[key] = row[get_number_for_nonempty_column(key, for_ipeds_id = ipeds_id, from_csv_sheet = sheet)]
 		except Exception:
+			print "Couldn't get a price for '" + key + "'."
 			pass
 		
 	return total_price
@@ -145,25 +146,28 @@ def get_school_info_from_csv_sheet(sheet, for_ipeds_id):
 	ipeds_id = for_ipeds_id
 	row = get_row_for_school_id(ipeds_id, from_csv_sheet = sheet)
 
+	school_info = {}
+
 	# Pluck the appropriate info from the columns in the list -- using a function to safeguard against the columns rearranging.
-	ipeds_id = row[get_number_for_column("unitid", from_csv_sheet = sheet)] # This should always be the same.
-	name = row[get_number_for_column("institution name", from_csv_sheet = sheet)]
-	kind = row[get_number_for_column("HD2013.Institutional category", from_csv_sheet = sheet)]
+	school_info['ipeds_id'] = row[get_number_for_column("unitid", from_csv_sheet = sheet)] # This should always be the same.
+	school_info['name'] = row[get_number_for_column("institution name", from_csv_sheet = sheet)]
+	school_info['kind'] = row[get_number_for_column("Institutional category", from_csv_sheet = sheet)]
+	school_info['sector'] = row[get_number_for_column("Sector of institution", from_csv_sheet = sheet)]
 	
-	admission_rate = row[get_number_for_column("DRVIC2013_RV.Percent admitted - total", from_csv_sheet = sheet)]
-	if admission_rate == "": admission_rate = None
+	school_info['admission_rate'] = row[get_number_for_column("Percent admitted - total", from_csv_sheet = sheet)]
+	if school_info['admission_rate'] == "": school_info['admission_rate'] = None
 	
-	city = row[get_number_for_column("HD2013.City location of institution", from_csv_sheet = sheet)]
-	state = row[get_number_for_column("HD2013.State abbreviation", from_csv_sheet = sheet)]
+	school_info['city'] = row[get_number_for_column("City location of institution", from_csv_sheet = sheet)]
+	school_info['state'] = row[get_number_for_column("State abbreviation", from_csv_sheet = sheet)]
 
 	latitude = row[get_number_for_column("Latitude", from_csv_sheet = sheet)]
 	longitude = row[get_number_for_column("Longitude", from_csv_sheet = sheet)]
-	location = {"latitude": latitude, "longitude": longitude}
+	school_info['location'] = {"latitude": latitude, "longitude": longitude}
 	
-	total_price = get_total_prices_for_school_id(ipeds_id, from_csv_sheet = sheet)
-	net_price = get_net_prices_for_school_id(ipeds_id, from_csv_sheet = sheet)
+	school_info['total_price'] = get_total_prices_for_school_id(ipeds_id, from_csv_sheet = sheet)
+	school_info['net_price'] = get_net_prices_for_school_id(ipeds_id, from_csv_sheet = sheet)
 	
-	return name, ipeds_id, kind, admission_rate, city, state, location, total_price, net_price
+	return school_info # name, ipeds_id, kind, sector, admission_rate, city, state, location, total_price, net_price
 
 
 def get_template_data_from_csv_sheet(sheet):
@@ -253,7 +257,7 @@ def update_school_with_ipeds_id(ipeds_id, from_cost_sheet):
 	sheet = from_cost_sheet
 
 	# Get all the info on the school from the CSV.
-	name, new_ipeds, kind, admission_rate, city, state, location, total_price, net_price = get_school_info_from_csv_sheet(sheet, for_ipeds_id = ipeds_id)
+	info = get_school_info_from_csv_sheet(sheet, for_ipeds_id = ipeds_id)
 
 	# Let's figure out if the school is already in the database, or needs creating.
 	try:
@@ -261,18 +265,18 @@ def update_school_with_ipeds_id(ipeds_id, from_cost_sheet):
 		print "\nUpdating info for the", school.name + "."
 	except Exception:
 		school = School()
-		print "\nAdding a school to the database: the", name + "."
+		print "\nAdding a school to the database: the", info['name'] + "."
 
 	# Then assign the new data. Peewee is smart enough to only make changes if the data actually changed:
-	school.name = name
-	school.ipeds_id = new_ipeds
-	school.kind = kind
-	school.admission_rate = admission_rate
-	school.city = city
-	school.state = state
-	school.location = location
-	school.total_price = total_price
-	school.net_price = net_price
+	school.name = info['name']
+	school.ipeds_id = info['ipeds_id']
+	school.kind = info['kind']
+	school.admission_rate = info['admission_rate']
+	school.city = info['city']
+	school.state = info['state']
+	school.location = info['location']
+	school.total_price = info['total_price']
+	school.net_price = info['net_price']
 	
 	# Finally, save it:
 	school.save()
@@ -471,9 +475,25 @@ def get_ipeds_ids_of_community_colleges(cost_sheet):
 	community_college_ids = []
 
 	for ipeds_id in cost_sheet_ids:
-		name, ipeds_id, kind, admission_rate, city, state, location, total_price, net_price = get_school_info_from_csv_sheet(cost_sheet, for_ipeds_id = ipeds_id)
-		if kind == "Degree-granting, associate's and certificates":
-			community_college_ids.append(ipeds_id)
+		info = get_school_info_from_csv_sheet(cost_sheet, for_ipeds_id = ipeds_id)
+
+		# It's pretty hard to detect genuine, public, community colleges that are likely to offer General Studies.
+		# Here's my attempt:
+
+		if info['kind'] == "Degree-granting, associate's and certificates" and info['sector'] == "Public, 2-year":
+			
+			red_flags = ["Technical", "Trade", "Nursing", "Health", "Tech", "Technology"]
+			flagged = False
+			
+			for flag in red_flags:
+				if flag in info['name']:
+					flagged = True
+
+			if "Community" in info['name']:
+				flagged = False
+
+			if not flagged:
+				community_college_ids.append(ipeds_id)
 
 	return community_college_ids
 

@@ -16,11 +16,39 @@ def calculate_roi(cost, gains):
 
 def cost_for_school(school, duration, income_level, home_state):
 	if school.state == home_state:
+
+		# First get whatever net price we have:
 		try:
-			cost = int(school.net_price[income_level])
-		
-		except Exception:
-			cost = int(school.total_price["in-state students living on campus"])
+			net_cost = int(school.net_price[income_level])
+		except:
+			try:
+				net_cost = int(school.net_price["average"])
+			except:
+				net_cost = None
+
+		# Then get a total price:
+		if school.kind == "Degree-granting, associate's and certificates":
+			situation = "in-state students living off campus (with family)"
+		else:
+			situation = "in-state students living on campus"
+
+		try:
+			total_cost = int(school.total_price[situation])
+		except:
+			total_cost = None
+
+		# Now find the lowest cost that's not None:
+		if net_cost is not None and total_cost is not None:
+			if net_cost < total_cost:
+				cost = net_cost
+			else:
+				cost = total_cost
+
+		elif net_cost is None: 
+			cost = total_cost
+
+		elif total_cost is None: 
+			cost = net_cost
 	
 	else:
 		cost = int(school.total_price["out-of-state students living on campus"])
@@ -70,44 +98,33 @@ def programs_by_roi_for_cip(cip, duration, income_level, home_state, only_report
 def check_school_kind(program, step):
 	school = program.school
 	if school.kind == step.school_kind:
-		print "School kind '" + school.kind + "' DOES mach the kind called for:", step.school_kind + "."
+		# print "School kind '" + school.kind + "' DOES mach the kind called for:", step.school_kind + "."
 		return True
 	else:
 		# print "School kind '" + school.kind + "' does not match kind called for:", step.school_kind + "."
 		return False
 
 
-def programs_by_city_for_step(step, student):
+def programs_by_distance_for_cip(cip, school_kind, student, only_reportable):
 	# This is hacky right now. It returns all schools in the same city, instead of finding them by distance.
-	# And it should be making its own database calls, taking into account location.
-	programs = []
+	if only_reportable:
+		query = (
+			(Program.cip == cip) & 
+			(Program.reportable == True) & 
+			(School.city == student.city) & # Replace city & state with an actual distance algorithm.
+			(School.state == student.state) & 
+			(School.kind == school_kind))
+	else:
+		query = (
+			(Program.cip == cip) & 
+			(School.city == student.city) & # Replace city & state with an actual distance algorithm.
+			(School.state == student.state) & 
+			(School.kind == school_kind))
 	
-	query = (
-		(School.city == student.city) & 
-		(School.state == student.state) & 
-		(School.kind == step.school_kind))
+	programs = []
 
-	for p in Program.select().join(School).where(query): # THIS IS THE PROBLEM. No community college has a single program. I need to make null programs (or general ed) for them!
+	for p in Program.select().join(School).where(query):
 		programs.append(p)
-
-	# programs = []
-
-	# for p in nearby_programs:
-	# 	# print "School nearby! Checking kind..."
-	# 	if check_school_kind(p, step):
-	# 		# print "And it's the correct kind!"
-	# 		programs.append(p)
-	# 	# else:
-	# 	# 	"It's the wrong kind:", p.school.kind
-
-	# print "Found", str(len(programs)), "parsing by school type."
-	# for p in programs:
-	# 	school = p.school
-	# 	if school.city == student.city and school.state == student.state and check_school_kind(p, step) is True:
-	# 		print "\nFound some matching programs by city..."
-	# 		if check_school_kind(program, step) is True:
-	# 			print "And some with the correct school kind..."
-	# 			programs.append(p)
 
 	return programs
 
@@ -138,73 +155,126 @@ def programs_by_roi_for_step(step, student):
 	return programs, safe_search
 
 
+def programs_by_distance_for_step(step, student):
+	safe_search = True
+
+	programs = []
+
+	for cip in step.cips:
+		p = programs_by_distance_for_cip(cip = cip, school_kind = step.school_kind, student = student, only_reportable = True)
+
+		if len(p) == 0:
+			p = programs_by_distance_for_cip(cip = cip, school_kind = step.school_kind, student = student, only_reportable = False)
+			safe_search = False
+		
+		if len(p) > 0:
+			for program in p:
+				if check_school_kind(program, step) is True:
+					programs.append(program)
+
+	# May need to sort by distance again here, as above.
+
+	return programs, safe_search
+
+
 def programs_for_step(step, student):
 	if step.sort_by == "ROI":
 		programs, safe_search = programs_by_roi_for_step(step, student)
-
-		if not safe_search:
-			print "Couldn't find any reportable programs, had to remove that restriction..."
-
+	
 	elif step.sort_by == "Location":
-		programs = programs_by_city_for_step(step, student)
+		programs, safe_search = programs_by_distance_for_step(step, student)
 		
-		if len(programs) == 0:
-			print "Couldn't find any nearby programs."
-		else:
-			print "Found", str(len(programs)), "programs nearby."
+		# if len(programs) == 0:
+		# 	print "Couldn't find any nearby programs."
+		# else:
+		# 	print "Found", str(len(programs)), "programs nearby."
 
+	if not safe_search:
+		print "Had to use programs with low data."
 
 	return programs
 
 
-def make_pathways_for_student(student, how_many):
-	career = student.career
-	templates = career.templates
+def check_pathway(pathway, template):
+	# Check if we made enough pathway steps:
+	if len(pathway.pathway_steps) != len(template.steps):
+		print "Oh no! The pathway didn't have enough steps :("
+		print "Deleting it..."
+		pathway.delete_instance(recursive = True)
 
-	for template in templates:
-		pathways_needed = how_many		
-		pathways_created = 0
-		abort = False
 
-		print "\nWorking on template #" + str(template.number)
-		print "Pathways needed: ", pathways_needed
-		while pathways_created < pathways_needed:
-			# Create the pathway first, since the steps have to reference it:
-			print "\nTrying to make a pathway...\n"
-			pathway = data_helper.save_pathway(student)
+def excluded_programs(student):
+	programs = []
 
-			# Now create its steps:
-			i = 0
-			for step in template.steps:
-				programs = programs_for_step(step, student)
+	for pathway in student.pathways:
+		for step in pathway.pathway_steps:
+			school = step.program.school
+			if school.kind != "": # It's OK to reuse community colleges.
+				programs.append(step.program)
 
-				print "Found", str(len(programs)), "possible programs for step #" + str(step.number) + "."
-				
-				if len(programs) < pathways_needed:
-					pathways_needed = len(programs)
-					print "Only found enough programs to make", str(pathways_needed), "pathway(s)."
+	return programs
 
+
+def make_pathway_from_template(template, student):
+	pathway = data_helper.save_pathway(student) # Pathway steps reference their pathway, so we need it in the database right away.
+
+	# Make as many pathway steps as we can:
+	for step in template.steps:
+		
+		# Get all applicable programs:
+		programs = programs_for_step(step, student)
+
+		# Then try to find one that fits juuust right:
+		program_found = False
+		i = 0
+		while not program_found and i < len(programs):
+			
+			program = programs[i]
+
+			if not program in excluded_programs(student):	
 				try:
-					program = programs[i]
+					cost = cost_for_school(program.school, duration = step.duration, income_level = student.income, home_state = student.state)
+					program_found = True
+					print program.name, "at", program.school.name, "works for step", step.number
+				
 				except Exception:
-					print "Ran out of programs to make pathways with!"
-					pathway.delete_instance(recursive = True) # No sense having an incomplete pathway.
-					abort = True
-					break
+					print program.name, "at", program.school.name, "didn't work out :("
 
-				number = step.number
-				cost = cost_for_school(program.school, duration = step.duration, income_level = student.income, home_state = student.state)
-
-				data_helper.save_pathway_step(pathway = pathway, program = program, step = step, number = number, cost = cost)
-
-			if abort: break
-			
-			if pathway.cost() > student.budget:
-				print "Pathway was too expensive! Trying again..."
-				pathway.delete_instance(recursive = True) # No sense having a pathway that's too expensive.
-			else:
-				pathways_created += 1
-			
 			i += 1
 
-		print "\nMade " + str(pathways_created) + " pathways from template #" + str(template.number) + ".\n"
+		# And save whatever we've got!
+		if program_found:
+			data_helper.save_pathway_step(pathway = pathway, program = program, step = step, number = step.number, cost = cost)
+
+	return pathway
+
+
+def make_pathways(student):
+	career = student.career
+	templates = career.templates
+		
+	for template in templates:
+		print "\nMaking a pathway."
+		print "  Career:", career.name
+		print "  Template:", template.number, "\n"
+		pathway = make_pathway_from_template(template, student)
+		print "\nChecking the pathway..."
+		check_pathway(pathway, template)
+
+
+def make_pathways_for_student(student, how_many):	
+	while len(student.pathways) < how_many:
+		make_pathways(student)
+
+	if len(student.pathways) > how_many:
+		pathways = []
+		for pathway in student.sorted_pathways():
+			pathways.append(pathway)
+
+		index = -1
+		while len(student.pathways) > how_many:
+			p = pathways[index]
+			print "Deleting a pathway with an ROI of", str(p.roi())
+			p.delete_instance(recursive = True)
+			index -= 1
+			

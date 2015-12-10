@@ -54,6 +54,13 @@ class Student(BaseModel):
 	state = CharField()
 	location = HStoreField(null = True) # For storing latitude and longitude keys.
 
+	def sorted_pathways(self): # Pathways aren't returned in any particular order; this sorts them by ROI.
+		pathways = []
+		for p in self.pathways:
+			pathways.append(p)
+		pathways.sort(key = lambda p: p.roi(), reverse = True)
+		return pathways
+
 
 class Template(BaseModel):
 	career = ForeignKeyField(Career, related_name = "templates")
@@ -102,11 +109,13 @@ class Pathway(BaseModel):
 		return duration
 
 	def median_salary(self):
-		if len(self.pathway_steps) > 1:
-			last_pathway_step = self.pathway_steps[len(self.pathway_steps)-1]
-		else:
-			last_pathway_step = self.pathway_steps[0]
-		salary = last_pathway_step.median_salary()
+		# if len(self.pathway_steps) > 1:
+		pathway_steps = self.sorted_steps()
+		last_pathway_step = pathway_steps[-1]
+			# last_pathway_step = self.sorted_steps()[len(self.pathway_steps)-1]
+		# else:
+		# 	last_pathway_step = self.pathway_steps[0]
+		salary = pathway_steps[-1].median_salary()
 		return salary
 
 	def roi(self):
