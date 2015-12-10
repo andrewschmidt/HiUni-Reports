@@ -197,19 +197,17 @@ def pathway_complete(pathway, template):
 		return True
 
 
-# excluded_programs = []
-
-def get_excluded_programs(student):
-	programs = []
+def get_excluded_schools(student):
+	schools = []
 	for pathway in student.pathways:
 		for step in pathway.pathway_steps:
 			school = step.program.school
 			if school.kind != "Degree-granting, associate's and certificates": # It's OK to reuse community colleges.
-				programs.append(step.program)
-	return programs
+				schools.append(step.program)
+	return schools
 
 
-def make_pathway_from_template(template, student, excluded_programs):
+def make_pathway_from_template(template, student, excluded_schools):
 	pathway = data_helper.save_pathway(student) # Pathway steps reference their pathway, so we need it in the database right away.
 
 	# Working through the steps backwards prioritizes the final step --
@@ -226,7 +224,7 @@ def make_pathway_from_template(template, student, excluded_programs):
 		# Then try to find one that fits juuust right:
 		program_found = False
 		for program in programs:
-			if not program_found and program not in excluded_programs: # and not program in excluded_programs(student):	
+			if not program_found and program not in excluded_schools:
 				try:
 					cost = cost_for_school(program.school, duration = step.duration, income_level = student.income, home_state = student.state)
 					
@@ -266,7 +264,7 @@ def pathway_schools_conflict(pathway_1, pathway_2):
 	return False
 
 
-def make_pathway_for_every_template(student, excluded_programs):
+def make_pathway_for_every_template(student, excluded_schools):
 	career = student.career
 	templates = career.templates
 	good_pathways = []
@@ -276,7 +274,7 @@ def make_pathway_for_every_template(student, excluded_programs):
 		print "  Career:", career.name
 		print "  Template:", template.number, "\n"
 		
-		pathway = make_pathway_from_template(template, student, excluded_programs)
+		pathway = make_pathway_from_template(template, student, excluded_schools)
 
 		if pathway is not None:
 			good_pathways.append(pathway)
@@ -290,14 +288,14 @@ def make_pathway_for_every_template(student, excluded_programs):
 
 def make_pathways_for_student(student, how_many):	
 	# Prepopulate the excluded schools list with schools from any preexisting pathways:
-	excluded_programs = get_excluded_programs(student)
+	excluded_schools = get_excluded_schools(student)
 
 	good_pathways = []
 	failed = False
 
 	# First make pathways:
 	while len(good_pathways) < how_many and not failed:
-		made_pathways = make_pathway_for_every_template(student, excluded_programs)
+		made_pathways = make_pathway_for_every_template(student, excluded_schools)
 
 		if made_pathways is not None:
 			made_pathways.sort(key = lambda p: p.roi()) # Worst to best ROI.
@@ -320,7 +318,7 @@ def make_pathways_for_student(student, how_many):
 					pass
 
 			# Finally, update the list of excluded schools:
-			excluded_programs = get_excluded_programs(student)
+			excluded_schools = get_excluded_schools(student)
 
 			# And add this narrower list of pathways to our list of good pathways:
 			good_pathways += made_pathways
