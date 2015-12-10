@@ -197,35 +197,19 @@ def pathway_complete(pathway, template):
 		return True
 
 
-# def within_budget(pathway, student):
-# 	if pathway.cost() <= student.budget:
-# 		return True
-# 	else:
-# 		return False
+# excluded_programs = []
 
-
-# def excluded_programs(student):
-# 	programs = []
-
-# 	for pathway in student.pathways:
-# 		for step in pathway.pathway_steps:
-# 			school = step.program.school
-# 			if school.kind != "Degree-granting, associate's and certificates": # It's OK to reuse community colleges.
-# 				programs.append(step.program)
-
-# 	return programs
-
-
-excluded_programs = []
-def update_excluded_programs(student):
+def get_excluded_programs(student):
+	programs = []
 	for pathway in student.pathways:
 		for step in pathway.pathway_steps:
 			school = step.program.school
 			if school.kind != "Degree-granting, associate's and certificates": # It's OK to reuse community colleges.
-				excluded_programs.append(step.program)
+				programs.append(step.program)
+	return programs
 
 
-def make_pathway_from_template(template, student):
+def make_pathway_from_template(template, student, excluded_programs):
 	pathway = data_helper.save_pathway(student) # Pathway steps reference their pathway, so we need it in the database right away.
 
 	# Working through the steps backwards prioritizes the final step --
@@ -263,18 +247,6 @@ def make_pathway_from_template(template, student):
 	return pathway
 
 
-def better_pathway_by_roi(pathway_1, pathway_2):
-	if pathway_1.roi() > pathway_2.roi():
-		return pathway_1
-	else:
-		return pathway_2
-
-def better_pathway_by_cost(pathway_1, pathway_2):
-	if pathway_1.cost() < pathway_2.cost():
-		return pathway_1
-	else:
-		return pathway_2
-
 def pathway_schools_conflict(pathway_1, pathway_2):
 	pathways = pathway_1, pathway_2
 	school_sets = []
@@ -294,7 +266,7 @@ def pathway_schools_conflict(pathway_1, pathway_2):
 	return False
 
 
-def make_pathway_for_every_template(student):
+def make_pathway_for_every_template(student, excluded_programs):
 	career = student.career
 	templates = career.templates
 	good_pathways = []
@@ -304,19 +276,11 @@ def make_pathway_for_every_template(student):
 		print "  Career:", career.name
 		print "  Template:", template.number, "\n"
 		
-		pathway = make_pathway_from_template(template, student)
+		pathway = make_pathway_from_template(template, student, excluded_programs)
 
 		if pathway is not None:
 			good_pathways.append(pathway)
 			print "Made a pathway."
-		
-		# print "\nChecking the pathway..."
-
-		# if pathway_complete(pathway, template) and within_budget(pathway, student):
-		# 	good_pathways.append(pathway)
-		# 	print "Made a pathway."
-		# else:
-		# 	print "Pathway is too expensive or incomplete."
 
 	if len(good_pathways) > 0:
 		return good_pathways
@@ -325,12 +289,15 @@ def make_pathway_for_every_template(student):
 
 
 def make_pathways_for_student(student, how_many):	
+	# Prepopulate the excluded schools list with schools from any preexisting pathways:
+	excluded_programs = get_excluded_programs(student)
+
 	good_pathways = []
 	failed = False
 
 	# First make pathways:
 	while len(good_pathways) < how_many and not failed:
-		made_pathways = make_pathway_for_every_template(student)
+		made_pathways = make_pathway_for_every_template(student, excluded_programs)
 
 		if made_pathways is not None:
 			made_pathways.sort(key = lambda p: p.roi()) # Worst to best ROI.
@@ -344,14 +311,16 @@ def make_pathways_for_student(student, how_many):
 					
 					# Pathway 2 has a better ROI than Pathway 1 -- so if their schools conflict, let's keep pathway 2.
 					if pathway_schools_conflict(pathway_1, pathway_2):
+						print "Found duplicate schools: deleting a pathway with", str(pathway_1.roi()) + "% ROI in favor of one with", str(pathway_2.roi()) + "%"
 						pathway_1.delete_instance(recursive = True)
 						made_pathways.remove(pathway_1)
 
 				except Exception:
-					print "hit the end of the list?"
+					print "Hit the end of the list"
+					pass
 
 			# Finally, update the list of excluded schools:
-			update_excluded_programs(student)
+			excluded_programs = get_excluded_programs(student)
 
 			# And add this narrower list of pathways to our list of good pathways:
 			good_pathways += made_pathways
@@ -359,20 +328,7 @@ def make_pathways_for_student(student, how_many):
 		else:
 			failed = True
 
-	# Now clean up the leftovers --
-	# Starting with pathways that were too expensive or incomplete:
-	# for p in student.pathways:
-	# 	if not within_budget(p, student):
-	# 		p.delete_instance(recursive = True)
-		
-	# 	s = p.pathway_steps
-	# 	for pathway_step in s:
-	# 		template = pathway_step.step.template
-
-	# 	if not pathway_complete(p, template):
-	# 		p.delete_instance(recursive = True)
-
-	# And any extra ones:
+	# Now clean up any extra pathways:
 	if len(good_pathways) > how_many:
 		good_pathways.sort(key = lambda p: p.roi(), reverse = True)
 
