@@ -452,7 +452,10 @@ def import_template_from_file(file_name):
 	if ".csv" not in file_name:
 		file_name += ".csv"
 
-	sheet = get_csv_sheet(file_name)
+	folder = "Career Templates/"
+	folder += file_name
+
+	sheet = get_csv_sheet(folder)
 	import_template_from_sheet(sheet)
 
 
