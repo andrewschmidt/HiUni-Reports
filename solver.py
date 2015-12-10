@@ -298,15 +298,19 @@ def make_pathways_for_student(student, how_many):
 			p.delete_instance(recursive = True)
 
 	# And any extra ones:
-	if len(student.pathways) > how_many:
-		pathways = []
-		for pathway in student.sorted_pathways():
-			pathways.append(pathway)
+	if len(good_pathways) > how_many:
+
+		good_pathways.sort(key = lambda p: p.roi(), reverse = True)
+
+		# pathways = []
+		# for pathway in student.sorted_pathways():
+		# 	pathways.append(pathway)
 
 		index = -1
-		while len(student.pathways) > how_many:
-			p = pathways[index]
+		while len(good_pathways) > how_many:
+			p = good_pathways[index]
 			print "Deleting a pathway with an ROI of", str(p.roi())
 			p.delete_instance(recursive = True)
+			good_pathways.remove(p)
 			index -= 1
 

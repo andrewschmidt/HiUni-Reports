@@ -251,7 +251,7 @@ def show_pathways_for_student(student):
 		pathway_steps = pathway.sorted_steps()
 
 		for step in pathway_steps:
-			print "\n      " + Style.BRIGHT + "STEP " + str(step.number) + ": '" + step.title() + "'", ""
+			print "\n      " + Style.BRIGHT + "Step " + str(step.number) + ": " + step.title()
 			# print Style.NORMAL + "        Study " + step.program.name, Style.DIM + "at", Style.NORMAL + step.program.school.name
 			print Style.DIM + "          Study:", Style.NORMAL + step.program.name
 			print Style.DIM + "          School:", Style.NORMAL + step.program.school.name
