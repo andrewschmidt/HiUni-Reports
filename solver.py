@@ -16,7 +16,6 @@ def calculate_roi(cost, gains):
 
 def cost_for_school(school, duration, income_level, home_state):
 	if school.state == home_state:
-
 		# First get whatever net price we have:
 		try:
 			net_cost = int(school.net_price[income_level])
@@ -273,7 +272,6 @@ def make_pathways(student):
 			print "Pathway is too expensive or incomplete."
 
 	return good_pathways
-
 
 
 def make_pathways_for_student(student, how_many):	
