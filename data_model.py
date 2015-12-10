@@ -72,6 +72,13 @@ class Template(BaseModel):
 			duration += step.duration
 		return duration
 
+	def sorted_steps(self): # Steps aren't returned in any particular order; this sorts them.
+		steps = []
+		for step in self.steps:
+			steps.append(step)
+		steps.sort(key = lambda s: s.number)
+		return steps
+
 
 class Step(BaseModel):
 	template = ForeignKeyField(Template, related_name = "steps")
