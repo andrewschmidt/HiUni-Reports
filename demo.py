@@ -256,7 +256,7 @@ def show_pathways_for_student(student):
 			print Style.DIM + "          Study:", Style.NORMAL + step.program.name
 			print Style.DIM + "          School:", Style.NORMAL + step.program.school.name
 			# print Style.DIM + "          Kind:", Style.NORMAL + step.program.school.kind
-			print Style.DIM + "          Located:", Style.NORMAL + step.program.school.city + ", " + step.program.school.state
+			# print Style.DIM + "          Located:", Style.NORMAL + step.program.school.city + ", " + step.program.school.state
 			print Style.DIM + "          Cost:", Style.NORMAL + "$" + str(step.cost)
 			print Style.DIM + "          Duration:", Style.NORMAL + str(step.duration()) + " years"
 			description = step.description()

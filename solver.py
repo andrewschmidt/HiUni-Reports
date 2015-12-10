@@ -191,7 +191,7 @@ def programs_for_step(step, student):
 def pathway_complete(pathway, template):
 	# Check if we made enough pathway steps:
 	if len(pathway.pathway_steps) != len(template.steps):
-		print "Oh no! The pathway didn't have enough steps :("
+		# print "Oh no! The pathway didn't have enough steps :("
 		# print "Deleting it..."
 		# pathway.delete_instance(recursive = True)
 		return False
@@ -225,6 +225,7 @@ def make_pathway_from_template(template, student):
 	for step in template.steps:
 		# Get all applicable programs:
 		programs = programs_for_step(step, student)
+		print "Found", len(programs), "programs for step #" + str(step.number)
 
 		# Then try to find one that fits juuust right:
 		program_found = False
@@ -262,6 +263,7 @@ def make_pathways(student):
 		print "\nMaking a pathway."
 		print "  Career:", career.name
 		print "  Template:", template.number, "\n"
+		
 		pathway = make_pathway_from_template(template, student)
 		
 		print "\nChecking the pathway..."
