@@ -304,16 +304,25 @@ def make_pathways_for_student(student, how_many):
 			
 			# Let's check if any of the schools in these conflict.
 			for i in range(len(made_pathways)-1):
-				print i
 				pathway_1 = made_pathways[i]
 				try:
 					pathway_2 = made_pathways[i+1]
 					
 					# Pathway 2 has a better ROI than Pathway 1 -- so if their schools conflict, let's keep pathway 2.
 					if pathway_schools_conflict(pathway_1, pathway_2):
-						print "Found duplicate schools: deleting a pathway with", str(pathway_1.roi()) + "% ROI in favor of one with", str(pathway_2.roi()) + "%"
-						pathway_1.delete_instance(recursive = True)
-						made_pathways.remove(pathway_1)
+						
+						if budget_modifier == 0:
+							print "Found duplicate schools: deleting a pathway with", str(pathway_1.roi()) + "% ROI in favor of one with", str(pathway_2.roi()) + "%"
+							pathway_to_delete = pathway_1
+						
+						elif budget_modifier > 0:
+							p = [pathway_1, pathway_2]
+							p.sort(key = lambda c: c.cost()) # Cheapest to most expensive.
+							print "Found duplicate schools: deleting a $" + str(p[1].cost()), "pathway in favor of a $" + str(p[0].cost()), "one."
+							pathway_to_delete = p[1]
+
+						pathway_to_delete.delete_instance(recursive = True)
+						made_pathways.remove(pathway_to_delete)
 
 				except Exception:
 					print "Hit the end of the list"
