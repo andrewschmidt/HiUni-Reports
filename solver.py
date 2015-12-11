@@ -26,8 +26,8 @@ def cost_for_school(school, duration, income_level, home_state):
 				net_cost = None
 
 		# Then get a total price:
-		if school.kind == "Degree-granting, associate's and certificates":
-			situation = "in-state students living off campus (with family)"
+		if school.kind == "Degree-granting, associate's and certificates":    # Instead of hardcoding this, it'd be interesting to get a student's distance to a school-- 
+			situation = "in-state students living off campus (with family)"   # and if it's close enough, default to this.
 		else:
 			situation = "in-state students living on campus"
 
@@ -188,6 +188,16 @@ def programs_for_step(step, student):
 	return programs
 
 
+def get_excluded_schools(student):
+	schools = []
+	for pathway in student.pathways:
+		for step in pathway.pathway_steps:
+			school = step.program.school
+			if school.kind != "Degree-granting, associate's and certificates": # It's OK to reuse community colleges.
+				schools.append(step.program)
+	return schools
+
+
 def pathway_complete(pathway, template):
 	# Check if we made enough pathway steps:
 	if len(pathway.pathway_steps) != len(template.steps):
@@ -197,14 +207,23 @@ def pathway_complete(pathway, template):
 		return True
 
 
-def get_excluded_schools(student):
-	schools = []
-	for pathway in student.pathways:
-		for step in pathway.pathway_steps:
-			school = step.program.school
-			if school.kind != "Degree-granting, associate's and certificates": # It's OK to reuse community colleges.
-				schools.append(step.program)
-	return schools
+def pathway_schools_conflict(pathway_1, pathway_2):
+	pathways = pathway_1, pathway_2
+	school_sets = []
+
+	for pathway in pathways:
+		schools = []
+		for step in pathway.sorted_steps():
+			schools.append(step.program.school)
+		school_sets.append(schools)
+
+	school_sets.sort(key = lambda s: len(s), reverse = True) # The set with more schools should come first.
+
+	for school in school_sets[0]:
+		if school in school_sets[1]:
+			return True
+
+	return False
 
 
 def make_pathway_from_template(template, student, excluded_schools, budget_modifier):
@@ -243,25 +262,6 @@ def make_pathway_from_template(template, student, excluded_schools, budget_modif
 		return None
 	
 	return pathway
-
-
-def pathway_schools_conflict(pathway_1, pathway_2):
-	pathways = pathway_1, pathway_2
-	school_sets = []
-
-	for pathway in pathways:
-		schools = []
-		for step in pathway.sorted_steps():
-			schools.append(step.program.school)
-		school_sets.append(schools)
-
-	school_sets.sort(key = lambda s: len(s), reverse = True) # The set with more schools should come first.
-
-	for school in school_sets[0]:
-		if school in school_sets[1]:
-			return True
-
-	return False
 
 
 def make_pathway_for_every_template(student, excluded_schools, budget_modifier):
