@@ -207,7 +207,7 @@ def get_excluded_schools(student):
 	return schools
 
 
-def make_pathway_from_template(template, student, excluded_schools):
+def make_pathway_from_template(template, student, excluded_schools, budget_modifier):
 	pathway = data_helper.save_pathway(student) # Pathway steps reference their pathway, so we need it in the database right away.
 
 	# Working through the steps backwards prioritizes the final step --
@@ -228,7 +228,7 @@ def make_pathway_from_template(template, student, excluded_schools):
 				try:
 					cost = cost_for_school(program.school, duration = step.duration, income_level = student.income, home_state = student.state)
 					
-					if pathway.cost() + cost <= student.budget:
+					if pathway.cost() + cost <= student.budget + budget_modifier:
 						program_found = True
 						data_helper.save_pathway_step(pathway = pathway, program = program, step = step, number = step.number, cost = cost)
 						
@@ -264,7 +264,7 @@ def pathway_schools_conflict(pathway_1, pathway_2):
 	return False
 
 
-def make_pathway_for_every_template(student, excluded_schools):
+def make_pathway_for_every_template(student, excluded_schools, budget_modifier):
 	career = student.career
 	templates = career.templates
 	good_pathways = []
@@ -274,7 +274,7 @@ def make_pathway_for_every_template(student, excluded_schools):
 		print "  Career:", career.name
 		print "  Template:", template.number, "\n"
 		
-		pathway = make_pathway_from_template(template, student, excluded_schools)
+		pathway = make_pathway_from_template(template, student, excluded_schools, budget_modifier)
 
 		if pathway is not None:
 			good_pathways.append(pathway)
@@ -289,13 +289,15 @@ def make_pathway_for_every_template(student, excluded_schools):
 def make_pathways_for_student(student, how_many):	
 	# Prepopulate the excluded schools list with schools from any preexisting pathways:
 	excluded_schools = get_excluded_schools(student)
+	budget_modifier = 0
+	budget_leeway = 30000
 
 	good_pathways = []
 	failed = False
 
 	# First make pathways:
 	while len(good_pathways) < how_many and not failed:
-		made_pathways = make_pathway_for_every_template(student, excluded_schools)
+		made_pathways = make_pathway_for_every_template(student, excluded_schools, budget_modifier)
 
 		if made_pathways is not None:
 			made_pathways.sort(key = lambda p: p.roi()) # Worst to best ROI.
@@ -322,6 +324,9 @@ def make_pathways_for_student(student, how_many):
 
 			# And add this narrower list of pathways to our list of good pathways:
 			good_pathways += made_pathways
+
+		elif budget_modifier < budget_leeway: # At some point we have to give up... right?
+			budget_modifier += 10000
 
 		else:
 			failed = True
