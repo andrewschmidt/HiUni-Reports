@@ -177,15 +177,20 @@ def programs_by_distance_for_step(step, student):
 
 
 def programs_for_step(step, student):
+	unsafe_search_allowed = True
+
 	if step.sort_by == "ROI":
 		programs, safe_search = programs_by_roi_for_step(step, student)
 	elif step.sort_by == "Location":
 		programs, safe_search = programs_by_distance_for_step(step, student)
 
-	if not safe_search:
+	if safe_search:
+		return programs
+	elif unsafe_search_allowed:
 		print "Had to use programs with low data."
+		return programs
 
-	return programs
+	return None
 
 
 def get_excluded_schools(student):
@@ -238,6 +243,10 @@ def make_pathway_from_template(template, student, excluded_schools, budget_modif
 	for step in steps:
 		# Get all applicable programs:
 		programs = programs_for_step(step, student)
+		if programs is None:
+			print "Couldn't find any programs."
+			break
+
 		print "Found", len(programs), "programs for step #" + str(step.number)
 
 		# Then try to find one that fits juuust right:

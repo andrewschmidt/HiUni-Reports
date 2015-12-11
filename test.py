@@ -254,7 +254,7 @@ def print_community_colleges(city, state):
 # print_steps()
 # print_community_colleges(city = "Los Angeles", state = "California")
 
-get_best_roi_schools_for_cip("50.04", how_many = 5, home_state = "New York") # Economics = 45.06, Design = 50.04, Biology = 26.01, Drama = 50.05, Journalism = 09.04, Architecture = 04.02
+get_best_roi_schools_for_cip("26.13", how_many = 5, home_state = "New York") # Economics = 45.06, Design = 50.04, Biology = 26.01, Drama = 50.05, Journalism = 09.04, Architecture = 04.02
 # test_roi()
 # swap_cip_for_test_purposes()
 # make_pathways_for_sample_student()
