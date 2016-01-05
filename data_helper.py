@@ -530,11 +530,11 @@ def import_school_data_from_sheets(cost_sheet, salary_sheet):
 
 def import_school_data(): # A hands-off version of import_school_data_from_sheets().
 	folder = "School Data Sources/"
-	ipeds_file_name = folder+ipeds_file
-	payscale_file_name = folder+payscale_file
+	ipeds = folder+ipeds_file
+	payscale = folder+payscale_file
 
-	cost_sheet = get_csv_sheet(ipeds_file_name)
-	salary_sheet = get_csv_sheet(payscale_file_name)
+	cost_sheet = get_csv_sheet(ipeds)
+	salary_sheet = get_csv_sheet(payscale)
 	print "\nLet's import!"
 	import_school_data_from_sheets(cost_sheet, salary_sheet = salary_sheet)
 
