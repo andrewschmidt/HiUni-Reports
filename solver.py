@@ -4,6 +4,9 @@ from data_model import *
 import data_helper
 
 
+unsafe_search_allowed = False
+
+
 def calculate_roi(cost, gains):
 	cost = float(cost)
 	gains = float(gains)
@@ -177,8 +180,6 @@ def programs_by_distance_for_step(step, student):
 
 
 def programs_for_step(step, student):
-	unsafe_search_allowed = True
-
 	if step.sort_by == "ROI":
 		programs, safe_search = programs_by_roi_for_step(step, student)
 	elif step.sort_by == "Location":

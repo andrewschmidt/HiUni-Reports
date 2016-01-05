@@ -512,13 +512,20 @@ def hidden_menu():
 
 	print "\nWhat would you like to do?"
 
-	choices = ["Import schools", "Delete all schools", "Exit"]
+	if solver.unsafe_search_allowed:
+		unsafe_search_toggle = "Turn off unsafe searches"
+	else:
+		unsafe_search_toggle = "Turn on unsafe searches"
+
+	choices = [unsafe_search_toggle, "Import schools", "Delete all schools", "Exit"]
 	i = 1
 	for c in choices:
 		if "Import" in c: 
 			text_style = Fore.GREEN
 		elif "Delete" in c:
 			text_style = Fore.RED
+		elif "unsafe" in c:
+			text_style = Fore.BLUE
 		else:
 			text_style = Style.BRIGHT
 		
@@ -533,6 +540,11 @@ def hidden_menu():
 
 	if choice == "Import schools": import_schools()
 	if choice == "Delete all schools": delete_schools()
+	if "unsafe" in choice:
+		if solver.unsafe_search_allowed:
+				solver.unsafe_search_allowed = False
+		else:
+			solver.unsafe_search_allowed = True
 	if choice == "Exit": menu()
 
 
