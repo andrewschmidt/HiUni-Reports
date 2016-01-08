@@ -1,11 +1,5 @@
-<html>
-	
-	<head>
-		<title>{{ title }} - a microblog</title>
-	</head>
+{% extends "base.html" %}
 
-	<body>
+{% block content %}
 		<h1>Hello, {{ user.nickname }}!</h1>
-	</body>
-
-</html>
+{% endblock %}

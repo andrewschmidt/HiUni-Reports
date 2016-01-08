@@ -2,17 +2,18 @@
 
 
 from peewee import *
-from playhouse.postgres_ext import *
+# from playhouse.postgres_ext import *
 
-database = PostgresqlExtDatabase("hiuni_database", user = "Andrew")
-
-
-class BaseModel(Model):
-	class Meta:
-		database = database
+from app import db
+# database = PostgresqlExtDatabase("hiuni_database", user = "Andrew")
 
 
-class School(BaseModel):
+# class BaseModel(Model):
+# 	class Meta:
+# 		database = database
+
+
+class School(db.Model):
 	name = CharField()
 	ipeds_id = CharField()
 	kind = CharField()
@@ -28,7 +29,7 @@ class School(BaseModel):
 	net_price = HStoreField() # For public institutions, net price refers to net price for in-state students only.
 
 
-class Program(BaseModel):
+class Program(db.Model):
 	school = ForeignKeyField(School, related_name = "programs")
 	name = CharField()
 	cip = CharField()
@@ -36,13 +37,13 @@ class Program(BaseModel):
 	reportable = BooleanField()
 
 
-class Career(BaseModel):
+class Career(db.Model):
 	name = CharField()
 	nicknames = ArrayField(CharField, null = True) # Neither of these are being imported yet.
 	description = TextField(null = True)
 
 
-class Student(BaseModel):
+class Student(db.Model):
 	name = CharField()
 	email = CharField()
 	
@@ -62,7 +63,7 @@ class Student(BaseModel):
 		return pathways
 
 
-class Template(BaseModel):
+class Template(db.Model):
 	career = ForeignKeyField(Career, related_name = "templates")
 	number = IntegerField()
 
@@ -80,7 +81,7 @@ class Template(BaseModel):
 		return steps
 
 
-class Step(BaseModel):
+class Step(db.Model):
 	template = ForeignKeyField(Template, related_name = "steps")
 
 	number = IntegerField()
@@ -93,7 +94,7 @@ class Step(BaseModel):
 	sort_by = CharField()
 
 
-class Pathway(BaseModel):
+class Pathway(db.Model):
 	student = ForeignKeyField(Student, related_name = "pathways")
 
 	def sorted_steps(self): # Steps aren't returned in any particular order; this sorts them.
@@ -133,7 +134,7 @@ class Pathway(BaseModel):
 		return roi
 
 
-class Pathway_Step(BaseModel):
+class Pathway_Step(db.Model):
 	pathway = ForeignKeyField(Pathway, related_name = "pathway_steps")
 	program = ForeignKeyField(Program)
 	step = ForeignKeyField(Step)
