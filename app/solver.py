@@ -204,9 +204,9 @@ def get_excluded_schools(student):
 	return schools
 
 
-def pathway_complete(pathway, template):
+def pathway_complete(pathway, recipe):
 	# Check if we made enough pathway steps:
-	if len(pathway.pathway_steps) != len(template.steps):
+	if len(pathway.pathway_steps) != len(recipe.steps):
 		# print "Oh no! The pathway didn't have enough steps :("
 		return False
 	else:
@@ -232,12 +232,12 @@ def pathway_schools_conflict(pathway_1, pathway_2):
 	return False
 
 
-def make_pathway_from_template(template, student, excluded_schools, budget_modifier):
+def make_pathway_from_recipe(recipe, student, excluded_schools, budget_modifier):
 	pathway = data_helper.save_pathway(student) # Pathway steps reference their pathway, so we need it in the database right away.
 
 	# Working through the steps backwards prioritizes the final step --
 	# which is the step whose salary matters most.
-	steps = template.sorted_steps()
+	steps = recipe.sorted_steps()
 	steps.reverse()
 
 	# Make as many pathway steps as we can:
@@ -267,24 +267,24 @@ def make_pathway_from_template(template, student, excluded_schools, budget_modif
 					# print program.name, "at", program.school.name, "didn't work out :("
 					pass
 
-	if not pathway_complete(pathway, template):
+	if not pathway_complete(pathway, recipe):
 		pathway.delete_instance(recursive = True)
 		return None
 	
 	return pathway
 
 
-def make_pathway_for_every_template(student, excluded_schools, budget_modifier):
+def make_pathway_for_every_recipe(student, excluded_schools, budget_modifier):
 	career = student.career
-	templates = career.templates
+	recipes = career.recipes
 	good_pathways = []
 		
-	for template in templates:
+	for recipe in recipes:
 		print "\nMaking a pathway."
 		print "  Career:", career.name
-		print "  Template:", template.number, "\n"
+		print "  Recipe:", recipe.number, "\n"
 		
-		pathway = make_pathway_from_template(template, student, excluded_schools, budget_modifier)
+		pathway = make_pathway_from_recipe(recipe, student, excluded_schools, budget_modifier)
 
 		if pathway is not None:
 			good_pathways.append(pathway)
@@ -307,7 +307,7 @@ def make_pathways_for_student(student, how_many):
 
 	# First make pathways:
 	while len(good_pathways) < how_many and not failed:
-		made_pathways = make_pathway_for_every_template(student, excluded_schools, budget_modifier)
+		made_pathways = make_pathway_for_every_recipe(student, excluded_schools, budget_modifier)
 
 		if made_pathways is not None:
 			made_pathways.sort(key = lambda p: p.roi()) # Worst to best ROI.

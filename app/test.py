@@ -103,10 +103,10 @@ def get_best_roi_schools_for_cip(cip, how_many, home_state):
 		print "Couldn't find any reportable programs for that CIP."
 
 
-def import_sample_template():
-	# sheet = data_helper.get_csv_sheet("Sample Template.csv")
-	# data_helper.import_template_from_sheet(sheet)
-	data_helper.import_template_from_file("Sample Template.csv")
+def import_sample_recipe():
+	# sheet = data_helper.get_csv_sheet("Sample Recipe.csv")
+	# data_helper.import_recipe_from_sheet(sheet)
+	data_helper.import_recipe_from_file("Sample Recipe.csv")
 
 
 def print_careers():
@@ -114,7 +114,7 @@ def print_careers():
 
 	careers = Career.select()
 	for career in careers:
-		print "\n    - " + career.name + ", with", career.templates.count(), "templates."
+		print "\n    - " + career.name + ", with", career.recipes.count(), "recipes."
 
 
 def print_students():
@@ -127,8 +127,8 @@ def print_students():
 			print "\n    - " + student.name + "."
 
 
-def print_templates():
-	print "\nThere are", str(Template.select().count()), "templates in the database."
+def print_recipes():
+	print "\nThere are", str(Recipe.select().count()), "recipes in the database."
 
 	
 def print_steps():
@@ -138,7 +138,7 @@ def print_steps():
 	for step in steps:
 		print step.title
 		print str(step.number)
-		print step.template.career.name
+		print step.recipe.career.name
 		print str(step.duration) + "years"
 
 
@@ -214,7 +214,7 @@ def destroy_and_rebuild_tables():
 
 def repopulate_everything():
 	data_helper.import_school_data()
-	import_sample_template()
+	import_sample_recipe()
 
 
 def print_community_colleges(city, state):
@@ -238,7 +238,7 @@ def print_community_colleges(city, state):
 # data_helper.delete_all_pathways()
 # data_helper.delete_all_students()
 # data_helper.import_school_data()
-# import_sample_template()
+# import_sample_recipe()
 
 
 # Local commands:
@@ -246,11 +246,11 @@ def print_community_colleges(city, state):
 # print_number_of_schools()
 # print_schools()
 # print_programs()
-# import_sample_template()
+# import_sample_recipe()
 # create_sample_student()
 # print_students()
 # print_careers()
-# print_templates()
+# print_recipes()
 # print_steps()
 # print_community_colleges(city = "Los Angeles", state = "California")
 

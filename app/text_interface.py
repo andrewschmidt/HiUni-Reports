@@ -50,7 +50,7 @@ def show_careers():
 	careers = Career.select()
 
 	for career in careers:
-		print "-", Style.BRIGHT + career.name, "with", Style.BRIGHT + str(career.templates.count()), "templates."
+		print "-", Style.BRIGHT + career.name, "with", Style.BRIGHT + str(career.recipes.count()), "recipes."
 
 	raw_input("\nPress enter return to the menu.")
 	menu()
@@ -130,22 +130,22 @@ def make_student():
 	menu()
 
 
-def import_templates_for_career_named(name):
+def import_recipes_for_career_named(name):
 	i = 1
-	templates_made = 0
+	recipes_made = 0
 	
 	while True:
-		file_name = name + " Template " + str(i) # Templates should follow the naming convention "Career Template 1.csv"
+		file_name = name + " Recipe " + str(i) # Recipes should follow the naming convention "Career Recipe 1.csv"
 		
 		try:
-			data_helper.import_template_from_file(file_name)
-			templates_made += 1
+			data_helper.import_recipe_from_file(file_name)
+			recipes_made += 1
 		except Exception:
 			break
 		
 		i += 1
 
-	if templates_made > 0:
+	if recipes_made > 0:
 		return True
 	else:
 		return False
@@ -158,12 +158,13 @@ def make_career():
 
 	career_name = raw_input("\nCareer name? ")
 
-	print "\nSearching for templates for '", career_name + "'..."
+	print "\nSearching for recipes for '" + career_name + "'..."
 	
-	templates_found = import_templates_for_career_named(career_name)
+	recipes_found = import_recipes_for_career_named(career_name)
 
-	if not templates_found:
-		print "\nCouldn't find any templates for the career '" + career_name + "'."
+	if not recipes_found:
+		print "\nCouldn't find any recipes for the career '" + career_name + "'."
+		print "Keep in mind, the Career Recipes folder needs to be in the same directory you're running text_interface.py from."
 	else:
 		print "\nSuccessfully added the career '" + career_name + "'."
 	

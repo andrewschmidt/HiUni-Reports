@@ -170,13 +170,13 @@ def get_school_info_from_csv_sheet(sheet, for_ipeds_id):
 	return school_info # name, ipeds_id, kind, sector, admission_rate, city, state, location, total_price, net_price
 
 
-def get_template_data_from_csv_sheet(sheet):
+def get_recipe_data_from_csv_sheet(sheet):
 	row = sheet[1]
 
 	career_name = row[get_number_for_column("Career", from_csv_sheet = sheet)]
-	template_number = int(row[get_number_for_column("Template Number", from_csv_sheet = sheet)])
+	recipe_number = int(row[get_number_for_column("Recipe Number", from_csv_sheet = sheet)])
 
-	return career_name, template_number
+	return career_name, recipe_number
 
 
 def get_steps_data_from_csv_sheet(sheet):
@@ -355,35 +355,35 @@ def update_career(name, nicknames, description):
 	career.save()
 
 
-def update_template_from_sheet(sheet):
-	career_name, template_number = get_template_data_from_csv_sheet(sheet)
+def update_recipe_from_sheet(sheet):
+	career_name, recipe_number = get_recipe_data_from_csv_sheet(sheet)
 
 	# First let's fetch the career, creating it if necessary in the process:
 	update_career(career_name, nicknames = None, description = None)
 	career = Career.get(Career.name == career_name)
 
-	# Next either update the info for an existing template, or create a new one. This is based on the "template number":
+	# Next either update the info for an existing recipe, or create a new one. This is based on the "recipe number":
 	try:
-		template = Template.select().join(Career).where((Template.number == template_number) & (Template.career == career)).get()
-		print "\nUpdating info for template #" + str(template.number), "for the career '" + career.name + ".'"
+		recipe = Recipe.select().join(Career).where((Recipe.number == recipe_number) & (Recipe.career == career)).get()
+		print "\nUpdating info for recipe #" + str(recipe.number), "for the career '" + career.name + ".'"
 	except Exception:
-		template = Template()
-		print "\nAdding template number", str(template_number) + ", for the career '" + career.name + ".'"
+		recipe = Recipe()
+		print "\nAdding recipe number", str(recipe_number) + ", for the career '" + career.name + ".'"
 
-	template.career = career
-	template.number = template_number
+	recipe.career = career
+	recipe.number = recipe_number
 
-	template.save()
+	recipe.save()
 
 
-def update_steps_for_template(template, from_sheet):
+def update_steps_for_recipe(recipe, from_sheet):
 	sheet = from_sheet
 
 	numbers, titles, descriptions, school_kinds, durations, cips, sort_bys = get_steps_data_from_csv_sheet(sheet)
 
 	for i in range(len(titles)):
 		try:
-			step = Step.select().join(Template).where((Step.number == numbers[i]) & (Step.template == template)).get()
+			step = Step.select().join(Recipe).where((Step.number == numbers[i]) & (Step.recipe == recipe)).get()
 			print "    - Updating info for step #" + str(step.number) + "."
 			print "        School kind:", school_kinds[i]
 			print "        Duration:", str(durations[i])
@@ -398,7 +398,7 @@ def update_steps_for_template(template, from_sheet):
 			print "        CIP:", str(cips[i])
 			print "        Sort by:", sort_bys[i]
 
-		step.template = template
+		step.recipe = recipe
 
 		step.number = numbers[i]
 		step.title = titles[i]
@@ -439,24 +439,26 @@ def save_pathway(student):
 
 # ***************** DATA IMPORT *****************
 
-def import_template_from_sheet(sheet):
-	update_template_from_sheet(sheet)
+def import_recipe_from_sheet(sheet):
+	update_recipe_from_sheet(sheet)
 
-	career_name, template_number = get_template_data_from_csv_sheet(sheet)
-	template = Template.select().join(Career).where((Template.number == template_number) & (Career.name == career_name)).get()
+	career_name, recipe_number = get_recipe_data_from_csv_sheet(sheet)
+	recipe = Recipe.select().join(Career).where((Recipe.number == recipe_number) & (Career.name == career_name)).get()
 
-	update_steps_for_template(template, from_sheet = sheet)
+	update_steps_for_recipe(recipe, from_sheet = sheet)
 
 
-def import_template_from_file(file_name):
+def import_recipe_from_file(file_name):
 	if ".csv" not in file_name:
 		file_name += ".csv"
 
-	folder = "Career Templates/"
+	folder = "Career Recipes/"
 	folder += file_name
 
+	print "\nSearching for", file_name + "..."
+
 	sheet = get_csv_sheet(folder)
-	import_template_from_sheet(sheet)
+	import_recipe_from_sheet(sheet)
 
 
 def get_ipeds_ids_in_both(cost_sheet, salary_sheet):
@@ -550,7 +552,7 @@ def delete_all_schools():
 
 
 def delete_all_careers():
-	# This should also remove related templates and steps.
+	# This should also remove related recipes and steps.
 	careers = Career.select()
 	for career in careers:
 		career.delete_instance(recursive = True)
@@ -576,7 +578,7 @@ def create_tables():
 	database.connect()
 	print "\nCreating tables..."
 	# database.create_tables([School, Program])
-	# database.create_tables([Career, Template, Step])
+	# database.create_tables([Career, Recipe, Step])
 	# database.create_tables([Student])
 	database.create_tables([Pathway, Pathway_Step])
 
@@ -591,5 +593,5 @@ def drop_tables():
 	print "\nDropping tables..."
 	# database.drop_tables([School, Program], safe = True)
 	# database.drop_tables([Student], safe = True)
-	# database.drop_tables([Career, Template, Step], safe = True)
+	# database.drop_tables([Career, Recipe, Step], safe = True)
 	database.drop_tables([Pathway, Pathway_Step], safe = True)
