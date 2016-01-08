@@ -1,11 +1,10 @@
 # Just the data model.
 
-
 from peewee import *
 from playhouse.postgres_ext import *
+from app import database
 
-# from app import db
-database = PostgresqlExtDatabase("hiuni_database", user = "Andrew")
+# database = PostgresqlExtDatabase("hiuni_database", user = "Andrew")
 
 
 class BaseModel(Model):
