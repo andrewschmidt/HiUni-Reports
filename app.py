@@ -51,7 +51,7 @@ def report(id):
 	student = Student.get(Student.id == id)
 	pathways = Pathway.select().where(Pathway.student == student)
 
-	return render_template("report.html", student = student, pathways = pathways)
+	return render_template("report.html", title = student.name + "'s Report", student = student, pathways = pathways)
 
 
 
