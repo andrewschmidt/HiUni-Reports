@@ -1,11 +1,13 @@
 # Run this!
 
-from flask import Flask, g, render_template
+from flask import Flask, g, render_template, request
 
 from peewee import *
 from playhouse.postgres_ext import *
+from wtfpeewee.orm import model_form
 
 from data_model import *
+
 
 
 # CONFIGURATION
@@ -23,6 +25,7 @@ database = PostgresqlExtDatabase(DATABASE)
 
 # REQUEST HANDLERS
 # Apparently this is all I really needed from flask-peewee.
+
 @app.before_request
 def before_request():
 	g.db = database
@@ -36,6 +39,14 @@ def after_request(response):
 
 
 
+# FORMS
+
+# def create_forms():
+Student_Form = model_form(Student, exclude = ("location", "career"))
+Career_Form = model_form(Career, exclude = ("nicknames",))
+print "Successfully made forms..."
+
+
 # VIEWS
 
 @app.route("/")
@@ -46,12 +57,33 @@ def index():
 	return render_template("index.html", title = "Home", student = student)
 
 
-@app.route("/report/<id>")
-def report(id):
-	student = Student.get(Student.id == id)
+@app.route("/report/<student_id>")
+def report(student_id):
+	try:
+		student = Student.get(id = student_id)
+	except Student.DoesNotExist:
+		abort(404)
+
 	pathways = Pathway.select().where(Pathway.student == student)
 
 	return render_template("report.html", title = student.name + "'s Report", student = student, pathways = pathways)
+
+
+@app.route("/questions", methods = ['GET', 'POST'])
+def questionnaire():
+	student = Student()
+
+	if request.method == "POST":
+		form = Student_Form(request.form, obj = student)
+		
+		if form.validate():
+			form.populate_obj(student)
+			student.save()
+
+	else:
+		form = Student_Form(obj = student)
+
+	return render_template("questionnaire.html", title = "Questionnaire", form = form, student = student)
 
 
 
@@ -70,4 +102,5 @@ def create_tables():
 
 if __name__ == '__main__':
     create_tables()
+    # create_forms()
     app.run()
