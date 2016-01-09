@@ -70,7 +70,7 @@ def report(student_id):
 
 
 @app.route("/questions", methods = ['GET', 'POST'])
-def questionnaire():
+def questions():
 	student = Student()
 
 	if request.method == "POST":
@@ -83,7 +83,7 @@ def questionnaire():
 	else:
 		form = Student_Form(obj = student)
 
-	return render_template("questionnaire.html", title = "Questionnaire", form = form, student = student)
+	return render_template("questions.html", form = form, student = student)
 
 
 
