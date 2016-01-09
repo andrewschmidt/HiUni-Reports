@@ -75,7 +75,6 @@ class Recipe(BaseModel):
 		steps = []
 		for step in self.steps:
 			steps.append(step)
-		steps.sort(key = lambda s: s.number)
 		return steps
 
 
@@ -91,6 +90,9 @@ class Step(BaseModel):
 	cips = ArrayField(CharField)
 	sort_by = CharField()
 
+	class Meta:
+		order_by = ("number",)
+
 
 class Pathway(BaseModel):
 	student = ForeignKeyField(Student, related_name = "pathways")
@@ -99,7 +101,6 @@ class Pathway(BaseModel):
 		steps = []
 		for step in self.pathway_steps:
 			steps.append(step)
-		steps.sort(key = lambda s: s.number)
 		return steps
 
 	def cost(self):
@@ -115,12 +116,7 @@ class Pathway(BaseModel):
 		return duration
 
 	def median_salary(self):
-		# if len(self.pathway_steps) > 1:
 		pathway_steps = self.sorted_steps()
-		last_pathway_step = pathway_steps[-1]
-			# last_pathway_step = self.sorted_steps()[len(self.pathway_steps)-1]
-		# else:
-		# 	last_pathway_step = self.pathway_steps[0]
 		salary = pathway_steps[-1].median_salary()
 		return salary
 
@@ -152,5 +148,5 @@ class Pathway_Step(BaseModel):
 	def median_salary(self):
 		return self.program.median_salary
 
-	# class Meta:
-	# 	order_by = ("number")
+	class Meta:
+		order_by = ("number",)
