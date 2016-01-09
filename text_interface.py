@@ -25,6 +25,7 @@ def print_student_info(student):
 		income_string = student.income
 	print Style.DIM + "  Income:", income_string
 	print Style.DIM + "  Budget: ", "$" + str(student.budget)
+	print Style.DIM + "  Database ID:", str(student.id)
 	print ""
 
 

@@ -151,3 +151,6 @@ class Pathway_Step(BaseModel):
 
 	def median_salary(self):
 		return self.program.median_salary
+
+	# class Meta:
+	# 	order_by = ("number")

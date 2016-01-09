@@ -16,12 +16,14 @@ app.config.from_object(__name__)
 database = PostgresqlExtDatabase(DATABASE)
 
 
-# Request handlers
+# Request handlers --
 # Apparently this is all I really needed from flask-peewee.
+
 @app.before_request
 def before_request():
 	g.db = database
 	g.db.connect()
+
 
 @app.after_request
 def after_request(response):

@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block content %}
+	<h1>{{ student.name }}'s Report</h1>
+
+	{% for pathway in pathways %}
+		
+		<h2><b>Pathway #{{ loop.index }}</b></h2>
+		<p>Total Cost: <b>${{ pathway.cost() }}</b></p>
+		<p>Time: <b>{{ pathway.duration() }} years</b></p>
+		<p>Median Salary: <b>${{ pathway.median_salary() }}</b></p>
+		<p>ROI: <b>{{ pathway.roi() }}%</b></p>
+		
+		{% for step in pathway.sorted_steps() %}
+			
+			<h3>Step #{{ step.number }}: {{ step.title() }}</h3>
+			{% if step.program.name != "General Studies" %}
+				<p>Study: <b>{{ step.program.name }}</b></p>
+			{% endif %}
+			<p>School: <b>{{ step.program.school.name }}</b></p>
+			{% if step.program.school.admission_rate != None %}
+				<p>Acceptance Rate: <b>{{ step.program.school.admission_rate }}%</b></p>
+			{% endif %}
+			<p>Cost: <b>${{ step.cost }}</b></p>
+			<p>Duration: <b>{{ step.duration() }} years</b></p>
+			<p>Description: <br>{{ step.description() }}</b></p>
+		
+		{% endfor %}
+		
+		<br>
+	
+	{% endfor %}
+
+{% endblock %}
