@@ -1,10 +1,15 @@
 # Run this!
 
-from flask import Flask, g, render_template, request
+from flask import Flask, g, render_template, request, abort, flash
 
 from peewee import *
 from playhouse.postgres_ext import *
-from wtfpeewee.orm import model_form
+
+from flask.ext.wtf import Form
+from wtforms.fields import StringField, SelectField
+from wtforms.validators import DataRequired, Email
+
+from wtfpeewee.orm import model_form # For modeling forms from database objects. Not sure I really need it.
 
 from data_model import *
 
@@ -12,9 +17,14 @@ from data_model import *
 
 # CONFIGURATION
 
+# Database config:
 DATABASE = "hiuni_database"
 USER = "Andrew"
 DEBUG = True
+
+# Forms config:
+WTF_CSRF_ENABLED = True
+SECRET_KEY = 'secret'
 
 app = Flask(__name__)
 app.config.from_object(__name__)
@@ -41,10 +51,32 @@ def after_request(response):
 
 # FORMS
 
-# def create_forms():
-Student_Form = model_form(Student, exclude = ("location", "career"))
-Career_Form = model_form(Career, exclude = ("nicknames",))
-print "Successfully made forms..."
+class Questionnaire_Form(Form):
+	first_name = StringField("First name:")
+	last_name = StringField("Last name:")
+
+	email = StringField("Email:")
+
+	careers = Career.select()
+	career_choices = [(None, "")]
+	for career in careers:
+		career_choices.append((career.name, career.name))
+	career = SelectField("Career:", choices = career_choices)
+
+	income_levels = ["0-30,000", "30,001-48,000", "48,001-75,000", "75,001-110,000", "over 110,000"]
+	income_choices = [(None, "")]
+	for level in income_levels:
+		if level == "over 110,000":
+			income_choices.append((level, "Over $110,000"))
+		else:
+			income_choices.append((level, "$"+level))
+	income = SelectField("What's your family's income level?", choices = income_choices)
+
+	budget = StringField("What's your budget for higher education? $")
+
+	city = StringField("What city do you live in?")
+	state = StringField("What state do you live in?")
+
 
 
 # VIEWS
@@ -71,19 +103,30 @@ def report(student_id):
 
 @app.route("/questions", methods = ['GET', 'POST'])
 def questions():
-	student = Student()
+	form = Questionnaire_Form()
 
-	if request.method == "POST":
-		form = Student_Form(request.form, obj = student)
+	if form.validate_on_submit():
+		flash("Validated!")
+
+		student = Student()
 		
-		if form.validate():
-			form.populate_obj(student)
-			student.save()
+		student.name = form.first_name.data + " " + form.last_name.data
+		student.email = form.email.data
+		student.career = Career.get(Career.name == form.career.data)
+		student.income = form.income.data
+		student.budget = int(form.budget.data)
+		student.city = form.city.data
+		student.state = form.state.data
 
-	else:
-		form = Student_Form(obj = student)
+		flash("Saving the student...")
+		student.save()
+		flash("Saved!")
+	
+	if len(form.errors) > 0:
+		for error in form.errors:
+			flash(error)
 
-	return render_template("questions.html", form = form, student = student)
+	return render_template("questions.html", form = form)
 
 
 
@@ -102,5 +145,4 @@ def create_tables():
 
 if __name__ == '__main__':
     create_tables()
-    # create_forms()
     app.run()
