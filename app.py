@@ -68,13 +68,28 @@ class Questionnaire_Form(Form):
 	for state in states:
 		state_choices.append((state, state))
 
+	# Last, budget categories:
+	budget_choices = [
+		("", ""), 
+		("10000", "Less than $10,000"), 
+		("20000", "$10,000 - $20,000"), 
+		("40000", "$20,000 - $40,000"), 
+		("60000", "$40,000 - $60,000"), 
+		("80000", "$60,000 - $80,000"), 
+		("100000", "$80,000 - $100k"), 
+		("120000", "$100k - $120k"), 
+		("150000", "$120k - $150k"), 
+		("200000", "$150k - $200k"), 
+		("300000", "More than $200k")
+	]
+
 	# With that out of the way, let's generate some fields!
 	first_name = StringField("First name:", validators = [Required("Please enter your first name.")])
 	last_name = StringField("Last name:", validators = [Required("Please enter your last name.")])
 	email = StringField("Email:", validators = [Required("Please enter your email."), Email("Please enter an email address.")])
 	career = SelectQueryField("Career:", query = Career.select(), get_label = "name", allow_blank = True, blank_text = " ", validators = [Required("Please choose a career.")])
 	income = SelectField("What's your family's income level?", choices = income_choices, validators = [Required("Please select your family's income level.")])
-	budget = StringField("What's your budget for higher education? $", validators = [Required("Please enter a budget.")])
+	budget = SelectField("What's your budget for higher education?", choices = budget_choices, validators = [Required("Please enter a budget.")])
 	city = StringField("What city do you live in?", validators = [Required("Please enter the city you live in.")])
 	state = SelectField("What state do you live in?", choices = state_choices, validators = [Required("Please enter the state you live in.")])
 
