@@ -52,7 +52,8 @@ def after_request(response):
 # FORMS
 
 class Questionnaire_Form(Form):
-	# First, let's hardcode some data:
+	# Let's hardcode some data.
+	# First, income levels:
 	income_levels = ["0-30,000", "30,001-48,000", "48,001-75,000", "75,001-110,000", "over 110,000"]
 	income_choices = [("", "")]
 	for level in income_levels:
@@ -61,12 +62,13 @@ class Questionnaire_Form(Form):
 		else:
 			income_choices.append((level, "$"+level))
 
+	# Next, US states:
 	states = ["Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado", "Connecticut", "Delaware", "Florida", "Georgia", "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana", "Maine", "Maryland", "Massachusetts", "Michigan", "Minnesota", "Mississippi", "Missouri", "Montana", "Nebraska", "Nevada", "New Hampshire", "New Jersey", "New Mexico", "New York", "North Carolina", "North Dakota", "Ohio", "Oklahoma", "Oregon", "Pennsylvania", "Rhode Island", "South Carolina", "South Dakota", "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington", "West Virginia", "Wisconsin", "Wyoming"]
 	state_choices = [("", "")]
 	for state in states:
 		state_choices.append((state, state))
 
-	# Now let's generate some fields!
+	# With that out of the way, let's generate some fields!
 	first_name = StringField("First name:", validators = [Required("Please enter your first name.")])
 	last_name = StringField("Last name:", validators = [Required("Please enter your last name.")])
 	email = StringField("Email:", validators = [Required("Please enter your email."), Email("Please enter an email address.")])

@@ -64,7 +64,6 @@ class Student(Model):
 		database = database
 		indexes = ((("name", "email", "career", "income", "budget", "city", "state"), True),) # This make it impossible to make a duplicate student.
 
-# database.create_index(Student, ["name", "email", "career", "income", "budget", "city", "state"], True)
 
 class Recipe(BaseModel):
 	career = ForeignKeyField(Career, related_name = "recipes")
