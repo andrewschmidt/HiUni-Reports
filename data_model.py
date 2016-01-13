@@ -41,7 +41,7 @@ class Career(BaseModel):
 	description = TextField(null = True)
 
 
-class Student(BaseModel):
+class Student(Model):
 	name = CharField()
 	email = CharField()
 	
@@ -60,6 +60,11 @@ class Student(BaseModel):
 		pathways.sort(key = lambda p: p.roi(), reverse = True)
 		return pathways
 
+	class Meta:
+		database = database
+		indexes = ((("name", "email", "career", "income", "budget", "city", "state"), True),) # This make it impossible to make a duplicate student.
+
+# database.create_index(Student, ["name", "email", "career", "income", "budget", "city", "state"], True)
 
 class Recipe(BaseModel):
 	career = ForeignKeyField(Career, related_name = "recipes")

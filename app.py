@@ -1,17 +1,19 @@
 # Run this!
 
-from flask import Flask, g, render_template, request, abort, flash
+from flask import Flask, g, render_template, redirect, request, abort, flash
 
 from peewee import *
 from playhouse.postgres_ext import *
 
 from flask.ext.wtf import Form
 from wtforms.fields import StringField, SelectField
-from wtforms.validators import DataRequired, Email
+from wtforms.fields.html5 import EmailField
+from wtforms.validators import DataRequired, Email, Required
 
+from wtfpeewee.fields import SelectQueryField # Unlike a regular SelectField, this returns actual model classes.
 from wtfpeewee.orm import model_form # For modeling forms from database objects. Not sure I really need it.
 
-from data_model import *
+from data_model import * # Includes the "database" variable.
 
 
 
@@ -28,8 +30,6 @@ SECRET_KEY = 'secret'
 
 app = Flask(__name__)
 app.config.from_object(__name__)
-
-database = PostgresqlExtDatabase(DATABASE)
 
 
 
@@ -55,13 +55,15 @@ class Questionnaire_Form(Form):
 	first_name = StringField("First name:")
 	last_name = StringField("Last name:")
 
-	email = StringField("Email:")
+	email = StringField("Email:", validators = [Required("Please enter your email."), Email("Please enter an email address.")])
 
-	careers = Career.select()
-	career_choices = [(None, "")]
-	for career in careers:
-		career_choices.append((career.name, career.name))
-	career = SelectField("Career:", choices = career_choices)
+	# careers = Career.select()
+	# career_choices = [(None, "")]
+	# for career in careers:
+	# 	career_choices.append((career.name, career.name))
+	# career = SelectField("Career:", choices = [])
+
+	career = SelectQueryField("Career:", query = Career.select(), get_label = "name", allow_blank = True, blank_text = " ", validators = [Required()])
 
 	income_levels = ["0-30,000", "30,001-48,000", "48,001-75,000", "75,001-110,000", "over 110,000"]
 	income_choices = [(None, "")]
@@ -106,21 +108,22 @@ def questions():
 	form = Questionnaire_Form()
 
 	if form.validate_on_submit():
-		flash("Validated!")
+		try:
+			with database.atomic(): # This will fail, and rollback any commits, if the student isn't unique.
+				student = Student.create(
+					name = form.first_name.data + " " + form.last_name.data,
+					email = form.email.data,
+					career = form.career.data,
+					income = form.income.data,
+					budget = int(form.budget.data),
+					city = form.city.data,
+					state = form.state.data
+				)
+			return redirect("/confirmation")
 
-		student = Student()
-		
-		student.name = form.first_name.data + " " + form.last_name.data
-		student.email = form.email.data
-		student.career = Career.get(Career.name == form.career.data)
-		student.income = form.income.data
-		student.budget = int(form.budget.data)
-		student.city = form.city.data
-		student.state = form.state.data
-
-		flash("Saving the student...")
-		student.save()
-		flash("Saved!")
+		except IntegrityError:
+			flash("It looks like you've already created a profile. Try logging in!")
+			return redirect("/questions")
 	
 	if len(form.errors) > 0:
 		for error in form.errors:
