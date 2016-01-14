@@ -104,17 +104,6 @@ def index():
 	return render_template("index.html", title = "Home")
 
 
-@app.route("/admin")
-def admin():
-	session["authorized"] = True
-	return redirect("/report/151")
-
-@app.route("/clear")
-def clear():
-	session.clear()
-	return redirect("/index")
-
-
 @app.route("/report/<student_id>")
 def report(student_id):
 	try:
@@ -124,11 +113,7 @@ def report(student_id):
 
 	pathways = Pathway.select().where(Pathway.student == student)
 
-	try:
-		authorized = session["authorized"]
-		mode = True
-	except KeyError:
-		mode = False
+	edit_mode = False
 
 	return render_template("report.html", title = student.name + "'s Report", student = student, pathways = pathways, edit_mode = mode)
 
