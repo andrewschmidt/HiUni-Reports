@@ -1,6 +1,6 @@
 # Run this!
 
-from flask import Flask, g, render_template, redirect, request, abort, flash
+from flask import Flask, g, render_template, redirect, request, abort, flash, session
 
 from peewee import *
 from playhouse.postgres_ext import *
@@ -14,6 +14,7 @@ from wtfpeewee.fields import SelectQueryField # Unlike a regular SelectField, th
 from wtfpeewee.orm import model_form # For modeling forms from database objects. Not sure I really need it.
 
 from data_model import * # Includes the "database" variable.
+import solver
 
 
 
@@ -100,9 +101,18 @@ class Questionnaire_Form(Form):
 @app.route("/")
 @app.route("/index")
 def index():
-	student = Student.select().where(Student.name == "Jonathan Turpen").get()
+	return render_template("index.html", title = "Home")
 
-	return render_template("index.html", title = "Home", student = student)
+
+@app.route("/admin")
+def admin():
+	session["authorized"] = True
+	return redirect("/report/151")
+
+@app.route("/clear")
+def clear():
+	session.clear()
+	return redirect("/index")
 
 
 @app.route("/report/<student_id>")
@@ -114,7 +124,13 @@ def report(student_id):
 
 	pathways = Pathway.select().where(Pathway.student == student)
 
-	return render_template("report.html", title = student.name + "'s Report", student = student, pathways = pathways)
+	try:
+		authorized = session["authorized"]
+		mode = True
+	except KeyError:
+		mode = False
+
+	return render_template("report.html", title = student.name + "'s Report", student = student, pathways = pathways, edit_mode = mode)
 
 
 @app.route("/questions", methods = ['GET', 'POST'])
@@ -133,17 +149,26 @@ def questions():
 					city = form.city.data,
 					state = form.state.data
 				)
-			return redirect("/confirmation")
-
 		except IntegrityError:
 			flash("It looks like you've already created a profile. Try logging in!")
-			return redirect("/questions")
+			return redirect("/index")
+
+		solver.make_pathways_async(student = student, how_many = 6) # This *should* be asynchronous.
+		session["student name"] = student.name
+		return redirect("/confirmation")
+
 	else:
 		for field, errors in form.errors.items():
 			for error in errors:
 				flash(error)
 
 	return render_template("questions.html", form = form)
+
+
+@app.route("/confirmation")
+def confirmation():
+	student_name = session["student name"]
+	return render_template("confirmation.html", title = "Thank you!", student_name = student_name)
 
 
 

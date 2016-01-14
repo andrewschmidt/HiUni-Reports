@@ -3,8 +3,10 @@
 from data_model import *
 import data_helper
 
+from decorators import async
 
-unsafe_search_allowed = False
+
+unsafe_search_allowed = True
 
 
 def calculate_roi(cost, gains):
@@ -362,3 +364,12 @@ def make_pathways_for_student(student, how_many):
 			good_pathways.remove(p)
 			index -= 1
 
+	if not failed:
+		print "\nSuccessfully made", len(good_pathways), "pathways for", student.name + ".\n"
+	else:
+		print "\nFailed to make pathways for", student.name + ".\n"
+
+
+@async
+def make_pathways_async(student, how_many):
+	make_pathways_for_student(student = student, how_many = how_many)

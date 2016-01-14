@@ -20,7 +20,9 @@
 	{% for pathway in pathways %}
 		
 		<h2><b>Pathway #{{ loop.index }}</b></h2>
-		
+		{% if edit_mode %}
+			<h4>Edit mode activated!</h4>
+		{% endif %}
 		<ul>
 			<li>Total Cost: <b>${{ pathway.cost() }}</b></li>
 			<li>Time: <b>{{ pathway.duration() }} years</b></li>
