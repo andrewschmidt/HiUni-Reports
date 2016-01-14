@@ -11,18 +11,15 @@
 		{% endif %}
 		
 		<li>Location: <b>{{ student.city }}, {{ student.state }}</b></li>
-		<li>Career: <b>{{ student.career.name }}</b></li>
+		<li>Career: <b>{{ report.career.name }}</b></li>
 		<li>Income: <b>{{ income }}</b></li>
 		<li>Budget: <b>${{ student.budget }}</b></li>
 	</ul>
 	<br>
 
-	{% for pathway in pathways %}
+	{% for pathway in report.pathways %}
 		
 		<h2><b>Pathway #{{ loop.index }}</b></h2>
-		{% if edit_mode %}
-			<h4>Edit mode activated!</h4>
-		{% endif %}
 		<ul>
 			<li>Total Cost: <b>${{ pathway.cost() }}</b></li>
 			<li>Time: <b>{{ pathway.duration() }} years</b></li>

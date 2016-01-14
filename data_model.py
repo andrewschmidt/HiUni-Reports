@@ -45,7 +45,6 @@ class Student(Model):
 	name = CharField()
 	email = CharField()
 	
-	career = ForeignKeyField(Career, null = True)
 	income = CharField()
 	budget = IntegerField()
 	
@@ -53,16 +52,9 @@ class Student(Model):
 	state = CharField()
 	location = HStoreField(null = True) # For storing latitude and longitude keys.
 
-	def sorted_pathways(self): # Pathways aren't returned in any particular order; this sorts them by ROI.
-		pathways = []
-		for p in self.pathways:
-			pathways.append(p)
-		pathways.sort(key = lambda p: p.roi(), reverse = True)
-		return pathways
-
 	class Meta:
 		database = database
-		indexes = ((("name", "email", "career", "income", "budget", "city", "state"), True),) # This make it impossible to make a duplicate student.
+		indexes = ((("name", "email", "income", "budget", "city", "state"), True),) # This make it impossible to make a duplicate student.
 
 
 class Recipe(BaseModel):
@@ -98,8 +90,21 @@ class Step(BaseModel):
 		order_by = ("number",)
 
 
+class Report(BaseModel):
+	student = ForeignKeyField(Student, related_name = "reports")
+	career = ForeignKeyField(Career, null = True)
+
+	def sorted_pathways(self): # Pathways aren't returned in any particular order; this sorts them by ROI.
+		pathways = []
+		for p in self.pathways:
+			pathways.append(p)
+		pathways.sort(key = lambda p: p.roi(), reverse = True)
+		return pathways
+
+
 class Pathway(BaseModel):
-	student = ForeignKeyField(Student, related_name = "pathways")
+	report = ForeignKeyField(Report, related_name = "pathways")
+	low_data = BooleanField()
 
 	def sorted_steps(self): # Steps aren't returned in any particular order; this sorts them.
 		steps = []

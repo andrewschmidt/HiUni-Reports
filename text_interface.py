@@ -17,8 +17,9 @@ def clear():
 def print_student_info(student):
 	print ""
 	print Style.BRIGHT + student.name, "in", student.city + ",", student.state
-	if student.career is not None:
-		print Style.DIM + "  Career:", student.career.name
+	report = student.reports[0]
+	if report.career is not None:
+		print Style.DIM + "  Career:", report.career.name
 	if student.income != "over 110,000":
 		income_string = "$" + student.income
 	else:
@@ -115,7 +116,6 @@ def make_student():
 	student.name = name
 	student.email = email
 	
-	student.career = career
 	student.income = income
 	student.budget = budget
 	
@@ -123,6 +123,14 @@ def make_student():
 	student.state = state
 
 	student.save()
+
+	# And save an empty report w/ the career of choice:
+	report = Report()
+
+	report.student = student
+	report.career = career
+
+	report.save()
 
 	print "\nSuccessfully saved the student! Details:\n"
 	print_student_info(student)
@@ -197,11 +205,16 @@ def make_pathways():
 	except Exception: 
 		menu()
 
+	# Get a report to make pathways for.
+	# Right now this just uses the first report that returns.
+	# In the future I should make it so you can select which report to use.
+	report = Report.select().join(Student).where((Student.id == student.id)).get()
+
 	print "\nOK! Generating pathways for", student.name + "."
 	print "\nSearching", str(School.select().count()), "schools offering", str(Program.select().count()), "programs...\n"
 
 	# try:
-	solver.make_pathways_for_student(student, how_many = pathways_needed)
+	solver.make_pathways_for_student(student, report = report, how_many = pathways_needed)
 	# except Exception:
 	# 	print "\nFailed to make pathways, error in solver.make_pathways_for_student()."
 
@@ -239,8 +252,9 @@ def show_pathways_for_student(student):
 	print Style.BRIGHT + Fore.CYAN + "\nSHOW PATHWAYS"
 	print "-------------"
 	print_student_info(student)
-
-	pathways = student.sorted_pathways()
+	
+	report = student.reports[0]
+	pathways = report.sorted_pathways()
 
 	i = 1
 	for pathway in pathways:
@@ -351,10 +365,10 @@ def delete_students():
 
 def delete_pathways():
 	clear()
-	print Style.BRIGHT + Fore.RED + "\nDELETE ALL PATHWAYS"
+	print Style.BRIGHT + Fore.RED + "\nDELETE REPORTS"
 	print "-------------------"
 
-	print "\nDelete pathways for which student?"
+	print "\nDelete reports for which student?"
 	students = Student.select()
 	i = 1
 	for student in students:
@@ -375,7 +389,7 @@ def delete_pathways():
 	elif number == i:
 		confirm = raw_input(Style.BRIGHT + "\nAre you sure you want to delete all pathways? Y/N: ")
 		if confirm == "y" or confirm == "Y":
-			to_delete = Pathway.select()
+			to_delete = Report.select()
 		else:
 			raw_input("\nPress enter to return to the menu.")
 			menu()
@@ -391,8 +405,9 @@ def delete_pathways():
 		confirm = raw_input(Style.BRIGHT + "\nAre you sure you want to delete " + student.name + "'s pathways? Y/N: ")
 		if confirm == "y" or confirm == "Y":
 			to_delete = []
-			for pathway in student.pathways:
-				to_delete.append(pathway)
+			for report in student.reports:
+				to_delete.append(report)
+
 		else:
 			raw_input("\nPress enter to return to the menu.")
 			menu()
@@ -401,7 +416,7 @@ def delete_pathways():
 	for item in to_delete:
 		item.delete_instance(recursive = True)
 
-	print "Deleted", count, "pathways."
+	print "Deleted", count, "objects."
 
 	raw_input("\nPress enter to return to the menu.")
 	menu()
@@ -558,8 +573,10 @@ def menu():
 	number_schools = str(School.select().count())
 	number_careers = str(Career.select().count())
 	number_students = str(Student.select().count())
+	number_reports = str(Report.select().count())
 
 	print "\nCurrently: ", Style.BRIGHT + number_schools, "schools,", Style.BRIGHT + number_careers, "careers, and", Style.BRIGHT + number_students, "students."
+	# print "\nAlso,", Style.BRIGHT + number_reports, "reports."
 
 	print "\nWhat would you like to do?"
 
