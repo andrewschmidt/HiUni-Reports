@@ -245,7 +245,7 @@ def get_programs_data_from_csv_sheet(sheet, for_school):
 		names.append("General Studies")
 		cips.append("24.0102")
 		median_salaries.append(None)
-		reportables.append(False)
+		reportables.append(True) # We'll set them to be reportable, even though they aren't in PayScale's database.
 
 	return names, cips, median_salaries, reportables
 

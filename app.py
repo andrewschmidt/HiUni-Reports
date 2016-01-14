@@ -115,7 +115,7 @@ def report(student_id):
 
 	edit_mode = False
 
-	return render_template("report.html", title = student.name + "'s Report", student = student, pathways = pathways, edit_mode = mode)
+	return render_template("report.html", title = student.name + "'s Report", student = student, pathways = pathways, edit_mode = edit_mode)
 
 
 @app.route("/questions", methods = ['GET', 'POST'])
