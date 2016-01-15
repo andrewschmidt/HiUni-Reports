@@ -25,6 +25,9 @@
 			<li>Time: <b>{{ pathway.duration() }} years</b></li>
 			<li>Median Salary: <b>${{ pathway.median_salary() }}</b></li>
 			<li>ROI: <b>{{ pathway.roi() }}%</b></li>
+			{% if pathway.low_data %}
+				<li><b>Some schools in this pathway have low salary data.</b></li>
+			{% endif %}
 			
 			{% for step in pathway.sorted_steps() %}
 				
