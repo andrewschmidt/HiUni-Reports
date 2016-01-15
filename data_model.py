@@ -11,6 +11,40 @@ class BaseModel(Model):
 		database = database
 
 
+# USER AUTHENTICATION-RELATED MODELS
+
+class Customer(BaseModel):
+	organization = TextField(null = True)
+
+
+class Employee(BaseModel):
+	name = TextField(null = True)
+
+
+class User(BaseModel):
+	customer = ForeignKeyField(Customer, related_name = "users", null = True)
+	employee = ForeignKeyField(Employee, related_name = "employees", null = True)
+
+	# The rest is required by Flask-Login
+	email = TextField(unique = True, primary_key = True)
+	password = TextField()
+	authenticated = BooleanField(default = False)
+
+	def is_active(self):
+		return True
+
+	def get_id(self):
+		return self.email
+
+	def is_authenticated(self):
+		return self.authenticated
+
+	def is_anonymous(self):
+		return False
+
+
+# SOLVER-RELATED MODELS
+
 class School(BaseModel):
 	name = CharField()
 	ipeds_id = CharField()
@@ -51,6 +85,8 @@ class Student(Model):
 	city = CharField()
 	state = CharField()
 	location = HStoreField(null = True) # For storing latitude and longitude keys.
+
+	customer = ForeignKeyField(Customer, related_name = "students", null = True)
 
 	class Meta:
 		database = database
@@ -104,7 +140,7 @@ class Report(BaseModel):
 
 class Pathway(BaseModel):
 	report = ForeignKeyField(Report, related_name = "pathways")
-	low_data = BooleanField()
+	low_data = BooleanField(default = False)
 
 	def sorted_steps(self): # Steps aren't returned in any particular order; this sorts them.
 		steps = []

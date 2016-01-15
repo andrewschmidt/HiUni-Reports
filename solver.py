@@ -6,7 +6,7 @@ import data_helper
 from decorators import async
 
 
-unsafe_search_allowed = False
+unsafe_search_allowed = True
 
 
 def calculate_roi(cost, gains):
@@ -188,19 +188,17 @@ def programs_for_step(step, student):
 		programs, safe_search = programs_by_distance_for_step(step, student)
 
 	if safe_search:
-		used_low_data = False
-		return programs, used_low_data
+		return programs
 	elif unsafe_search_allowed:
 		print "Had to use programs with low data."
-		used_low_data = True
-		return programs, used_low_data
+		return programs
 
-	return None, None
+	return None
 
 
-def get_excluded_schools(report):
+def get_excluded_schools(student):
 	schools = []
-	for pathway in report.pathways:
+	for pathway in student.pathways:
 		for step in pathway.pathway_steps:
 			school = step.program.school
 			if school.kind != "Degree-granting, associate's and certificates": # It's OK to reuse community colleges.
@@ -211,6 +209,7 @@ def get_excluded_schools(report):
 def pathway_complete(pathway, recipe):
 	# Check if we made enough pathway steps:
 	if len(pathway.pathway_steps) != len(recipe.steps):
+		# print "Oh no! The pathway didn't have enough steps :("
 		return False
 	else:
 		return True
@@ -235,8 +234,8 @@ def pathway_schools_conflict(pathway_1, pathway_2):
 	return False
 
 
-def make_pathway_from_recipe(recipe, student, report, excluded_schools, budget_modifier):
-	pathway = data_helper.save_pathway(report) # Pathway steps reference their pathway, so we need it in the database right away.
+def make_pathway_from_recipe(recipe, student, excluded_schools, budget_modifier):
+	pathway = data_helper.save_pathway(student) # Pathway steps reference their pathway, so we need it in the database right away.
 
 	# Working through the steps backwards prioritizes the final step --
 	# which is the step whose salary matters most.
@@ -246,15 +245,10 @@ def make_pathway_from_recipe(recipe, student, report, excluded_schools, budget_m
 	# Make as many pathway steps as we can:
 	for step in steps:
 		# Get all applicable programs:
-		programs, used_low_data = programs_for_step(step, student)
-				
+		programs = programs_for_step(step, student)
 		if programs is None:
 			print "Couldn't find any programs."
 			break
-		
-		# Make note of whether the pathway uses low data or not:
-		if used_low_data:
-			pathway.low_data = True
 
 		print "Found", len(programs), "programs for step #" + str(step.number)
 
@@ -282,8 +276,8 @@ def make_pathway_from_recipe(recipe, student, report, excluded_schools, budget_m
 	return pathway
 
 
-def make_pathway_for_every_recipe(student, report, excluded_schools, budget_modifier):
-	career = report.career
+def make_pathway_for_every_recipe(student, excluded_schools, budget_modifier):
+	career = student.career
 	recipes = career.recipes
 	good_pathways = []
 		
@@ -292,7 +286,7 @@ def make_pathway_for_every_recipe(student, report, excluded_schools, budget_modi
 		print "  Career:", career.name
 		print "  Recipe:", recipe.number, "\n"
 		
-		pathway = make_pathway_from_recipe(recipe, student, report, excluded_schools, budget_modifier)
+		pathway = make_pathway_from_recipe(recipe, student, excluded_schools, budget_modifier)
 
 		if pathway is not None:
 			good_pathways.append(pathway)
@@ -304,9 +298,9 @@ def make_pathway_for_every_recipe(student, report, excluded_schools, budget_modi
 		return None
 
 
-def make_pathways_for_student(student, report, how_many):	
+def make_pathways_for_student(student, how_many):	
 	# Prepopulate the excluded schools list with schools from any preexisting pathways:
-	excluded_schools = get_excluded_schools(report)
+	excluded_schools = get_excluded_schools(student)
 	budget_modifier = 0
 	budget_leeway = 30000
 
@@ -315,7 +309,7 @@ def make_pathways_for_student(student, report, how_many):
 
 	# First make pathways:
 	while len(good_pathways) < how_many and not failed:
-		made_pathways = make_pathway_for_every_recipe(student, report, excluded_schools, budget_modifier)
+		made_pathways = make_pathway_for_every_recipe(student, excluded_schools, budget_modifier)
 
 		if made_pathways is not None:
 			made_pathways.sort(key = lambda p: p.roi()) # Worst to best ROI.
@@ -347,7 +341,7 @@ def make_pathways_for_student(student, report, how_many):
 					pass
 
 			# Finally, update the list of excluded schools:
-			excluded_schools = get_excluded_schools(report)
+			excluded_schools = get_excluded_schools(student)
 
 			# And add this narrower list of pathways to our list of good pathways:
 			good_pathways += made_pathways
@@ -377,5 +371,5 @@ def make_pathways_for_student(student, report, how_many):
 
 
 @async
-def make_pathways_async(student, report, how_many):
-	make_pathways_for_student(student = student, report = report, how_many = how_many)
+def make_pathways_async(student, how_many):
+	make_pathways_for_student(student = student, how_many = how_many)
