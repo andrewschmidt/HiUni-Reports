@@ -1,4 +1,4 @@
-# Run this!
+# Run this.
 
 from flask import Flask, g, render_template, redirect, request, abort, flash, session
 
