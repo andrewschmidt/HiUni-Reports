@@ -185,7 +185,11 @@ def register():
 
 		user.save()
 
-		return redirect("/login")
+		# Log them in!
+		user.authenticated = True
+		login_user(user, remember = True)
+
+		return redirect("/questions")
 
 	return render_template("register.html", form = form)
 
@@ -245,9 +249,14 @@ def list_students():
 	# If the user is an employee, that should be *all* students.
 	if current_user.customer is not None:
 		query = Student.select().where(Student.customer == current_user.customer)
+		if query.count() == 1:
+			student = query.get()
+			return redirect("/reports/" + str(student.id))
+
 	elif current_user.employee is not None:
 		query = Student.select()
 		student_query = Student.select()
+	
 	else:
 		flash("User is neither customer nor employee!")
 		print(current_user.customer)
@@ -268,6 +277,10 @@ def list_students():
 def list_reports(student_id):
 	student = Student.get(id = student_id)
 	query = Report.select().join(Student).where(Student.id == student_id)
+
+	if query.count() == 1:
+		report = query.get()
+		return redirect("/report/" + str(student.id) + "_" + str(report.id))
 
 	form = Choose_Report()
 	form.report.query = query

@@ -6,7 +6,7 @@ import data_helper
 from decorators import async
 
 
-unsafe_search_allowed = False
+unsafe_search_allowed = True
 
 
 def calculate_roi(cost, gains):
