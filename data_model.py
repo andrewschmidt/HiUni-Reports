@@ -23,7 +23,7 @@ class Employee(BaseModel):
 
 class User(BaseModel):
 	customer = ForeignKeyField(Customer, related_name = "users", null = True)
-	employee = ForeignKeyField(Employee, related_name = "employees", null = True)
+	employee = ForeignKeyField(Employee, related_name = "users", null = True)
 
 	# The rest is required by Flask-Login
 	email = TextField(unique = True, primary_key = True)
@@ -86,7 +86,7 @@ class Student(Model):
 	state = CharField()
 	location = HStoreField(null = True) # For storing latitude and longitude keys.
 
-	customer = ForeignKeyField(Customer, related_name = "students", null = True)
+	customer = ForeignKeyField(Customer, related_name = "students")
 
 	class Meta:
 		database = database
@@ -128,7 +128,8 @@ class Step(BaseModel):
 
 class Report(BaseModel):
 	student = ForeignKeyField(Student, related_name = "reports")
-	career = ForeignKeyField(Career, null = True)
+	career = ForeignKeyField(Career)
+	published = BooleanField(default = False)
 
 	def sorted_pathways(self): # Pathways aren't returned in any particular order; this sorts them by ROI.
 		pathways = []

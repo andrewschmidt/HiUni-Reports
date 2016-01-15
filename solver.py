@@ -255,6 +255,7 @@ def make_pathway_from_recipe(recipe, student, report, excluded_schools, budget_m
 		# Make note of whether the pathway uses low data or not:
 		if used_low_data:
 			pathway.low_data = True
+			pathway.save()
 
 		print "Found", len(programs), "programs for step #" + str(step.number)
 

@@ -177,10 +177,12 @@ def register():
 		)
 		
 		if form.user_type.data == "customer":
-			customer = Customer.create()
+			customer = Customer()
+			customer.save()
 			user.customer = customer
 		elif form.user_type.data == "employee":
-			employee = Employee.create()
+			employee = Employee()
+			employee.save()
 			user.employee = employee
 
 		user.save()
@@ -253,6 +255,8 @@ def list_students():
 		if query.count() == 1:
 			student = query.get()
 			return redirect("/reports/" + str(student.id))
+		elif query.count() == 0:
+			return redirect("/questions")
 
 	elif current_user.employee is not None:
 		query = Student.select()
@@ -301,6 +305,9 @@ def report(student_id, report_id):
 	except DoesNotExist:
 		abort(404)
 
+	if not report.published and current_user.employee is None:
+		return redirect("/confirmation")
+
 	return render_template("report.html", title = student.name + "'s Report", student = student, report = report)
 
 
@@ -314,18 +321,18 @@ def confirmation():
 # RUN IT
 
 def create_tables():
+	Customer.create_table(True)
+	Employee.create_table(True)
+	User.create_table(True)
 	School.create_table(True)
 	Program.create_table(True)
-	Career.create_table(True)
 	Student.create_table(True)
+	Career.create_table(True)
 	Recipe.create_table(True)
 	Step.create_table(True)
 	Report.create_table(True)
 	Pathway.create_table(True)
 	Pathway_Step.create_table(True)
-	Customer.create_table(True)
-	Employee.create_table(True)
-	User.create_table(True)
 
 
 if __name__ == '__main__':

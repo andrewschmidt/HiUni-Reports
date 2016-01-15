@@ -129,6 +129,7 @@ def make_student():
 
 	report.student = student
 	report.career = career
+	report.published = False
 
 	report.save()
 
@@ -478,6 +479,128 @@ def delete_careers():
 	menu()
 
 
+def delete_customers():
+	clear()
+	print Style.BRIGHT + Fore.RED + "\nDELETE CUSTOMERS"
+	print "---------------"
+
+	print "\nDelete which customer?"
+	customers = Customer.select()
+	i = 1
+	for customer in customers:
+		user = customer.users[0]
+		print Style.BRIGHT + "  " + str(i) + ". " + Fore.RED + user.email
+		i += 1
+	print Style.BRIGHT + "  " + str(i) + ". " + Fore.RED + "Delete all"
+	print Style.BRIGHT + "  " + str(i+1) + ". Exit"
+	
+	choice = raw_input("  ")
+	try:
+		number = int(choice)
+	except Exception:
+		menu()
+
+	if number == i+1:
+		menu()
+	
+	elif number == i:
+		confirm = raw_input(Style.BRIGHT + "\nAre you sure you want to delete all customers? Y/N: ")
+		if confirm == "y" or confirm == "Y":
+			to_delete = Customer.select()
+
+		else:
+			raw_input("\nPress enter to return to the menu.")
+			menu()
+
+	else:
+		try:
+			customer = customers[number-1]
+		except Exception:
+			print "\nGot the input:", str(number) + ", didn't know what to do with it."
+			raw_input("\nPress enter to return to the menu.")
+			menu()
+		
+		user = customer.users[0]
+		confirm = raw_input(Style.BRIGHT + "\nAre you sure you want to delete " + user.email + "? Y/N: ")
+		if confirm == "y" or confirm == "Y":
+			to_delete = [customer]
+		else:
+			raw_input("\nPress enter to return to the menu.")
+			menu()
+	
+	count = len(to_delete)	
+	for item in to_delete:
+		user = item.users[0]
+		user.delete_instance()
+		item.delete_instance(recursive = True)
+
+	print "Deleted", count, "customers and their associated user accounts."
+
+	raw_input("\nPress enter to return to the menu.")
+	menu()
+
+
+def delete_employees():
+	clear()
+	print Style.BRIGHT + Fore.RED + "\nDELETE EMPLOYEES"
+	print "---------------"
+
+	print "\nDelete which employee?"
+	employees = Employee.select()
+	i = 1
+	for employee in employees:
+		user = employee.users[0]
+		print Style.BRIGHT + "  " + str(i) + ". " + Fore.RED + user.email
+		i += 1
+	print Style.BRIGHT + "  " + str(i) + ". " + Fore.RED + "Delete all"
+	print Style.BRIGHT + "  " + str(i+1) + ". Exit"
+	
+	choice = raw_input("  ")
+	try:
+		number = int(choice)
+	except Exception:
+		menu()
+
+	if number == i+1:
+		menu()
+	
+	elif number == i:
+		confirm = raw_input(Style.BRIGHT + "\nAre you sure you want to delete all employees? Y/N: ")
+		if confirm == "y" or confirm == "Y":
+			to_delete = Employee.select()
+
+		else:
+			raw_input("\nPress enter to return to the menu.")
+			menu()
+
+	else:
+		try:
+			employee = employees[number-1]
+		except Exception:
+			print "\nGot the input:", str(number) + ", didn't know what to do with it."
+			raw_input("\nPress enter to return to the menu.")
+			menu()
+		
+		user = employee.users[0]
+		confirm = raw_input(Style.BRIGHT + "\nAre you sure you want to delete " + user.email + "? Y/N: ")
+		if confirm == "y" or confirm == "Y":
+			to_delete = [employee]
+		else:
+			raw_input("\nPress enter to return to the menu.")
+			menu()
+	
+	count = len(to_delete)	
+	for item in to_delete:
+		user = item.users[0]
+		user.delete_instance()
+		item.delete_instance(recursive = True)
+
+	print "Deleted", count, "employees and their associated user accounts."
+
+	raw_input("\nPress enter to return to the menu.")
+	menu()
+
+
 def delete_schools():
 	clear()
 	print Style.BRIGHT + Fore.RED + "\nDELETE ALL SCHOOLS"
@@ -493,13 +616,35 @@ def delete_schools():
 	menu()
 
 
+def delete_users():
+	clear()
+	print Style.BRIGHT + Fore.RED + "\nDELETE ALL USERS"
+	print "------------------"
+
+	choice = raw_input(Style.BRIGHT + Fore.RED + "\nAre you sure you want to delete all users? Y/N: ")
+	
+	if choice == "y" or choice == "Y":
+		users = User.select()
+		customers = Customer.select()
+		employees = Employee.select()
+
+		for user in users: user.delete_instance(recursive = True)
+		for customer in customers: customer.delete_instance(recursive = True)
+		for employee in employees: employee.delete_instance(recursive = True)
+		
+		print "\nAll users, customers, and employees deleted."
+
+	raw_input("\nPress enter to return to the menu.")
+	menu()
+
+
 def delete():
 	clear()
 	print Style.BRIGHT + Fore.RED + "\nDELETE"
 	print "------"
 
 	print "\nWhat would you like to delete?"
-	choices = ["Students", "Pathways", "Careers", "Exit"]
+	choices = ["Students", "Pathways", "Careers", "Customers", "Employees", "Users", "Exit"]
 	i = 1
 	for c in choices:
 		if "Exit" in c: 
@@ -519,6 +664,9 @@ def delete():
 	if choice == "Students": delete_students()
 	if choice == "Pathways": delete_pathways()
 	if choice == "Careers": delete_careers()
+	if choice == "Customers": delete_customers()
+	if choice == "Employees": delete_employees()
+	if choice == "All users": delete_users()
 	if choice == "Exit": menu()
 
 
@@ -572,11 +720,16 @@ def menu():
 
 	number_schools = str(School.select().count())
 	number_careers = str(Career.select().count())
+	number_customers = str(Customer.select().count())
 	number_students = str(Student.select().count())
+	number_users = str(User.select().count())
+	number_employees = str(Employee.select().count())
 	number_reports = str(Report.select().count())
 
-	print "\nCurrently: ", Style.BRIGHT + number_schools, "schools,", Style.BRIGHT + number_careers, "careers, and", Style.BRIGHT + number_students, "students."
-	# print "\nAlso,", Style.BRIGHT + number_reports, "reports."
+	print "\nCurrently: ", Style.BRIGHT + number_schools, "schools,", Style.BRIGHT + number_careers, "careers, and", Style.BRIGHT + number_customers, "customers with", Style.BRIGHT + number_students, "students."
+	print "   Total users:", Style.BRIGHT + number_users
+	print "   Employees:  ", Style.BRIGHT + number_employees
+	print "   Reports:    ", Style.BRIGHT + number_reports
 
 	print "\nWhat would you like to do?"
 
