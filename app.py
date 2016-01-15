@@ -205,6 +205,7 @@ def logout():
 @login_required
 def questions():
 	if current_user.customer is None:
+		flash("You have to be a customer to add students.")
 		return redirect("/")
 
 	form = Questionnaire_Form(email = current_user.email)
