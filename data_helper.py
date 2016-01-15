@@ -114,7 +114,7 @@ def get_total_prices_for_school_id(ipeds_id, from_csv_sheet):
 		try:
 			total_price[key] = row[get_number_for_nonempty_column(key, for_ipeds_id = ipeds_id, from_csv_sheet = sheet)]
 		except Exception:
-			print "Couldn't get a price for '" + key + "'."
+			# print "Couldn't get a price for '" + key + "'."
 			pass
 		
 	return total_price
@@ -245,7 +245,7 @@ def get_programs_data_from_csv_sheet(sheet, for_school):
 		names.append("General Studies")
 		cips.append("24.0102")
 		median_salaries.append(None)
-		reportables.append(False)
+		reportables.append(True) # We'll set them to be reportable, even though they aren't in PayScale's database.
 
 	return names, cips, median_salaries, reportables
 
@@ -428,9 +428,10 @@ def save_pathway_step(pathway, program, step, number, cost):
 	pathway_step.save()
 
 
-def save_pathway(student):
+def save_pathway(report):
 	pathway = Pathway()
-	pathway.student = student
+	pathway.report = report
+	pathway.low_data = False
 	pathway.save()
 	
 	return pathway

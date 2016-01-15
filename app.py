@@ -104,33 +104,15 @@ def index():
 	return render_template("index.html", title = "Home")
 
 
-@app.route("/admin")
-def admin():
-	session["authorized"] = True
-	return redirect("/report/151")
-
-@app.route("/clear")
-def clear():
-	session.clear()
-	return redirect("/index")
-
-
-@app.route("/report/<student_id>")
-def report(student_id):
+@app.route("/report/<student_id>_<report_id>")
+def report(student_id, report_id):
 	try:
 		student = Student.get(id = student_id)
-	except Student.DoesNotExist:
+		report = Report.get(id = report_id)
+	except DoesNotExist:
 		abort(404)
 
-	pathways = Pathway.select().where(Pathway.student == student)
-
-	try:
-		authorized = session["authorized"]
-		mode = True
-	except KeyError:
-		mode = False
-
-	return render_template("report.html", title = student.name + "'s Report", student = student, pathways = pathways, edit_mode = mode)
+	return render_template("report.html", title = student.name + "'s Report", student = student, report = report)
 
 
 @app.route("/questions", methods = ['GET', 'POST'])
@@ -143,17 +125,20 @@ def questions():
 				student = Student.create(
 					name = form.first_name.data + " " + form.last_name.data,
 					email = form.email.data,
-					career = form.career.data,
 					income = form.income.data,
 					budget = int(form.budget.data),
 					city = form.city.data,
 					state = form.state.data
 				)
+				report = Report.create(
+					student = student,
+					career = form.career.data
+				)
 		except IntegrityError:
 			flash("It looks like you've already created a profile. Try logging in!")
 			return redirect("/index")
 
-		solver.make_pathways_async(student = student, how_many = 6) # This *should* be asynchronous.
+		solver.make_pathways_async(student = student, report = report, how_many = 6) # This *should* be asynchronous.
 		session["student name"] = student.name
 		return redirect("/confirmation")
 
@@ -181,6 +166,7 @@ def create_tables():
 	Student.create_table(True)
 	Recipe.create_table(True)
 	Step.create_table(True)
+	Report.create_table(True)
 	Pathway.create_table(True)
 	Pathway_Step.create_table(True)
 
