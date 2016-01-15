@@ -22,3 +22,11 @@ Career Templates/Barista Template 1.csv
 *.pyc
 
 *.pyc
+
+*.pyc
+
+app.pyc
+
+data_model.pyc
+
+views.pyc
