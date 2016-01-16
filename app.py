@@ -185,7 +185,6 @@ def register():
 		)
 
 		user.save()
-		flash("Registered!")
 
 		# Log them in!
 		user.authenticated = True
@@ -213,7 +212,6 @@ def register_employee():
 			)
 			
 			user.save()
-			flash("Registered a new employee:", user.email)
 			
 			return redirect("/students")
 

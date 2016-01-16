@@ -17,7 +17,7 @@
 					("/register_employee", "register_employee", "Register an employee"),
 					("/logout", "logout", "Log out")
 				] -%}
-			{% elif current_user.customer.organization != None %}
+			{% elif current_user.customer.organization != "" %}
 				{% set navigation_bar = [
 					("/", "index", "HiUni"),
 					("/students", "students", "Reports"),
