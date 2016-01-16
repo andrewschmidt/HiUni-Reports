@@ -80,7 +80,7 @@ class Registration_Form(Form):
 	email = EmailField("Email:", validators = [Required("Please enter an email."), Email("Please enter a valid email address.")])
 	password = PasswordField("Password:", validators = [Required("Please enter a password."), EqualTo("confirm_password", message = "Passwords must match.")])
 	confirm_password = PasswordField("Confirm password:", validators = [Required("Please confirm your password.")])
-	user_type = SelectField("Are you a customer or an employee?", choices = [("", ""),("customer", "Customer"), ("employee", "Employee")], validators = [Required()])
+	organization = StringField("Name of organization:")
 
 
 class Choose_Student(Form):
@@ -171,21 +171,21 @@ def register():
 	form = Registration_Form()
 	
 	if form.validate_on_submit():
+		customer = Customer()
+		
+		if form.organization.data is not None:
+			customer.organization = form.organization.data
+		
+		customer.save()
+
 		user = User.create(
 			email = form.email.data,
-			password = form.password.data
+			password = form.password.data,
+			customer = customer
 		)
-		
-		if form.user_type.data == "customer":
-			customer = Customer()
-			customer.save()
-			user.customer = customer
-		elif form.user_type.data == "employee":
-			employee = Employee()
-			employee.save()
-			user.employee = employee
 
 		user.save()
+		flash("Registered!")
 
 		# Log them in!
 		user.authenticated = True
@@ -194,6 +194,32 @@ def register():
 		return redirect("/questions")
 
 	return render_template("register.html", form = form)
+
+
+@app.route("/register_employee", methods = ["GET", "POST"])
+@login_required
+def register_employee():
+	if current_user.employee:
+		form = Registration_Form()
+		
+		if form.validate_on_submit():
+			employee = Employee()
+			employee.save()
+			
+			user = User.create(
+				email = form.email.data,
+				password = form.password.data,
+				employee = employee
+			)
+			
+			user.save()
+			flash("Registered a new employee:", user.email)
+			
+			return redirect("/students")
+
+		return render_template("register_employee.html", form = form)
+
+	else: return redirect("/")
 
 
 @app.route("/logout")
@@ -350,6 +376,20 @@ def create_tables():
 	Pathway_Step.create_table(True)
 
 
+def create_admin():
+	if Employee.select().count() == 0:
+		print "Creating an admin."
+		employee = Employee()
+		employee.save()
+		user = User.create(
+			email = "admin@gohiuni.com",
+			password = "admin",
+			employee = employee
+		)
+		user.save()
+
+
 if __name__ == '__main__':
-    create_tables()
-    app.run()
+	create_tables()
+	if DEBUG: create_admin()
+	app.run()

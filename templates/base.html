@@ -10,12 +10,27 @@
 
 	<body>
 		{% if current_user.is_authenticated %}
-			{% set navigation_bar = [
-				("/", "index", "HiUni"),
-				("/students", "students", "Reports"),
-				("/questions", "questions", "Add a new student"),
-				("/logout", "logout", "Log out")
-			] -%}
+			{% if current_user.employee != None %}
+				{% set navigation_bar = [
+					("/", "index", "HiUni"),
+					("/students", "students", "Reports"),
+					("/register_employee", "register_employee", "Register an employee"),
+					("/logout", "logout", "Log out")
+				] -%}
+			{% elif current_user.customer.organization != None %}
+				{% set navigation_bar = [
+					("/", "index", "HiUni"),
+					("/students", "students", "Reports"),
+					("/questions", "questions", "Add a new student"),
+					("/logout", "logout", "Log out")
+				] -%}
+			{% else %}
+				{% set navigation_bar = [
+					("/", "index", "HiUni"),
+					("/students", "students", "My Report"),
+					("/logout", "logout", "Log out")
+				] -%}
+			{% endif %}
 		{% else %}
 			{% set navigation_bar = [
 				("/", "index", "HiUni"),

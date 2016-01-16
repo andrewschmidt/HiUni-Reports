@@ -7,10 +7,27 @@
 
 	<form method="post" action = "">
 		{{ form.hidden_tag() }}
-		
-		{% for field in form if field.widget.input_type != "hidden" %}
+		{% for field in form if field.widget.input_type != "hidden" and field != form.organization %}
 			<p>{{ field.label }} {{ field }}</p>
 		{% endfor %}
+		
+		<p><input type = "checkbox" name = "check" onClick = "showMe('orgField')"> Register an organization</p>
+
+		<div id = "orgField" style = "display:none"><p>{{ form.organization.label }} {{ form.organization }}</p></div>
+
+		<script type="text/javascript">
+  			function showMe (box) {
+    			var chboxs = document.getElementsByName("check");
+    			var vis = "none";
+    			for(var i=0;i<chboxs.length;i++) { 
+       				if(chboxs[i].checked){
+         				vis = "block";
+            			break;
+        			}
+    			}
+    			document.getElementById(box).style.display = vis;
+			}
+ 		</script>
 		
 		<p><button type="submit">Submit</button></p>
 		
