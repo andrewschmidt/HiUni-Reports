@@ -9,7 +9,6 @@
 		{% else %}
 			{% set income = "over $110,000" %}
 		{% endif %}
-		
 		<li>Location: <b>{{ student.city }}, {{ student.state }}</b></li>
 		<li>Career: <b>{{ report.career.name }}</b></li>
 		<li>Income: <b>{{ income }}</b></li>
@@ -19,10 +18,18 @@
 
 	{% for pathway in report.pathways %}
 		
-		<h2><b>Pathway #{{ loop.index }}</b></h2>
+		<h2>
+			<b>Pathway #{{ loop.index }}</b>
+			{% if current_user.employee != None and not report.published %}
+				<form action = "/report/{{ student.id }}_{{ report.id }}" method = "post">
+					<button type = "delete" value = "{{ pathway.id }}" name = "delete">Delete</button>
+				</form>
+			{% endif %}
+		</h2>
+
 		<ul>
-			{% if pathway.low_data == True and current_user.employee != None %}
-				<li><b>This pathway uses schools with minimal reported salary data.</b></li>
+			{% if pathway.low_data == True and current_user.employee != None and not report.published %}
+				<li><b>This pathway uses programs with low salary data.</b></li>
 			{% endif %}
 			<li>Total Cost: <b>${{ pathway.cost() }}</b></li>
 			<li>Time: <b>{{ pathway.duration() }} years</b></li>
@@ -52,5 +59,16 @@
 		<br>
 	
 	{% endfor %}
+	<hr>
+	{% if current_user.employee != None %}
+		<form action = "/report/{{ student.id }}_{{ report.id }}" method = "post">
+			{% if not report.published %}
+				<button name = "publish">Publish</button>
+			{% else %}
+				<button name = "unpublish">Unpublish</button>
+			{% endif %}
+		</form>
+	{% endif %}
+
 
 {% endblock %}

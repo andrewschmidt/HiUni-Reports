@@ -297,7 +297,7 @@ def list_reports(student_id):
 	return render_template("reports.html", title = student.name + "'s Reports", student = student, form = form)
 
 
-@app.route("/report/<student_id>_<report_id>")
+@app.route("/report/<student_id>_<report_id>", methods = ["GET", "POST"])
 def report(student_id, report_id):
 	try:
 		student = Student.get(id = student_id)
@@ -307,6 +307,21 @@ def report(student_id, report_id):
 
 	if not report.published and current_user.employee is None:
 		return redirect("/confirmation")
+
+	if request.method == "POST" and current_user.employee is not None:
+
+		if "delete" in request.form:
+			pathway_id = request.form["delete"]
+			pathway = Pathway.get(id = pathway_id)
+			pathway.delete_instance(recursive = True)
+		
+		elif "publish" in request.form:
+			report.published = True
+			report.save()
+
+		elif "unpublish" in request.form:
+			report.published = False
+			report.save()
 
 	return render_template("report.html", title = student.name + "'s Report", student = student, report = report)
 

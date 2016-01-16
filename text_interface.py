@@ -644,7 +644,7 @@ def delete():
 	print "------"
 
 	print "\nWhat would you like to delete?"
-	choices = ["Students", "Pathways", "Careers", "Customers", "Employees", "Users", "Exit"]
+	choices = ["Students", "Pathways", "Careers", "Customers", "Employees", "All users", "Exit"]
 	i = 1
 	for c in choices:
 		if "Exit" in c: 
@@ -727,11 +727,11 @@ def menu():
 	number_reports = str(Report.select().count())
 
 	print "\nCurrently: ", Style.BRIGHT + number_schools, "schools,", Style.BRIGHT + number_careers, "careers, and", Style.BRIGHT + number_customers, "customers with", Style.BRIGHT + number_students, "students."
-	print "   Total users:", Style.BRIGHT + number_users
-	print "   Employees:  ", Style.BRIGHT + number_employees
-	print "   Reports:    ", Style.BRIGHT + number_reports
+	print Style.DIM + "\n  Total users:", number_users
+	print Style.DIM + "  Employees:  ", number_employees
+	print Style.DIM + "  Reports:    ", number_reports
 
-	print "\nWhat would you like to do?"
+	print "\n\nWhat would you like to do?"
 
 	choices = ["Add a career", "Add a student", "Generate pathways", "Show all careers", "Show all students", "Show pathways", "Delete", "Quit"]
 	
