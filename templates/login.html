@@ -8,7 +8,11 @@
 		{{ form.hidden_tag() }}
 		
 		{% for field in form if field.widget.input_type != "hidden" %}
-			<p>{{ field.label }} {{ field }}</p>
+			{% if field == form.remember %}
+				<p>{{ field }} {{ field.label }}</p>
+			{% else %}
+				<p>{{ field.label }} {{ field }}</p>
+			{% endif %}
 		{% endfor %}
 		
 		<p><button type="submit">Submit</button></p>

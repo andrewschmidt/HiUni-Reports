@@ -73,7 +73,7 @@ class Login_Form(Form):
 	# For logging in users.
 	email = EmailField("Email:", validators = [Required("Please enter your email."), Email("Please enter a valid email address.")])
 	password = PasswordField("Password:", validators = [Required("Please enter your password.")])
-	remember = WTFBooleanField("Remember me")
+	remember = WTFBooleanField("Keep me signed in")
 
 
 class Registration_Form(Form):
