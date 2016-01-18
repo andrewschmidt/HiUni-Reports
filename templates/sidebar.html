@@ -24,14 +24,12 @@
 				
 				{% if current_user.employee != None %}
 					{% set sidebar = [
-						("/", "index", "Home"),
 						("/students", "students", "Edit reports"),
 						("/register_employee", "register_employee", "Add an employee"),
 					] -%}
 				
 				{% elif current_user.customer.is_organization %}
 					{% set sidebar = [
-						("/", "index", "Home"),
 						("/students", "students", "Students"),
 						("/questions", "questions", "Add a student"),
 					] -%}
