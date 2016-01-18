@@ -173,7 +173,7 @@ def register():
 	if form.validate_on_submit():
 		customer = Customer()
 		
-		if form.organization.data is not None:
+		if form.organization.data != "":
 			customer.is_organization = True
 			customer.organization = form.organization.data
 		

@@ -1,6 +1,14 @@
-{% extends "base.html" %}
+{% extends "sidebar.html" %}
+{% set sidebar_active = True %}
+{% set active_page = "students" %}
 
-{% block content %}
-	<h2>We have your answers, and we're crunching them already! </h2>
-	<p>You'll get an email when your report's ready.</p>
+{% block right_content %}
+<div class="row">
+	<div class="col-sm-1"></div>
+	<div class="col-sm-10">
+		<h2>Thank you!</h2>
+		<h3>We have your answers, and we're crunching them already.</h3>
+		You'll get an email when your report's ready.
+	</div>
+	<div class="col-sm-1"></div>
 {% endblock %}

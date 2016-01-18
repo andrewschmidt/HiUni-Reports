@@ -6,7 +6,6 @@
 
 
 <!-- Student info first -->
-	<br>
 	<div class="row">
 	    <div class="col-sm-1"></div>
 
@@ -60,6 +59,8 @@
 				<li><a data-toggle="tab" href="#{{ loop.index }}"><h4>Pathway {{ loop.index }}</h4></a></li>
 			{% endif %}
 		{% endfor %}
+
+
 	</ul>
 
 
@@ -80,7 +81,7 @@
 				<br>
 				{% if current_user.employee != None and not report.published %}
 					<form action = "/report/{{ student.id }}_{{ report.id }}" method = "post">
-						<button class="btn btn-danger btn-md" type = "delete" value = "{{ pathway.id }}" name = "delete">Delete</button>
+						<button class="btn btn-danger btn-md" type="delete" value="{{ pathway.id }}" name="delete">Delete</button>
 					</form>
 				{% endif %}
 
