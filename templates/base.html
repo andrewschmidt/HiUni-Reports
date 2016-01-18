@@ -19,6 +19,7 @@
 
 	</head>
 
+
 	<body>
 		<div class="container">
 			
@@ -26,7 +27,7 @@
 				<div class="container-fluid">
 					
 					<div class="navbar-header">
-						<a class="navbar-brand" href="/">HiUni</a>
+						<a class="pull-left" href="/"><img class="img-responsive" src="/static/hiunilogosmall.png"  width="100px"></a>
 					</div>
 					
 					<ul class="nav navbar-nav navbar-right">
@@ -40,50 +41,6 @@
 				
 				</div>
 			</nav>
-
-
-
-			<!-- OLD NAV BAR -->
-
-	{# 		{% if current_user.is_authenticated %}
-				{% if current_user.employee != None %}
-					{% set navigation_bar = [
-						("/", "index", "HiUni"),
-						("/students", "students", "Reports"),
-						("/register_employee", "register_employee", "Register an employee"),
-						("/logout", "logout", "Log out")
-					] -%}
-				{% elif current_user.customer.organization != "" %}
-					{% set navigation_bar = [
-						("/", "index", "HiUni"),
-						("/students", "students", "Reports"),
-						("/questions", "questions", "Add a new student"),
-						("/logout", "logout", "Log out")
-					] -%}
-				{% else %}
-					{% set navigation_bar = [
-						("/", "index", "HiUni"),
-						("/students", "students", "My Report"),
-						("/logout", "logout", "Log out")
-					] -%}
-				{% endif %}
-			{% else %}
-				{% set navigation_bar = [
-					("/", "index", "HiUni"),
-					("/register", "register", "Sign up")
-				] -%}
-			{% endif %}
-			
-			{% set active_page = active_page|default("index") -%}
-			<p>
-				{% for href, id, caption in navigation_bar %}
-					{% if id == active_page %}
-						<b><a href = "{{ href }}">{{ caption }}</a> | </b>
-					{% else %}
-						<a href = "{{ href }}"> {{ caption }}</a> | 
-					{% endif %}
-				{% endfor %}
-			</p> #}
 			
 
 			<!-- Flashed messages -->
@@ -99,6 +56,7 @@
 			
 
 			<!-- Content! -->
+			<br>
 			{% block content %}{% endblock %}
 
 		</div>

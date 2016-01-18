@@ -14,24 +14,25 @@
 			<div class="panel panel-primary">
 				
 				<div class="panel-heading">
-							<h3>{{ student.name}}</h3>
+					<h3>{{ student.name}}</h3>
 				</div>
 				
 				<div class="panel-body">
-						<ul>
-							{% if student.income != "over 110,000" %}
-								{% set income = "$" + student.income %}
-							{% else %}
-								{% set income = "over $110,000" %}
-							{% endif %}
-							<li>Location: <b>{{ student.city }}, {{ student.state }}</b></li>
-							<li>Career: <b>{{ report.career.name }}</b></li>
-							<li>Income: <b>{{ income }}</b></li>
-							<li>Budget: <b>${{ student.budget }}</b></li>
-						</ul>
+					<ul>
+						{% if student.income != "over 110,000" %}
+							{% set income = "$" + student.income %}
+						{% else %}
+							{% set income = "over $110,000" %}
+						{% endif %}
+						<li>Location: <b>{{ student.city }}, {{ student.state }}</b></li>
+						<li>Career: <b>{{ report.career.name }}</b></li>
+						<li>Income: <b>{{ income }}</b></li>
+						<li>Budget: <b>${{ student.budget }}</b></li>
+					</ul>
 				</div>
 			</div>
 
+			<!-- Publish button for employees: -->
 			{% if current_user.employee != None %}
 				<form action = "/report/{{ student.id }}_{{ report.id }}" method = "post">
 					{% if not report.published %}
@@ -53,10 +54,10 @@
 	{% set active_pathway = report.pathways[0] %}
 	<ul class="nav nav-tabs nav-justified">
 		{% for pathway in report.pathways %}
-			{% if active_pathway == pathway %}
-				<li class="active"><a data-toggle="tab" href="#{{ loop.index }}"><b>Pathway {{ loop.index }}</b></a></li>
+			{% if pathway == active_pathway %}
+				<li class="active"><a data-toggle="tab" href="#{{ loop.index }}"><h4>Pathway {{ loop.index }}</h4></a></li>
 			{% else %}
-				<li><a data-toggle="tab" href="#{{ loop.index }}"><b>Pathway #{{ loop.index }}</b></a></li>
+				<li><a data-toggle="tab" href="#{{ loop.index }}"><h4>Pathway {{ loop.index }}</h4></a></li>
 			{% endif %}
 		{% endfor %}
 	</ul>
@@ -65,102 +66,57 @@
 <!-- Pathway Details -->
 
 	<div class="tab-content">
-	{% for pathway in report.pathways %}
-		
-		{% if active_pathway == pathway %}
-			{% set tab_class = "tab-pane fade in active" %}
-		{% else %}
-			{% set tab_class = "tab-pane fade" %}
-		{% endif %}
-
-		<div id="{{ loop.index }}" class="{{ tab_class }}">
-	    	
-<!-- Pathway Content -->
-
-
-	    	<h3>{{ pathway.cost() }} </h3>
-
-
-	 	</div>
-	 {% endfor %}
-
-{% endblock %}
-
-
-{# 
-
-{% extends "base.html" %}
-{% set active_page = "students" %}
-
-{% block content %}
-	
-	<h1>{{ student.name }}'s Report</h1>
-	<ul>
-		{% if student.income != "over 110,000" %}
-			{% set income = "$" + student.income %}
-		{% else %}
-			{% set income = "over $110,000" %}
-		{% endif %}
-		<li>Location: <b>{{ student.city }}, {{ student.state }}</b></li>
-		<li>Career: <b>{{ report.career.name }}</b></li>
-		<li>Income: <b>{{ income }}</b></li>
-		<li>Budget: <b>${{ student.budget }}</b></li>
-	</ul>
-	<br>
-
-	{% for pathway in report.pathways %}
-		
-		<h2>
-			<b>Pathway #{{ loop.index }}</b>
-			{% if current_user.employee != None and not report.published %}
-				<form action = "/report/{{ student.id }}_{{ report.id }}" method = "post">
-					<button type = "delete" value = "{{ pathway.id }}" name = "delete">Delete</button>
-				</form>
-			{% endif %}
-		</h2>
-
-		<ul>
-			{% if pathway.low_data == True and current_user.employee != None and not report.published %}
-				<li><b>This pathway uses programs with low salary data.</b></li>
-			{% endif %}
-			<li>Total Cost: <b>${{ pathway.cost() }}</b></li>
-			<li>Time: <b>{{ pathway.duration() }} years</b></li>
-			<li>Median Salary: <b>${{ pathway.median_salary() }}</b></li>
-			<li>ROI: <b>{{ pathway.roi() }}%</b></li>
+		{% for pathway in report.pathways %}
 			
-			{% for step in pathway.sorted_steps() %}
-				
-				<ul>
-					<h3>Step #{{ step.number }}: {{ step.title() }}</h3>
-					
-					<ul>
-						{% if step.program.name != "General Studies" %}
-							<li>Major: <b>{{ step.program.name }}</b></li>
-						{% endif %}
-						<li>School: <b>{{ step.program.school.name }}</b></li>
-						<li>Cost: <b>${{ step.cost }}</b></li>
-						<li>Duration: <b>{{ step.duration() }} years</b></li>
-						{% if step.program.school.admission_rate != None %}
-							<li>Acceptance Rate: <b>{{ step.program.school.admission_rate }}%</b></li>
-						{% endif %}
-						<li>Description: <br><i>{{ step.description() }}</i></li>
-					</ul>
-				</ul>
-			{% endfor %}
-		</ul>
-		<br>
-	
-	{% endfor %}
-	<hr>
-	{% if current_user.employee != None %}
-		<form action = "/report/{{ student.id }}_{{ report.id }}" method = "post">
-			{% if not report.published %}
-				<button name = "publish">Publish</button>
+			{% if pathway == active_pathway %}
+				{% set tab_class = "tab-pane fade in active" %}
 			{% else %}
-				<button name = "unpublish">Unpublish</button>
+				{% set tab_class = "tab-pane fade" %}
 			{% endif %}
-		</form>
-	{% endif %}
 
+			<div id="{{ loop.index }}" class="{{ tab_class }}">
 
-{% endblock %} #}
+				<!-- Pathway Content -->
+				<br>
+				{% if current_user.employee != None and not report.published %}
+					<form action = "/report/{{ student.id }}_{{ report.id }}" method = "post">
+						<button class="btn btn-danger btn-md" type = "delete" value = "{{ pathway.id }}" name = "delete">Delete</button>
+					</form>
+				{% endif %}
+
+				<!-- Temporary, text-only pathway: -->
+				<ul>
+					{% if pathway.low_data == True and current_user.employee != None and not report.published %}
+						<li><b>This pathway uses programs with low salary data.</b></li>
+					{% endif %}
+					<li>Total Cost: <b>${{ pathway.cost() }}</b></li>
+					<li>Time: <b>{{ pathway.duration() }} years</b></li>
+					<li>Median Salary: <b>${{ pathway.median_salary() }}</b></li>
+					<li>ROI: <b>{{ pathway.roi() }}%</b></li>
+					
+					{% for step in pathway.sorted_steps() %}
+						
+						<ul>
+							<h3>Step #{{ step.number }}: {{ step.title() }}</h3>
+							
+							<ul>
+								{% if step.program.name != "General Studies" %}
+									<li>Major: <b>{{ step.program.name }}</b></li>
+								{% endif %}
+								<li>School: <b>{{ step.program.school.name }}</b></li>
+								<li>Cost: <b>${{ step.cost }}</b></li>
+								<li>Duration: <b>{{ step.duration() }} years</b></li>
+								{% if step.program.school.admission_rate != None %}
+									<li>Acceptance Rate: <b>{{ step.program.school.admission_rate }}%</b></li>
+								{% endif %}
+								<li>Description: <br><i>{{ step.description() }}</i></li>
+							</ul>
+						</ul>
+					{% endfor %}
+				</ul>
+
+			</div>
+			
+		{% endfor %}	
+	</div>
+{% endblock %}
