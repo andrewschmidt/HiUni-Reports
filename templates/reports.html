@@ -1,19 +1,26 @@
-{% extends "base.html" %}
+{% extends "sidebar.html" %}
+{% set sidebar_active = True %}
 {% set active_page = "students" %}
 
-{% block content %}
+{% block right_content %}
 	
-	<h1>Reports:</h1>
-
-	<form method="post" action = "">
-		{{ form.hidden_tag() }}
-		
-		{% for field in form if field.widget.input_type != "hidden" %}
-			<p>{{ field.label }} {{ field }}</p>
-		{% endfor %}
-		
-		<p><button type="submit">Submit</button></p>
-		
-	</form>
+	<div class="panel panel-primary">
+		<div class="panel-heading"><h4>Reports</h4></div>
+		<div class="panel-body">
+			<form class="form" role="form" method="post" action="">
+				
+					{{ form.hidden_tag() }}
+					
+					<div class="form-group-lg">
+						{% for field in form if field.widget.input_type != "hidden" %}
+							<label class="control-label" for="{{ field.id }}">{{ field.label }}</label>
+							{{ field(class="form-control" )}} <br>
+						{% endfor %}
+						<button class="btn btn-success" type="submit">Submit</button>
+					</div>
+			
+			</form>
+		</div>
+	</div>
 
 {% endblock %}

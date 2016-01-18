@@ -1,66 +1,107 @@
 <html>
 	
 	<head>
+		
+		<!-- Latest compiled and minified CSS -->
+		<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+		<!-- jQuery library -->
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+		<!-- Latest compiled JavaScript -->
+		<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		
 		{% if title %}
-			<title>{{ title }}</title>
+			<title>{{ title }} - HiUni</title>
 		{% else %}
-			<title>HiUni Reports</title>
+			<title>HiUni</title>
 		{% endif %}
+
 	</head>
 
 	<body>
-		{% if current_user.is_authenticated %}
-			{% if current_user.employee != None %}
-				{% set navigation_bar = [
-					("/", "index", "HiUni"),
-					("/students", "students", "Reports"),
-					("/register_employee", "register_employee", "Register an employee"),
-					("/logout", "logout", "Log out")
-				] -%}
-			{% elif current_user.customer.organization != "" %}
-				{% set navigation_bar = [
-					("/", "index", "HiUni"),
-					("/students", "students", "Reports"),
-					("/questions", "questions", "Add a new student"),
-					("/logout", "logout", "Log out")
-				] -%}
+		<div class="container">
+			
+			<nav class="navbar">
+				<div class="container-fluid">
+					
+					<div class="navbar-header">
+						<a class="navbar-brand" href="/">HiUni</a>
+					</div>
+					
+					<ul class="nav navbar-nav navbar-right">
+						{% if current_user.is_authenticated %}
+							<li><a href="/logout"><span class="glyphicon glyphicon-log-out"></span> Sign out</a></li>
+						{% else %}
+							<li><a href="/register"><span class="glyphicon glyphicon-user"></span> Sign up</a></li>
+							<li><a href="/login"><span class="glyphicon glyphicon-log-in"></span> Log in</a></li>
+						{% endif %}
+					</ul>
+				
+				</div>
+			</nav>
+
+
+
+			<!-- OLD NAV BAR -->
+
+	{# 		{% if current_user.is_authenticated %}
+				{% if current_user.employee != None %}
+					{% set navigation_bar = [
+						("/", "index", "HiUni"),
+						("/students", "students", "Reports"),
+						("/register_employee", "register_employee", "Register an employee"),
+						("/logout", "logout", "Log out")
+					] -%}
+				{% elif current_user.customer.organization != "" %}
+					{% set navigation_bar = [
+						("/", "index", "HiUni"),
+						("/students", "students", "Reports"),
+						("/questions", "questions", "Add a new student"),
+						("/logout", "logout", "Log out")
+					] -%}
+				{% else %}
+					{% set navigation_bar = [
+						("/", "index", "HiUni"),
+						("/students", "students", "My Report"),
+						("/logout", "logout", "Log out")
+					] -%}
+				{% endif %}
 			{% else %}
 				{% set navigation_bar = [
 					("/", "index", "HiUni"),
-					("/students", "students", "My Report"),
-					("/logout", "logout", "Log out")
+					("/register", "register", "Sign up")
 				] -%}
 			{% endif %}
-		{% else %}
-			{% set navigation_bar = [
-				("/", "index", "HiUni"),
-				("/register", "register", "Sign up")
-			] -%}
-		{% endif %}
-		
-		{% set active_page = active_page|default("index") -%}
-		<p>
-			{% for href, id, caption in navigation_bar %}
-				{% if id == active_page %}
-					<b><a href = "{{ href }}">{{ caption }}</a> | </b>
-				{% else %}
-					<a href = "{{ href }}"> {{ caption }}</a> | 
-				{% endif %}
-			{% endfor %}
-		</p>
-		
-		<hr>
+			
+			{% set active_page = active_page|default("index") -%}
+			<p>
+				{% for href, id, caption in navigation_bar %}
+					{% if id == active_page %}
+						<b><a href = "{{ href }}">{{ caption }}</a> | </b>
+					{% else %}
+						<a href = "{{ href }}"> {{ caption }}</a> | 
+					{% endif %}
+				{% endfor %}
+			</p> #}
+			
 
-		{% with messages = get_flashed_messages() %}
-      		{% if messages %}
-        		<ul>
-        			{% for message in messages %}
-            			<li>{{ message }} </li>
-        			{% endfor %}
-        		</ul>
-      		{% endif %}
-    	{% endwith %}
-		{% block content %}{% endblock %}
+			<!-- Flashed messages -->
+			{% with messages = get_flashed_messages() %}
+	      		{% if messages %}
+	        		<ul>
+	        			{% for message in messages %}
+	            			<li>{{ message }}</li>
+	        			{% endfor %}
+	        		</ul>
+	      		{% endif %}
+	    	{% endwith %}
+			
+
+			<!-- Content! -->
+			{% block content %}{% endblock %}
+
+		</div>
 	</body>
 
 </html>

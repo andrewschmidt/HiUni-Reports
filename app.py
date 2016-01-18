@@ -174,6 +174,7 @@ def register():
 		customer = Customer()
 		
 		if form.organization.data is not None:
+			customer.is_organization = True
 			customer.organization = form.organization.data
 		
 		customer.save()

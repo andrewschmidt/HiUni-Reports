@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+
+<!-- We only want the sidebar to show up when sidebar_active is set to True. -->
+{% set sidebar_active = sidebar_active|default(False) %}
+
+{% if sidebar_active %}
+	{% set sidebar_class = "col-sm-3" %}
+	{% set right_content_class = "col-sm-9" %}
+{% else %}
+	{% set left_spacing = "col-sm-2" %}
+	{% set sidebar_class = "hidden" %}
+	{% set right_content_class = "col-sm-8" %}
+	{% set right_spacing = "col-sm-2" %}
+{% endif %}
+
+{% block content %}
+	<div class = "{{ left_spacing }}"></div>
+		
+	<div class = "row">			
+		<div class = "{{ sidebar_class }}">
+			
+			{% if current_user.is_authenticated %}
+				
+				{% if current_user.employee != None %}
+					{% set sidebar = [
+						("/", "index", "Home"),
+						("/students", "students", "Edit reports"),
+						("/register_employee", "register_employee", "Add an employee"),
+					] -%}
+				
+				{% elif current_user.customer.is_organization %}
+					{% set sidebar = [
+						("/", "index", "Home"),
+						("/students", "students", "Students"),
+						("/questions", "questions", "Add a student"),
+					] -%}
+				
+				{% else %}
+					{% set sidebar = [
+						("/students", "students", "My Report"),
+						("/add_report", "add report", "Get a new report"),
+						("/logout", "logout", "Log out")
+					] -%}
+				
+				{% endif %}
+
+			{% endif %}
+			
+			<div class="list-group">
+
+				{% for href, id, label in sidebar %}
+					{% if active_page == id %}
+						<a href = "{{ href }}" class = "list-group-item active">{{ label }}</a>
+					{% else %}
+						<a href = "{{ href }}" class = "list-group-item">{{ label }}</a>
+					{% endif %}
+				{% endfor %}
+			</div>
+
+		</div>
+
+	<div class = "{{ right_content_class }}">
+		{% block right_content %}{% endblock %}
+	</div>
+
+{% endblock %}

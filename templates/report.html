@@ -1,3 +1,90 @@
+{% extends "sidebar.html" %}
+{% set sidebar_active = True %}
+{% set active_page = "students" %}
+
+{% block right_content %}
+
+<!-- Student info first -->
+	<br>
+	<div class="row">
+	    <div class="col-sm-1"></div>
+
+	    <div class="col-sm-10">
+			<div class="panel panel-primary">
+				<div class="panel-heading"><h3>{{ student.name}}</h3></div>
+				<div class="panel-body">
+						<ul>
+							{% if student.income != "over 110,000" %}
+								{% set income = "$" + student.income %}
+							{% else %}
+								{% set income = "over $110,000" %}
+							{% endif %}
+							<li>Location: <b>{{ student.city }}, {{ student.state }}</b></li>
+							<li>Career: <b>{{ report.career.name }}</b></li>
+							<li>Income: <b>{{ income }}</b></li>
+							<li>Budget: <b>${{ student.budget }}</b></li>
+						</ul>
+				</div>
+			</div>
+		</div>
+
+		<div class="col-sm-1"></div>
+	</div>
+	<br><br>
+
+<!-- Tabs -->
+	{% set active_pathway = report.pathways[0] %}
+	<ul class="nav nav-tabs">
+		{% for pathway in report.pathways %}
+			{% if active_pathway == pathway %}
+				<li class="active"><a data-toggle="tab" href="#{{ loop.index }}">Pathway #{{ loop.index }}</a></li>
+			{% else %}
+				<li><a data-toggle="tab" href="#{{ loop.index }}">Pathway #{{ loop.index }}</a></li>
+			{% endif %}
+		{% endfor %}
+	</ul>
+
+<!-- Pathway -->
+
+	<div class="tab-content">
+	{% for pathway in report.pathways %}
+		
+		{% if active_pathway == pathway %}
+			{% set tab_class = "tab-pane fade in active" %}
+		{% else %}
+			{% set tab_class = "tab-pane fade" %}
+		{% endif %}
+
+		<div id="{{ loop.index }}" class="{{ tab_class }}">
+	    	<!-- Pathway Content -->
+
+
+
+
+	    	<h3>{{ pathway.cost() }} </h3>
+
+	 	</div>
+	  		
+	  		{# <div id="{{ loop.index }}" class="tab-pane fade in active">
+	    		<h3>{{ pathway.cost() }} </h3>
+
+	 		</div>
+	 	
+	 	{% else %}
+	 		
+	 		<div id="{{ loop.index }}" class="tab-pane fade">
+	 			<h3>{{ pathway.cost() }} </h3>
+
+	 		</div>
+	 	
+	 	{% endif %} #}
+	 {% endfor %}
+
+{% endblock %}
+
+
+{# 
+
 {% extends "base.html" %}
 {% set active_page = "students" %}
 
@@ -72,4 +159,4 @@
 	{% endif %}
 
 
-{% endblock %}
+{% endblock %} #}
