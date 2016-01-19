@@ -51,7 +51,7 @@
 
 <!-- Tabs -->
 	{% set active_pathway = report.pathways[0] %}
-	<ul class="nav nav-tabs nav-justified">
+	<ul class="nav nav-pills nav-justified">
 		{% for pathway in report.pathways %}
 			{% if pathway == active_pathway %}
 				<li class="active"><a data-toggle="tab" href="#{{ loop.index }}"><h4>Pathway {{ loop.index }}</h4></a></li>
@@ -77,44 +77,47 @@
 
 			<div id="{{ loop.index }}" class="{{ tab_class }}">
 
+
 				<!-- Pathway Content -->
 				<br>
 				{% if current_user.employee != None and not report.published %}
 					<form action = "/report/{{ student.id }}_{{ report.id }}" method = "post">
 						<button class="btn btn-danger btn-md" type="delete" value="{{ pathway.id }}" name="delete">Delete</button>
 					</form>
+					<br>
 				{% endif %}
-
-				<!-- Temporary, text-only pathway: -->
-				<ul>
-					{% if pathway.low_data == True and current_user.employee != None and not report.published %}
-						<li><b>This pathway uses programs with low salary data.</b></li>
-					{% endif %}
-					<li>Total Cost: <b>${{ pathway.cost() }}</b></li>
-					<li>Time: <b>{{ pathway.duration() }} years</b></li>
-					<li>Median Salary: <b>${{ pathway.median_salary() }}</b></li>
-					<li>ROI: <b>{{ pathway.roi() }}%</b></li>
 					
-					{% for step in pathway.sorted_steps() %}
-						
-						<ul>
-							<h3>Step #{{ step.number }}: {{ step.title() }}</h3>
-							
-							<ul>
-								{% if step.program.name != "General Studies" %}
-									<li>Major: <b>{{ step.program.name }}</b></li>
-								{% endif %}
+				<div class="panel panel-default">
+<!-- 					<div class="panel-heading"><h5><center>Details</center></h5></div>
+ -->					<div class="panel-footer">
+							{% if pathway.low_data == True and current_user.employee != None and not report.published %}
+								<li><b>This pathway uses programs with low salary data.</b></li>
+							{% endif %}
+							<li>Total Cost: <b>${{ pathway.cost() }}</b></li>
+							<li>Time: <b>{{ pathway.duration() }} years</b></li>
+							<li>Median Salary: <b>${{ pathway.median_salary() }}</b></li>
+							<li>ROI: <b>{{ pathway.roi() }}%</b></li>
+					</div>
+				</div>
+
+				{% for step in pathway.sorted_steps() %}
+					<div class="panel panel-info">
+						<div class="panel-heading"><h4>Step #{{ step.number }}: <b>{{ step.title() }}</b></h4></div>
+						<div class="panel-body">
+							{% if step.program.name != "General Studies" %}
+								<li>Major: <b>{{ step.program.name }}</b></li>
+							{% endif %}
 								<li>School: <b>{{ step.program.school.name }}</b></li>
 								<li>Cost: <b>${{ step.cost }}</b></li>
 								<li>Duration: <b>{{ step.duration() }} years</b></li>
-								{% if step.program.school.admission_rate != None %}
-									<li>Acceptance Rate: <b>{{ step.program.school.admission_rate }}%</b></li>
-								{% endif %}
-								<li>Description: <br><i>{{ step.description() }}</i></li>
-							</ul>
-						</ul>
-					{% endfor %}
-				</ul>
+							{% if step.program.school.admission_rate != None %}
+								<li>Acceptance Rate: <b>{{ step.program.school.admission_rate }}%</b></li>
+							{% endif %}
+							<br><br><i>{{ step.description() }}</i>
+						</div>
+					</div>
+
+				{% endfor %}
 
 			</div>
 			
