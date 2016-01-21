@@ -51,7 +51,7 @@
 
 <!-- Tabs -->
 	{% set active_pathway = report.pathways[0] %}
-	<ul class="nav nav-pills nav-justified">
+	<ul class="nav nav-tabs nav-justified">
 		{% for pathway in report.pathways %}
 			{% if pathway == active_pathway %}
 				<li class="active"><a data-toggle="tab" href="#{{ loop.index }}"><h4>Pathway {{ loop.index }}</h4></a></li>
