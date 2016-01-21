@@ -20,20 +20,9 @@ import solver
 
 
 
-# CONFIGURATION
-
-# Database config:
-DATABASE = "hiuni_database"
-USER = "Andrew"
-DEBUG = True
-
-# Forms config:
-WTF_CSRF_ENABLED = True
-SECRET_KEY = 'secret'
-
 # Start the app:
 app = Flask(__name__)
-app.config.from_object(__name__)
+app.config.from_object("config")
 
 # Login config:
 login_manager = LoginManager()
@@ -424,5 +413,5 @@ def create_admin():
 
 if __name__ == '__main__':
 	create_tables()
-	if DEBUG: create_admin()
+	if config.DEBUG: create_admin()
 	app.run()

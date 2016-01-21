@@ -3,7 +3,9 @@
 from peewee import *
 from playhouse.postgres_ext import *
 
-database = PostgresqlExtDatabase("hiuni_database")
+import config
+
+database = PostgresqlExtDatabase(config.DATABASE)
 
 
 class BaseModel(Model):
