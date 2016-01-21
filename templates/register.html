@@ -1,36 +1,42 @@
-{% extends "base.html" %}
+{% extends "sidebar.html" %}
 {% set active_page = "register" %}
 
-{% block content %}
-	
-	<h1>Sign up:</h1>
+{% block right_content %}
+<br><br>
 
-	<form method="post" action = "">
-		{{ form.hidden_tag() }}
-		{% for field in form if field.widget.input_type != "hidden" and field != form.organization %}
-			<p>{{ field.label }} {{ field }}</p>
-		{% endfor %}
+	<div class="col-sm-2"></div>
+	<div class="col-sm-8">
 		
-		<p><input type = "checkbox" name = "check" onClick = "showMe('orgField')"> Register an organization</p>
+		<div class="panel panel-primary">
+			<div class="panel-heading"><h4>Sign up</h4></div>
+			<div class="panel-body">
+				<form class="form" role="form" method="post" action="">
+					
+						{{ form.hidden_tag() }}
+						
+						<div class="form-group-lg">
+							
+							{% for field in form if field.widget.input_type != "hidden" and field != form.is_organization %}
+								{% if field != form.organization %}
+									<label class="control-label" for="{{ field.id }}">{{ field.label }}</label>
+									{{ field(class="form-control") }}
+									<br>
+								{% else %}
+									<div class="collapse" id="orgName">
+										<label class="control-label" for="{{ field.id }}">{{ field.label }}</label>
+										{{ field(class="form-control") }}
+										<br>
+									</div>
+								{% endif %}
+							{% endfor %}
+							<button class="btn btn-success" type="submit">Sign up</button>
+							<button class="btn btn-default" type="button" data-toggle="collapse" data-target="#orgName">Register a team</button>
+						
+						</div>
+				</form>
+			</div>
+		</div>
 
-		<div id = "orgField" style = "display:none"><p>{{ form.organization.label }} {{ form.organization }}</p></div>
-
-		<script type="text/javascript">
-  			function showMe (box) {
-    			var chboxs = document.getElementsByName("check");
-    			var vis = "none";
-    			for(var i=0;i<chboxs.length;i++) { 
-       				if(chboxs[i].checked){
-         				vis = "block";
-            			break;
-        			}
-    			}
-    			document.getElementById(box).style.display = vis;
-			}
- 		</script>
-		
-		<p><button type="submit">Submit</button></p>
-		
-	</form>
-
+	</div>
+	<div class="col-sm-2"></div>
 {% endblock %}

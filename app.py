@@ -91,6 +91,11 @@ class Choose_Report(Form):
 	report = SelectQueryField("Choose a report to view:", query = Report.select(), get_label = "career.name", allow_blank = True, blank_text = " ", validators = [Required()])
 
 
+class Add_Report(Form):
+	student = SelectQueryField("Make a report for:", query = Student.select(), get_label = "name", validators = [Required()])
+	career = SelectQueryField("Choose a career:", query = Career.select(), get_label = "name", allow_blank = True, blank_text = " ", validators = [Required()])
+
+
 class Questionnaire_Form(Form):
 	# Let's hardcode some data.
 	# First, income levels:
@@ -173,7 +178,8 @@ def register():
 	if form.validate_on_submit():
 		customer = Customer()
 		
-		if form.organization.data is not None:
+		if form.organization.data != "":
+			customer.is_organization = True
 			customer.organization = form.organization.data
 		
 		customer.save()
@@ -269,6 +275,26 @@ def questions():
 	return render_template("questions.html", form = form)
 
 
+@app.route("/add_report", methods = ["GET", "POST"])
+@login_required
+def add_report():
+	form = Add_Report()
+	form.student.query = Student.select().where(Student.customer == current_user.customer)
+
+	if form.validate_on_submit():
+		student = form.student.data
+
+		report = Report.create(
+			student = student,
+			career = form.career.data
+		)
+
+		solver.make_pathways_async(student = student, report = report, how_many = 6)
+		return redirect("/confirmation")
+
+	return render_template("add_report.html", form = form)
+
+
 @app.route("/students", methods = ["GET", "POST"])
 @login_required
 def list_students():
@@ -305,11 +331,20 @@ def list_students():
 @login_required
 def list_reports(student_id):
 	student = Student.get(id = student_id)
-	query = Report.select().join(Student).where(Student.id == student_id)
+	
+	if current_user.employee is None:
+		query = Report.select().join(Student).where((Student.id == student_id) & (Report.published == True))
+	else:
+		query = Report.select().join(Student).where(Student.id == student_id)
 
 	if query.count() == 1:
 		report = query.get()
 		return redirect("/report/" + str(student.id) + "_" + str(report.id))
+	elif query.count() == 0:
+		if Report.select().join(Student).where(Student.id == student_id).count() > 0:
+			return redirect("/confirmation")
+		else:
+			return redirect("/")
 
 	form = Choose_Report()
 	form.report.query = query

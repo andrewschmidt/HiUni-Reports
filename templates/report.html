@@ -1,75 +1,126 @@
-{% extends "base.html" %}
+{% extends "sidebar.html" %}
+{% set sidebar_active = True %}
 {% set active_page = "students" %}
 
-{% block content %}
-	
-	<h1>{{ student.name }}'s Report</h1>
-	<ul>
-		{% if student.income != "over 110,000" %}
-			{% set income = "$" + student.income %}
-		{% else %}
-			{% set income = "over $110,000" %}
-		{% endif %}
-		<li>Location: <b>{{ student.city }}, {{ student.state }}</b></li>
-		<li>Career: <b>{{ report.career.name }}</b></li>
-		<li>Income: <b>{{ income }}</b></li>
-		<li>Budget: <b>${{ student.budget }}</b></li>
-	</ul>
-	<br>
+{% block right_content %}
 
-	{% for pathway in report.pathways %}
-		
-		<h2>
-			<b>Pathway #{{ loop.index }}</b>
-			{% if current_user.employee != None and not report.published %}
+
+<!-- Student info first -->
+	<div class="row">
+	    <div class="col-sm-1"></div>
+
+	    <div class="col-sm-10">
+			<div class="panel panel-primary">
+				
+				<div class="panel-heading">
+					<h3>{{ student.name}}</h3>
+				</div>
+				
+				<div class="panel-body">
+					<ul>
+						{% if student.income != "over 110,000" %}
+							{% set income = "$" + student.income %}
+						{% else %}
+							{% set income = "over $110,000" %}
+						{% endif %}
+						<li>Location: <b>{{ student.city }}, {{ student.state }}</b></li>
+						<li>Career: <b>{{ report.career.name }}</b></li>
+						<li>Income: <b>{{ income }}</b></li>
+						<li>Budget: <b>${{ student.budget }}</b></li>
+					</ul>
+				</div>
+			</div>
+
+			<!-- Publish button for employees: -->
+			{% if current_user.employee != None %}
 				<form action = "/report/{{ student.id }}_{{ report.id }}" method = "post">
-					<button type = "delete" value = "{{ pathway.id }}" name = "delete">Delete</button>
+					{% if not report.published %}
+						<button class = "btn btn-success btn-lg pull-right" name = "publish">Publish</button>
+					{% else %}
+						<button class = "btn btn-danger btn-lg pull-right" name = "unpublish">Unpublish</button>
+					{% endif %}
 				</form>
 			{% endif %}
-		</h2>
 
-		<ul>
-			{% if pathway.low_data == True and current_user.employee != None and not report.published %}
-				<li><b>This pathway uses programs with low salary data.</b></li>
-			{% endif %}
-			<li>Total Cost: <b>${{ pathway.cost() }}</b></li>
-			<li>Time: <b>{{ pathway.duration() }} years</b></li>
-			<li>Median Salary: <b>${{ pathway.median_salary() }}</b></li>
-			<li>ROI: <b>{{ pathway.roi() }}%</b></li>
-			
-			{% for step in pathway.sorted_steps() %}
-				
-				<ul>
-					<h3>Step #{{ step.number }}: {{ step.title() }}</h3>
-					
-					<ul>
-						{% if step.program.name != "General Studies" %}
-							<li>Major: <b>{{ step.program.name }}</b></li>
-						{% endif %}
-						<li>School: <b>{{ step.program.school.name }}</b></li>
-						<li>Cost: <b>${{ step.cost }}</b></li>
-						<li>Duration: <b>{{ step.duration() }} years</b></li>
-						{% if step.program.school.admission_rate != None %}
-							<li>Acceptance Rate: <b>{{ step.program.school.admission_rate }}%</b></li>
-						{% endif %}
-						<li>Description: <br><i>{{ step.description() }}</i></li>
-					</ul>
-				</ul>
-			{% endfor %}
-		</ul>
-		<br>
-	
-	{% endfor %}
-	<hr>
-	{% if current_user.employee != None %}
-		<form action = "/report/{{ student.id }}_{{ report.id }}" method = "post">
-			{% if not report.published %}
-				<button name = "publish">Publish</button>
+		</div>
+
+		<div class="col-sm-1"></div>
+	</div>
+	<br><br>
+
+
+<!-- Tabs -->
+	{% set active_pathway = report.pathways[0] %}
+	<ul class="nav nav-tabs nav-justified">
+		{% for pathway in report.pathways %}
+			{% if pathway == active_pathway %}
+				<li class="active"><a data-toggle="tab" href="#{{ loop.index }}"><h4>Pathway {{ loop.index }}</h4></a></li>
 			{% else %}
-				<button name = "unpublish">Unpublish</button>
+				<li><a data-toggle="tab" href="#{{ loop.index }}"><h4>Pathway {{ loop.index }}</h4></a></li>
 			{% endif %}
-		</form>
-	{% endif %}
+		{% endfor %}
 
 
+	</ul>
+
+
+<!-- Pathway Details -->
+
+	<div class="tab-content">
+		{% for pathway in report.pathways %}
+			
+			{% if pathway == active_pathway %}
+				{% set tab_class = "tab-pane fade in active" %}
+			{% else %}
+				{% set tab_class = "tab-pane fade" %}
+			{% endif %}
+
+			<div id="{{ loop.index }}" class="{{ tab_class }}">
+
+
+				<!-- Pathway Content -->
+				<br>
+				{% if current_user.employee != None and not report.published %}
+					<form action = "/report/{{ student.id }}_{{ report.id }}" method = "post">
+						<button class="btn btn-danger btn-md" type="delete" value="{{ pathway.id }}" name="delete">Delete</button>
+					</form>
+					<br>
+				{% endif %}
+					
+				<div class="panel panel-default">
+<!-- 					<div class="panel-heading"><h5><center>Details</center></h5></div>
+ -->					<div class="panel-footer">
+							{% if pathway.low_data == True and current_user.employee != None and not report.published %}
+								<li><b>This pathway uses programs with low salary data.</b></li>
+							{% endif %}
+							<li>Total Cost: <b>${{ pathway.cost() }}</b></li>
+							<li>Time: <b>{{ pathway.duration() }} years</b></li>
+							<li>Median Salary: <b>${{ pathway.median_salary() }}</b></li>
+							<li>ROI: <b>{{ pathway.roi() }}%</b></li>
+					</div>
+				</div>
+
+				{% for step in pathway.sorted_steps() %}
+					<div class="panel panel-info">
+						<div class="panel-heading"><h4>Step #{{ step.number }}: <b>{{ step.title() }}</b></h4></div>
+						<div class="panel-body">
+							{% if step.program.name != "General Studies" %}
+								<li>Major: <b>{{ step.program.name }}</b></li>
+							{% endif %}
+								<li>School: <b>{{ step.program.school.name }}</b></li>
+								<li>Cost: <b>${{ step.cost }}</b></li>
+								<li>Duration: <b>{{ step.duration() }} years</b></li>
+							{% if step.program.school.admission_rate != None %}
+								<li>Acceptance Rate: <b>{{ step.program.school.admission_rate }}%</b></li>
+							{% endif %}
+							<br><br><i>{{ step.description() }}</i>
+						</div>
+					</div>
+
+				{% endfor %}
+
+			</div>
+			
+		{% endfor %}	
+	</div>
 {% endblock %}

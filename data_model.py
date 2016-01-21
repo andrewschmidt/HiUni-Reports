@@ -14,6 +14,7 @@ class BaseModel(Model):
 # USER AUTHENTICATION-RELATED MODELS
 
 class Customer(BaseModel):
+	is_organization = BooleanField(default = False)
 	organization = TextField(null = True)
 
 
