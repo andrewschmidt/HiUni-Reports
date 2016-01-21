@@ -1,0 +1,37 @@
+{% extends "sidebar.html" %}
+{% set active_page = "login" %}
+
+{% block right_content %}
+<br><br>
+
+	<div class="col-sm-2"></div>
+	<div class="col-sm-8">
+		
+		<div class="panel panel-primary">
+			<div class="panel-heading"><h4>Log in</h4></div>
+			<div class="panel-body">
+				<form class="form" role="form" method="post" action="">
+					
+						{{ form.hidden_tag() }}
+						
+						<div class="form-group-lg">
+							
+							{% for field in form if field.widget.input_type != "hidden" %}
+								
+								{% if field != form.remember %}
+									<label class="control-label" for="{{ field.id }}">{{ field.label }}</label>
+									{{ field(class="form-control") }}
+									<br>
+								{% else %}
+									<label class="control-label pull-right" for="{{ field.id }}">{{ field }} {{ field.label }}</label>
+								{% endif %}
+							{% endfor %}
+							<button class="btn btn-success" type="submit">Submit</button>
+						</div>
+				</form>
+			</div>
+		</div>
+
+	</div>
+	<div class="col-sm-2"></div>
+{% endblock %}

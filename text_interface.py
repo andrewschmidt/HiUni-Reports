@@ -17,14 +17,16 @@ def clear():
 def print_student_info(student):
 	print ""
 	print Style.BRIGHT + student.name, "in", student.city + ",", student.state
-	if student.career is not None:
-		print Style.DIM + "  Career:", student.career.name
+	report = student.reports[0]
+	if report.career is not None:
+		print Style.DIM + "  Career:", report.career.name
 	if student.income != "over 110,000":
 		income_string = "$" + student.income
 	else:
 		income_string = student.income
 	print Style.DIM + "  Income:", income_string
 	print Style.DIM + "  Budget: ", "$" + str(student.budget)
+	print Style.DIM + "  Database ID:", str(student.id)
 	print ""
 
 
@@ -50,7 +52,7 @@ def show_careers():
 	careers = Career.select()
 
 	for career in careers:
-		print "-", Style.BRIGHT + career.name, "with", Style.BRIGHT + str(career.templates.count()), "templates."
+		print "-", Style.BRIGHT + career.name, "with", Style.BRIGHT + str(career.recipes.count()), "recipes."
 
 	raw_input("\nPress enter return to the menu.")
 	menu()
@@ -114,7 +116,6 @@ def make_student():
 	student.name = name
 	student.email = email
 	
-	student.career = career
 	student.income = income
 	student.budget = budget
 	
@@ -123,6 +124,15 @@ def make_student():
 
 	student.save()
 
+	# And save an empty report w/ the career of choice:
+	report = Report()
+
+	report.student = student
+	report.career = career
+	report.published = False
+
+	report.save()
+
 	print "\nSuccessfully saved the student! Details:\n"
 	print_student_info(student)
 
@@ -130,22 +140,22 @@ def make_student():
 	menu()
 
 
-def import_templates_for_career_named(name):
+def import_recipes_for_career_named(name):
 	i = 1
-	templates_made = 0
+	recipes_made = 0
 	
 	while True:
-		file_name = name + " Template " + str(i) # Templates should follow the naming convention "Career Template 1.csv"
+		file_name = name + " Recipe " + str(i) # Recipes should follow the naming convention "Career Recipe 1.csv"
 		
 		try:
-			data_helper.import_template_from_file(file_name)
-			templates_made += 1
+			data_helper.import_recipe_from_file(file_name)
+			recipes_made += 1
 		except Exception:
 			break
 		
 		i += 1
 
-	if templates_made > 0:
+	if recipes_made > 0:
 		return True
 	else:
 		return False
@@ -158,12 +168,13 @@ def make_career():
 
 	career_name = raw_input("\nCareer name? ")
 
-	print "\nSearching for templates for '", career_name + "'..."
+	print "\nSearching for recipes for '" + career_name + "'..."
 	
-	templates_found = import_templates_for_career_named(career_name)
+	recipes_found = import_recipes_for_career_named(career_name)
 
-	if not templates_found:
-		print "\nCouldn't find any templates for the career '" + career_name + "'."
+	if not recipes_found:
+		print "\nCouldn't find any recipes for the career '" + career_name + "'."
+		print "Keep in mind, the Career Recipes folder needs to be in the same directory you're running text_interface.py from."
 	else:
 		print "\nSuccessfully added the career '" + career_name + "'."
 	
@@ -195,11 +206,16 @@ def make_pathways():
 	except Exception: 
 		menu()
 
+	# Get a report to make pathways for.
+	# Right now this just uses the first report that returns.
+	# In the future I should make it so you can select which report to use.
+	report = Report.select().join(Student).where((Student.id == student.id)).get()
+
 	print "\nOK! Generating pathways for", student.name + "."
 	print "\nSearching", str(School.select().count()), "schools offering", str(Program.select().count()), "programs...\n"
 
 	# try:
-	solver.make_pathways_for_student(student, how_many = pathways_needed)
+	solver.make_pathways_for_student(student, report = report, how_many = pathways_needed)
 	# except Exception:
 	# 	print "\nFailed to make pathways, error in solver.make_pathways_for_student()."
 
@@ -237,8 +253,9 @@ def show_pathways_for_student(student):
 	print Style.BRIGHT + Fore.CYAN + "\nSHOW PATHWAYS"
 	print "-------------"
 	print_student_info(student)
-
-	pathways = student.sorted_pathways()
+	
+	report = student.reports[0]
+	pathways = report.sorted_pathways()
 
 	i = 1
 	for pathway in pathways:
@@ -349,10 +366,10 @@ def delete_students():
 
 def delete_pathways():
 	clear()
-	print Style.BRIGHT + Fore.RED + "\nDELETE ALL PATHWAYS"
+	print Style.BRIGHT + Fore.RED + "\nDELETE REPORTS"
 	print "-------------------"
 
-	print "\nDelete pathways for which student?"
+	print "\nDelete reports for which student?"
 	students = Student.select()
 	i = 1
 	for student in students:
@@ -373,7 +390,7 @@ def delete_pathways():
 	elif number == i:
 		confirm = raw_input(Style.BRIGHT + "\nAre you sure you want to delete all pathways? Y/N: ")
 		if confirm == "y" or confirm == "Y":
-			to_delete = Pathway.select()
+			to_delete = Report.select()
 		else:
 			raw_input("\nPress enter to return to the menu.")
 			menu()
@@ -389,8 +406,9 @@ def delete_pathways():
 		confirm = raw_input(Style.BRIGHT + "\nAre you sure you want to delete " + student.name + "'s pathways? Y/N: ")
 		if confirm == "y" or confirm == "Y":
 			to_delete = []
-			for pathway in student.pathways:
-				to_delete.append(pathway)
+			for report in student.reports:
+				to_delete.append(report)
+
 		else:
 			raw_input("\nPress enter to return to the menu.")
 			menu()
@@ -399,7 +417,7 @@ def delete_pathways():
 	for item in to_delete:
 		item.delete_instance(recursive = True)
 
-	print "Deleted", count, "pathways."
+	print "Deleted", count, "objects."
 
 	raw_input("\nPress enter to return to the menu.")
 	menu()
@@ -461,6 +479,128 @@ def delete_careers():
 	menu()
 
 
+def delete_customers():
+	clear()
+	print Style.BRIGHT + Fore.RED + "\nDELETE CUSTOMERS"
+	print "---------------"
+
+	print "\nDelete which customer?"
+	customers = Customer.select()
+	i = 1
+	for customer in customers:
+		user = customer.users[0]
+		print Style.BRIGHT + "  " + str(i) + ". " + Fore.RED + user.email
+		i += 1
+	print Style.BRIGHT + "  " + str(i) + ". " + Fore.RED + "Delete all"
+	print Style.BRIGHT + "  " + str(i+1) + ". Exit"
+	
+	choice = raw_input("  ")
+	try:
+		number = int(choice)
+	except Exception:
+		menu()
+
+	if number == i+1:
+		menu()
+	
+	elif number == i:
+		confirm = raw_input(Style.BRIGHT + "\nAre you sure you want to delete all customers? Y/N: ")
+		if confirm == "y" or confirm == "Y":
+			to_delete = Customer.select()
+
+		else:
+			raw_input("\nPress enter to return to the menu.")
+			menu()
+
+	else:
+		try:
+			customer = customers[number-1]
+		except Exception:
+			print "\nGot the input:", str(number) + ", didn't know what to do with it."
+			raw_input("\nPress enter to return to the menu.")
+			menu()
+		
+		user = customer.users[0]
+		confirm = raw_input(Style.BRIGHT + "\nAre you sure you want to delete " + user.email + "? Y/N: ")
+		if confirm == "y" or confirm == "Y":
+			to_delete = [customer]
+		else:
+			raw_input("\nPress enter to return to the menu.")
+			menu()
+	
+	count = len(to_delete)	
+	for item in to_delete:
+		user = item.users[0]
+		user.delete_instance()
+		item.delete_instance(recursive = True)
+
+	print "Deleted", count, "customers and their associated user accounts."
+
+	raw_input("\nPress enter to return to the menu.")
+	menu()
+
+
+def delete_employees():
+	clear()
+	print Style.BRIGHT + Fore.RED + "\nDELETE EMPLOYEES"
+	print "---------------"
+
+	print "\nDelete which employee?"
+	employees = Employee.select()
+	i = 1
+	for employee in employees:
+		user = employee.users[0]
+		print Style.BRIGHT + "  " + str(i) + ". " + Fore.RED + user.email
+		i += 1
+	print Style.BRIGHT + "  " + str(i) + ". " + Fore.RED + "Delete all"
+	print Style.BRIGHT + "  " + str(i+1) + ". Exit"
+	
+	choice = raw_input("  ")
+	try:
+		number = int(choice)
+	except Exception:
+		menu()
+
+	if number == i+1:
+		menu()
+	
+	elif number == i:
+		confirm = raw_input(Style.BRIGHT + "\nAre you sure you want to delete all employees? Y/N: ")
+		if confirm == "y" or confirm == "Y":
+			to_delete = Employee.select()
+
+		else:
+			raw_input("\nPress enter to return to the menu.")
+			menu()
+
+	else:
+		try:
+			employee = employees[number-1]
+		except Exception:
+			print "\nGot the input:", str(number) + ", didn't know what to do with it."
+			raw_input("\nPress enter to return to the menu.")
+			menu()
+		
+		user = employee.users[0]
+		confirm = raw_input(Style.BRIGHT + "\nAre you sure you want to delete " + user.email + "? Y/N: ")
+		if confirm == "y" or confirm == "Y":
+			to_delete = [employee]
+		else:
+			raw_input("\nPress enter to return to the menu.")
+			menu()
+	
+	count = len(to_delete)	
+	for item in to_delete:
+		user = item.users[0]
+		user.delete_instance()
+		item.delete_instance(recursive = True)
+
+	print "Deleted", count, "employees and their associated user accounts."
+
+	raw_input("\nPress enter to return to the menu.")
+	menu()
+
+
 def delete_schools():
 	clear()
 	print Style.BRIGHT + Fore.RED + "\nDELETE ALL SCHOOLS"
@@ -476,13 +616,35 @@ def delete_schools():
 	menu()
 
 
+def delete_users():
+	clear()
+	print Style.BRIGHT + Fore.RED + "\nDELETE ALL USERS"
+	print "------------------"
+
+	choice = raw_input(Style.BRIGHT + Fore.RED + "\nAre you sure you want to delete all users? Y/N: ")
+	
+	if choice == "y" or choice == "Y":
+		users = User.select()
+		customers = Customer.select()
+		employees = Employee.select()
+
+		for user in users: user.delete_instance(recursive = True)
+		for customer in customers: customer.delete_instance(recursive = True)
+		for employee in employees: employee.delete_instance(recursive = True)
+		
+		print "\nAll users, customers, and employees deleted."
+
+	raw_input("\nPress enter to return to the menu.")
+	menu()
+
+
 def delete():
 	clear()
 	print Style.BRIGHT + Fore.RED + "\nDELETE"
 	print "------"
 
 	print "\nWhat would you like to delete?"
-	choices = ["Students", "Pathways", "Careers", "Exit"]
+	choices = ["Students", "Pathways", "Careers", "Customers", "Employees", "All users", "Exit"]
 	i = 1
 	for c in choices:
 		if "Exit" in c: 
@@ -502,6 +664,9 @@ def delete():
 	if choice == "Students": delete_students()
 	if choice == "Pathways": delete_pathways()
 	if choice == "Careers": delete_careers()
+	if choice == "Customers": delete_customers()
+	if choice == "Employees": delete_employees()
+	if choice == "All users": delete_users()
 	if choice == "Exit": menu()
 
 
@@ -555,11 +720,18 @@ def menu():
 
 	number_schools = str(School.select().count())
 	number_careers = str(Career.select().count())
+	number_customers = str(Customer.select().count())
 	number_students = str(Student.select().count())
+	number_users = str(User.select().count())
+	number_employees = str(Employee.select().count())
+	number_reports = str(Report.select().count())
 
-	print "\nCurrently: ", Style.BRIGHT + number_schools, "schools,", Style.BRIGHT + number_careers, "careers, and", Style.BRIGHT + number_students, "students."
+	print "\nCurrently: ", Style.BRIGHT + number_schools, "schools,", Style.BRIGHT + number_careers, "careers, and", Style.BRIGHT + number_customers, "customers with", Style.BRIGHT + number_students, "students."
+	print Style.DIM + "\n  Total users:", number_users
+	print Style.DIM + "  Employees:  ", number_employees
+	print Style.DIM + "  Reports:    ", number_reports
 
-	print "\nWhat would you like to do?"
+	print "\n\nWhat would you like to do?"
 
 	choices = ["Add a career", "Add a student", "Generate pathways", "Show all careers", "Show all students", "Show pathways", "Delete", "Quit"]
 	

@@ -1,0 +1,27 @@
+{% extends "sidebar.html" %}
+{% set active_page = "questions" %}
+
+<!-- For signup flow reasons, customers that aren't organizations shouldn't be able to see the sidebar when they're here. -->
+{% set sidebar_active = current_user.customer.is_organization %}
+
+{% block right_content %}
+		<div class="panel panel-primary">
+			<div class="panel-heading"><h4>We have some questions...</h4></div>
+			<div class="panel-body">
+				<form class="form" role="form" method="post" action="">
+					
+						{{ form.hidden_tag() }}
+						
+						<div class="form-group">
+							{% for field in form if field.widget.input_type != "hidden" %}
+								<label class="control-label" for="{{ field.id }}">{{ field.label }}</label>
+								{{ field(class="form-control")}} <br>
+							{% endfor %}
+							<button class="btn btn-success" type="submit">Submit</button>
+						</div>
+				
+				</form>
+			</div>
+		</div>
+	</div>
+{% endblock %}

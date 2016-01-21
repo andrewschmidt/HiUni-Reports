@@ -1,16 +1,50 @@
 # Just the data model.
 
-
 from peewee import *
 from playhouse.postgres_ext import *
 
-database = PostgresqlExtDatabase("hiuni_database", user = "Andrew")
+database = PostgresqlExtDatabase("hiuni_database")
 
 
 class BaseModel(Model):
 	class Meta:
 		database = database
 
+
+# USER AUTHENTICATION-RELATED MODELS
+
+class Customer(BaseModel):
+	is_organization = BooleanField(default = False)
+	organization = TextField(null = True)
+
+
+class Employee(BaseModel):
+	name = TextField(null = True)
+
+
+class User(BaseModel):
+	customer = ForeignKeyField(Customer, related_name = "users", null = True)
+	employee = ForeignKeyField(Employee, related_name = "users", null = True)
+
+	# The rest is required by Flask-Login
+	email = TextField(unique = True, primary_key = True)
+	password = TextField()
+	authenticated = BooleanField(default = False)
+
+	def is_active(self):
+		return True
+
+	def get_id(self):
+		return self.email
+
+	def is_authenticated(self):
+		return self.authenticated
+
+	def is_anonymous(self):
+		return False
+
+
+# SOLVER-RELATED MODELS
 
 class School(BaseModel):
 	name = CharField()
@@ -42,11 +76,10 @@ class Career(BaseModel):
 	description = TextField(null = True)
 
 
-class Student(BaseModel):
+class Student(Model):
 	name = CharField()
 	email = CharField()
 	
-	career = ForeignKeyField(Career, null = True)
 	income = CharField()
 	budget = IntegerField()
 	
@@ -54,16 +87,15 @@ class Student(BaseModel):
 	state = CharField()
 	location = HStoreField(null = True) # For storing latitude and longitude keys.
 
-	def sorted_pathways(self): # Pathways aren't returned in any particular order; this sorts them by ROI.
-		pathways = []
-		for p in self.pathways:
-			pathways.append(p)
-		pathways.sort(key = lambda p: p.roi(), reverse = True)
-		return pathways
+	customer = ForeignKeyField(Customer, related_name = "students")
+
+	class Meta:
+		database = database
+		indexes = ((("name", "email", "income", "budget", "city", "state"), True),) # This make it impossible to make a duplicate student.
 
 
-class Template(BaseModel):
-	career = ForeignKeyField(Career, related_name = "templates")
+class Recipe(BaseModel):
+	career = ForeignKeyField(Career, related_name = "recipes")
 	number = IntegerField()
 
 	def duration(self):
@@ -76,12 +108,11 @@ class Template(BaseModel):
 		steps = []
 		for step in self.steps:
 			steps.append(step)
-		steps.sort(key = lambda s: s.number)
 		return steps
 
 
 class Step(BaseModel):
-	template = ForeignKeyField(Template, related_name = "steps")
+	recipe = ForeignKeyField(Recipe, related_name = "steps")
 
 	number = IntegerField()
 	title = CharField()
@@ -92,15 +123,31 @@ class Step(BaseModel):
 	cips = ArrayField(CharField)
 	sort_by = CharField()
 
+	class Meta:
+		order_by = ("number",)
+
+
+class Report(BaseModel):
+	student = ForeignKeyField(Student, related_name = "reports")
+	career = ForeignKeyField(Career)
+	published = BooleanField(default = False)
+
+	def sorted_pathways(self): # Pathways aren't returned in any particular order; this sorts them by ROI.
+		pathways = []
+		for p in self.pathways:
+			pathways.append(p)
+		pathways.sort(key = lambda p: p.roi(), reverse = True)
+		return pathways
+
 
 class Pathway(BaseModel):
-	student = ForeignKeyField(Student, related_name = "pathways")
+	report = ForeignKeyField(Report, related_name = "pathways")
+	low_data = BooleanField(default = False)
 
 	def sorted_steps(self): # Steps aren't returned in any particular order; this sorts them.
 		steps = []
 		for step in self.pathway_steps:
 			steps.append(step)
-		steps.sort(key = lambda s: s.number)
 		return steps
 
 	def cost(self):
@@ -116,12 +163,7 @@ class Pathway(BaseModel):
 		return duration
 
 	def median_salary(self):
-		# if len(self.pathway_steps) > 1:
 		pathway_steps = self.sorted_steps()
-		last_pathway_step = pathway_steps[-1]
-			# last_pathway_step = self.sorted_steps()[len(self.pathway_steps)-1]
-		# else:
-		# 	last_pathway_step = self.pathway_steps[0]
 		salary = pathway_steps[-1].median_salary()
 		return salary
 
@@ -152,3 +194,6 @@ class Pathway_Step(BaseModel):
 
 	def median_salary(self):
 		return self.program.median_salary
+
+	class Meta:
+		order_by = ("number",)
