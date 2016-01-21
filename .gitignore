@@ -32,3 +32,8 @@ data_model.pyc
 views.pyc
 
 *.mp4
+
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
