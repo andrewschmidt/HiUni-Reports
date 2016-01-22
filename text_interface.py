@@ -634,6 +634,16 @@ def delete_users():
 		
 		print "\nAll users, customers, and employees deleted."
 
+		print "Creating an admin..."
+		employee = Employee()
+		employee.save()
+		user = User.create(
+			email = "admin@gohiuni.com",
+			password = "admin",
+			employee = employee
+		)
+		user.save()
+
 	raw_input("\nPress enter to return to the menu.")
 	menu()
 
