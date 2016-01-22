@@ -3,9 +3,16 @@
 from peewee import *
 from playhouse.postgres_ext import *
 
-import config
+from config import DATABASE as db
 
-database = PostgresqlExtDatabase(config.DATABASE)
+database = PostgresqlExtDatabase(
+	db["name"],
+	host = db["host"],
+	port = db["port"],
+	user = db["user"],
+	password = db["password"]
+)
+# To log in from command line: psql --host=hiuni.cygnxnxnzo7j.us-west-1.rds.amazonaws.com --port=5432 --username=andrew --password --dbname=hiuni_database
 
 
 class BaseModel(Model):

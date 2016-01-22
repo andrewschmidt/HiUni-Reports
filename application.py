@@ -18,16 +18,17 @@ from flask.ext.login import login_required, LoginManager, login_user, logout_use
 from data_model import * # Includes the "database" variable.
 import solver
 
+import config
 
 
-# Start the app:
-app = Flask(__name__)
-app.config.from_object("config")
-application = app
+
+# Start the application:
+application = Flask(__name__) # AWS expects this to be "application," not "app"
+application.config.from_object("config")
 
 # Login config:
 login_manager = LoginManager()
-login_manager.init_app(app)
+login_manager.init_app(application)
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -44,13 +45,13 @@ def load_user(user_id):
 # REQUEST HANDLERS
 # Apparently this is all I really needed from flask-peewee.
 
-@app.before_request
+@application.before_request
 def before_request():
 	g.db = database
 	g.db.connect()
 
 
-@app.after_request
+@application.after_request
 def after_request(response):
 	g.db.close()
 	return response
@@ -132,8 +133,8 @@ class Questionnaire_Form(Form):
 
 # VIEWS
 
-@app.route("/")
-@app.route("/index")
+@application.route("/")
+@application.route("/index")
 def index():
 	if current_user.is_authenticated:
 		return redirect("/students")
@@ -143,7 +144,7 @@ def index():
 	return render_template("index.html", title = "Home")
 
 
-@app.route("/login", methods = ["GET", "POST"])
+@application.route("/login", methods = ["GET", "POST"])
 def login():
 	form = Login_Form()
 	
@@ -161,7 +162,7 @@ def login():
 	return render_template("login.html", form = form)
 
 
-@app.route("/register", methods = ["GET", "POST"])
+@application.route("/register", methods = ["GET", "POST"])
 def register():
 	form = Registration_Form()
 	
@@ -191,7 +192,7 @@ def register():
 	return render_template("register.html", form = form)
 
 
-@app.route("/register_employee", methods = ["GET", "POST"])
+@application.route("/register_employee", methods = ["GET", "POST"])
 @login_required
 def register_employee():
 	if current_user.employee:
@@ -216,14 +217,14 @@ def register_employee():
 	else: return redirect("/")
 
 
-@app.route("/logout")
+@application.route("/logout")
 def logout():
 	if current_user.is_authenticated:
 		logout_user()
 	return redirect("/index")
 
 
-@app.route("/questions", methods = ['GET', 'POST'])
+@application.route("/questions", methods = ['GET', 'POST'])
 @login_required
 def questions():
 	if current_user.customer is None:
@@ -265,7 +266,7 @@ def questions():
 	return render_template("questions.html", form = form)
 
 
-@app.route("/add_report", methods = ["GET", "POST"])
+@application.route("/add_report", methods = ["GET", "POST"])
 @login_required
 def add_report():
 	form = Add_Report()
@@ -285,7 +286,7 @@ def add_report():
 	return render_template("add_report.html", form = form)
 
 
-@app.route("/students", methods = ["GET", "POST"])
+@application.route("/students", methods = ["GET", "POST"])
 @login_required
 def list_students():
 	# Create a query for the user's students.
@@ -317,7 +318,7 @@ def list_students():
 	return render_template("students.html", form = form)
 
 
-@app.route("/reports/<student_id>", methods = ["GET", "POST"])
+@application.route("/reports/<student_id>", methods = ["GET", "POST"])
 @login_required
 def list_reports(student_id):
 	student = Student.get(id = student_id)
@@ -346,7 +347,7 @@ def list_reports(student_id):
 	return render_template("reports.html", title = student.name + "'s Reports", student = student, form = form)
 
 
-@app.route("/report/<student_id>_<report_id>", methods = ["GET", "POST"])
+@application.route("/report/<student_id>_<report_id>", methods = ["GET", "POST"])
 def report(student_id, report_id):
 	try:
 		student = Student.get(id = student_id)
@@ -375,7 +376,7 @@ def report(student_id, report_id):
 	return render_template("report.html", title = student.name + "'s Report", student = student, report = report)
 
 
-@app.route("/confirmation")
+@application.route("/confirmation")
 @login_required
 def confirmation():
 	return render_template("confirmation.html", title = "Thank you!")
@@ -415,4 +416,4 @@ def create_admin():
 if __name__ == '__main__':
 	create_tables()
 	if config.DEBUG: create_admin()
-	app.run()
+	application.run()
