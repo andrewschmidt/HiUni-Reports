@@ -6,6 +6,7 @@
 
 from data_model import * # The data model & the database connection.
 import csv # For reading CSVs.
+from decorators import async
 
 
 ipeds_file = "IPEDS data.csv" # The CSV file w/ data from IPEDS.
@@ -540,6 +541,11 @@ def import_school_data(): # A hands-off version of import_school_data_from_sheet
 	salary_sheet = get_csv_sheet(payscale)
 	print "\nLet's import!"
 	import_school_data_from_sheets(cost_sheet, salary_sheet = salary_sheet)
+
+
+@async
+def import_school_data_async():
+	import_school_data()
 
 
 

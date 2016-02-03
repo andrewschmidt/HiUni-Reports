@@ -17,6 +17,7 @@ from flask.ext.login import login_required, LoginManager, login_user, logout_use
 
 from data_model import * # Includes the "database" variable.
 import solver
+import data_helper
 
 import config
 
@@ -213,6 +214,22 @@ def register_employee():
 			return redirect("/students")
 
 		return render_template("register_employee.html", form = form)
+
+	else: return redirect("/")
+
+
+@application.route("/manage_schools", methods = ["GET", "POST"])
+@login_required
+def manage_schools():
+	if current_user.employee:
+		if request.method == "POST":
+			if "import" in request.form:
+				data_helper.import_school_data_async()
+				flash("Importing schools... This may take a while.")
+
+		school_count = str(School.select().count())
+
+		return render_template("manage_schools.html", school_count = school_count)
 
 	else: return redirect("/")
 

@@ -26,12 +26,13 @@
 					{% set sidebar = [
 						("/students", "students", "Edit reports"),
 						("/register_employee", "register_employee", "Add an employee"),
+						("/manage_schools", "manage_schools", "Manage schools")
 					] -%}
 				
 				{% elif current_user.customer.is_organization %}
 					{% set sidebar = [
 						("/students", "students", "Students"),
-						("/questions", "questions", "Add a student"),
+						("/questions", "questions", "Add a student")
 					] -%}
 				
 				{% else %}

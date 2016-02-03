@@ -1,0 +1,22 @@
+{% extends "sidebar.html" %}
+{% set sidebar_active = True %}
+{% set active_page = "manage_schools" %}
+
+{% block right_content %}
+
+	<div class="panel panel-primary">
+		
+		<div class="panel-heading"><h4>Manage schools</h4></div>
+		
+		<div class="panel-body">
+			<h3><b>{{ school_count }}</b> schools in the database</h3>
+			<br>
+			<form action = "/manage_schools" method = "post">
+				<button class = "btn btn-warning btn-lg" name = "import">Import all</button>
+			</form>
+
+		</div>
+
+	</div>
+
+{% endblock %}
