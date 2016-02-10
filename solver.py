@@ -309,7 +309,7 @@ def make_pathways_for_student(student, report, how_many):
 	# Prepopulate the excluded schools list with schools from any preexisting pathways:
 	excluded_schools = get_excluded_schools(report)
 	budget_modifier = 0
-	budget_leeway = 30000
+	budget_leeway = 80000
 
 	good_pathways = []
 	failed = False
