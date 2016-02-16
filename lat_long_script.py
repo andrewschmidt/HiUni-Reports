@@ -6,9 +6,6 @@ from playhouse.migrate import *
 
 from data_model import *
 
-students = Student.select()
-for student in students:
-	student.save()
 
 # migrator = PostgresqlMigrator(database)
 
@@ -19,6 +16,10 @@ for student in students:
 # )
 
 # students = Student.select()
+
+students = Student.select()
+for student in students:
+	student.save()
 
 # for student in students:
 # 	student.latitude = student.location["latitude"]
