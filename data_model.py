@@ -107,10 +107,10 @@ class Student(Model):
 	customer = ForeignKeyField(Customer, related_name = "students")
 
 	def save(self, *args, **kwargs):
-		# if self.latitude is None:
-		geolocator = Nominatim()
-		location = geolocator.geocode(str(self.city + ", " + self.state))
-		self.latitude, self.longitude = location.latitude, location.longitude
+		if self.latitude is None:
+			geolocator = Nominatim()
+			location = geolocator.geocode(str(self.city + ", " + self.state))
+			self.latitude, self.longitude = location.latitude, location.longitude
 
 		return super(Student, self).save(*args, **kwargs)
 
