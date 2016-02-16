@@ -5,15 +5,27 @@ from playhouse.postgres_ext import *
 
 from config import DATABASE as db
 
-database = PostgresqlExtDatabase(
+
+# CUSTOM FIELDS
+
+# class PointField(Field): # I need this for location-based calculations.
+# 	db_field = "point"
+
+
+# DATABASE	
+
+database = PostgresqlExtDatabase( # To log in from command line: psql --host=hiuni.cygnxnxnzo7j.us-west-1.rds.amazonaws.com --port=5432 --username=andrew --password --dbname=hiuni_database
 	db["name"],
 	host = db["host"],
 	port = db["port"],
 	user = db["user"],
 	password = db["password"]
 )
-# To log in from command line: psql --host=hiuni.cygnxnxnzo7j.us-west-1.rds.amazonaws.com --port=5432 --username=andrew --password --dbname=hiuni_database
 
+# database.register_fields({"point": "POINT"}) # Register my custom fields.
+
+
+# MODELS
 
 class BaseModel(Model):
 	class Meta:
@@ -64,11 +76,17 @@ class School(BaseModel):
 	# Location:
 	city = CharField()
 	state = CharField()
-	location = HStoreField()
+	latitude = FloatField(null = True)
+	longitude = FloatField(null = True)
+	# point = PointField() # Don't forget to "CREATE EXTENSION cube, earthdistance;" to enable querying by location.
 	
 	# Cost:
 	total_price = HStoreField() # To setup, run "CREATE EXTENSION hstore;" for hiuni_database from psql.
 	net_price = HStoreField() # For public institutions, net price refers to net price for in-state students only.
+
+	# def save(self, *args, **kwargs):
+ #        self.point = # Automatically set point by location.
+ #        return super(School, self).save(*args, **kwargs)
 
 
 class Program(BaseModel):
@@ -94,7 +112,8 @@ class Student(Model):
 	
 	city = CharField()
 	state = CharField()
-	location = HStoreField(null = True) # For storing latitude and longitude keys.
+	latitude = FloatField(null = True)
+	longitude = FloatField(null = True)
 
 	customer = ForeignKeyField(Customer, related_name = "students")
 

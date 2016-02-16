@@ -161,14 +161,13 @@ def get_school_info_from_csv_sheet(sheet, for_ipeds_id):
 	school_info['city'] = row[get_number_for_column("City location of institution", from_csv_sheet = sheet)]
 	school_info['state'] = row[get_number_for_column("State abbreviation", from_csv_sheet = sheet)]
 
-	latitude = row[get_number_for_column("Latitude", from_csv_sheet = sheet)]
-	longitude = row[get_number_for_column("Longitude", from_csv_sheet = sheet)]
-	school_info['location'] = {"latitude": latitude, "longitude": longitude}
+	school_info["latitude"] = row[get_number_for_column("Latitude", from_csv_sheet = sheet)]
+	school_info["longitude"] = row[get_number_for_column("Longitude", from_csv_sheet = sheet)]
 	
 	school_info['total_price'] = get_total_prices_for_school_id(ipeds_id, from_csv_sheet = sheet)
 	school_info['net_price'] = get_net_prices_for_school_id(ipeds_id, from_csv_sheet = sheet)
 	
-	return school_info # name, ipeds_id, kind, sector, admission_rate, city, state, location, total_price, net_price
+	return school_info # name, ipeds_id, kind, sector, admission_rate, city, state, latitude, longitude, total_price, net_price
 
 
 def get_recipe_data_from_csv_sheet(sheet):
@@ -275,7 +274,8 @@ def update_school_with_ipeds_id(ipeds_id, from_cost_sheet):
 	school.admission_rate = info['admission_rate']
 	school.city = info['city']
 	school.state = info['state']
-	school.location = info['location']
+	school.latitude = info['latitude']
+	school.longitude = info['longitude']
 	school.total_price = info['total_price']
 	school.net_price = info['net_price']
 	
@@ -584,9 +584,9 @@ def create_tables():
 	print "\nConnecting to the database..."
 	database.connect()
 	print "\nCreating tables..."
-	# database.create_tables([School, Program])
-	# database.create_tables([Career, Recipe, Step])
-	# database.create_tables([Student])
+	database.create_tables([School, Program])
+	database.create_tables([Career, Recipe, Step])
+	database.create_tables([Student])
 	database.create_tables([Pathway, Pathway_Step])
 
 
