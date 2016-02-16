@@ -6,6 +6,10 @@ from playhouse.migrate import *
 
 from data_model import *
 
+students = Student.select()
+for student in students:
+	student.save()
+
 # migrator = PostgresqlMigrator(database)
 
 # migrate(

@@ -3,6 +3,8 @@
 from peewee import *
 from playhouse.postgres_ext import *
 
+from geopy.geocoders import Nominatim
+
 from config import DATABASE as db
 
 
@@ -104,9 +106,13 @@ class Student(Model):
 
 	customer = ForeignKeyField(Customer, related_name = "students")
 
-	# def save(self, *args, **kwargs):
-	# 	self.latitude, self.longitude = # Automatically set lat/long by city/state.
-	# 	return super(Student, self).save(*args, **kwargs)
+	def save(self, *args, **kwargs):
+		if self.latitude is None:
+			geolocator = Nominatim()
+			location = geolocator.geocode(str(self.city + ", " + self.state))
+			self.latitude, self.longitude = location.latitude, location.longitude
+			
+		return super(Student, self).save(*args, **kwargs)
 
 	class Meta:
 		database = database
