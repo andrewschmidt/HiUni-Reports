@@ -1,6 +1,5 @@
 # CONFIGURATION
 
-# Database config:
 DATABASE = {
 	"name": "hiuni_database",
 	"engine": "playhouse.postgres_ext.PostgresqlExtDatabase",
@@ -9,8 +8,10 @@ DATABASE = {
 	"user": "andrew",
 	"password": "ihPCU6gX2YipqAq"
 }
-# USER = "andrew"
+
 DEBUG = True
+
+BCRYPT_LOG_ROUNDS = 15
 
 # Forms config:
 WTF_CSRF_ENABLED = True

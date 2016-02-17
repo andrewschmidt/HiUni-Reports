@@ -1,35 +1,43 @@
-# Run this.
-
 from flask import Flask, g, render_template, redirect, request, abort, flash, session
+from flask.ext.bcrypt import Bcrypt
+
+import config
+
+# Start the app:
+app = Flask(__name__) # AWS expects this to be "application," not "app"
+app.config.from_object("config")
+
+bcrypt = Bcrypt(app)
+
 
 from peewee import *
 from playhouse.postgres_ext import *
 
+# Form imports:
 from flask.ext.wtf import Form
 from wtforms import StringField, SelectField, PasswordField, BooleanField as WTFBooleanField # Peewee also has a "BooleanField," so this was necessary.
 from wtforms.fields.html5 import EmailField
 from wtforms.validators import Email, Required, EqualTo
-
 from wtfpeewee.fields import SelectQueryField # Unlike a regular WTForms SelectField, this returns actual model classes.
 from wtfpeewee.orm import model_form # For modeling forms from database objects. Not sure I really need it, but I do really like it.
 
+# View imports:
 from flask.ext.login import login_required, LoginManager, login_user, logout_user, current_user
 
 from data_model import * # Includes the "database" variable.
 import solver
 import data_helper
 
-import config
 
 
 
-# Start the application:
-application = Flask(__name__) # AWS expects this to be "application," not "app"
-application.config.from_object("config")
+
+
 
 # Login config:
 login_manager = LoginManager()
-login_manager.init_app(application)
+login_manager.init_app(app)
+
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -46,13 +54,13 @@ def load_user(user_id):
 # REQUEST HANDLERS
 # Apparently this is all I really needed from flask-peewee.
 
-@application.before_request
+@app.before_request
 def before_request():
 	g.db = database
 	g.db.connect()
 
 
-@application.after_request
+@app.after_request
 def after_request(response):
 	g.db.close()
 	return response
@@ -134,8 +142,8 @@ class Questionnaire_Form(Form):
 
 # VIEWS
 
-@application.route("/")
-@application.route("/index")
+@app.route("/")
+@app.route("/index")
 def index():
 	if current_user.is_authenticated:
 		return redirect("/students")
@@ -145,14 +153,15 @@ def index():
 	return render_template("index.html", title = "Home")
 
 
-@application.route("/login", methods = ["GET", "POST"])
+@app.route("/login", methods = ["GET", "POST"])
 def login():
 	form = Login_Form()
 	
 	if form.validate_on_submit():
 		try:
 			user = User.get(User.email == form.email.data)
-			if user.password == form.password.data:
+			
+			if user.is_correct_password(form.password.data):
 				user.authenticated = True
 				login_user(user, remember = form.remember.data)
 				return redirect("/students")
@@ -163,7 +172,7 @@ def login():
 	return render_template("login.html", form = form)
 
 
-@application.route("/register", methods = ["GET", "POST"])
+@app.route("/register", methods = ["GET", "POST"])
 def register():
 	form = Registration_Form()
 	
@@ -193,7 +202,7 @@ def register():
 	return render_template("register.html", form = form)
 
 
-@application.route("/register_employee", methods = ["GET", "POST"])
+@app.route("/register_employee", methods = ["GET", "POST"])
 @login_required
 def register_employee():
 	if current_user.employee:
@@ -218,7 +227,7 @@ def register_employee():
 	else: return redirect("/")
 
 
-@application.route("/manage_schools", methods = ["GET", "POST"])
+@app.route("/manage_schools", methods = ["GET", "POST"])
 @login_required
 def manage_schools():
 	if current_user.employee:
@@ -234,14 +243,14 @@ def manage_schools():
 	else: return redirect("/")
 
 
-@application.route("/logout")
+@app.route("/logout")
 def logout():
 	if current_user.is_authenticated:
 		logout_user()
 	return redirect("/index")
 
 
-@application.route("/questions", methods = ['GET', 'POST'])
+@app.route("/questions", methods = ['GET', 'POST'])
 @login_required
 def questions():
 	if current_user.customer is None:
@@ -283,7 +292,7 @@ def questions():
 	return render_template("questions.html", form = form)
 
 
-@application.route("/add_report", methods = ["GET", "POST"])
+@app.route("/add_report", methods = ["GET", "POST"])
 @login_required
 def add_report():
 	form = Add_Report()
@@ -303,7 +312,7 @@ def add_report():
 	return render_template("add_report.html", form = form)
 
 
-@application.route("/students", methods = ["GET", "POST"])
+@app.route("/students", methods = ["GET", "POST"])
 @login_required
 def list_students():
 	# Create a query for the user's students.
@@ -335,7 +344,7 @@ def list_students():
 	return render_template("students.html", form = form)
 
 
-@application.route("/reports/<student_id>", methods = ["GET", "POST"])
+@app.route("/reports/<student_id>", methods = ["GET", "POST"])
 @login_required
 def list_reports(student_id):
 	student = Student.get(id = student_id)
@@ -364,7 +373,7 @@ def list_reports(student_id):
 	return render_template("reports.html", title = student.name + "'s Reports", student = student, form = form)
 
 
-@application.route("/report/<student_id>_<report_id>", methods = ["GET", "POST"])
+@app.route("/report/<student_id>_<report_id>", methods = ["GET", "POST"])
 def report(student_id, report_id):
 	try:
 		student = Student.get(id = student_id)
@@ -390,10 +399,10 @@ def report(student_id, report_id):
 			report.published = False
 			report.save()
 
-	return render_template("report.html", title = student.name + "'s Report", student = student, report = report)
+	return render_template("report.html", title = student._password + "'s Report", student = student, report = report)
 
 
-@application.route("/confirmation")
+@app.route("/confirmation")
 @login_required
 def confirmation():
 	return render_template("confirmation.html", title = "Thank you!")
@@ -430,7 +439,7 @@ def create_admin():
 		user.save()
 
 
-if __name__ == '__main__':
-	create_tables()
-	if config.DEBUG: create_admin()
-	application.run()
+# if __name__ == '__main__':
+# 	create_tables()
+# 	if config.DEBUG: create_admin()
+# 	app.run()

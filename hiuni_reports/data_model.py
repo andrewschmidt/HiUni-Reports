@@ -3,14 +3,15 @@
 from peewee import *
 from playhouse.postgres_ext import *
 
-from geopy.geocoders import Nominatim
-
 from config import DATABASE as db
+
+from geopy.geocoders import Nominatim
+from . import bcrypt
 
 
 # DATABASE	
 
-database = PostgresqlExtDatabase( # To log in from command line: psql --host=hiuni.cygnxnxnzo7j.us-west-1.rds.amazonaws.com --port=5432 --username=andrew --password --dbname=hiuni_database
+database = PostgresqlExtDatabase(
 	db["name"],
 	host = db["host"],
 	port = db["port"],
@@ -42,9 +43,20 @@ class User(BaseModel):
 	employee = ForeignKeyField(Employee, related_name = "users", null = True)
 
 	# The rest is required by Flask-Login
-	email = TextField(unique = True, primary_key = True)
-	password = TextField()
 	authenticated = BooleanField(default = False)
+	email = TextField(unique = True, primary_key = True)
+	_password = CharField()
+
+	@property
+	def password(self):
+		return self._password
+
+	@password.setter
+	def password(self, plaintext):
+		self._password = bcrypt.generate_password_hash(plaintext)
+
+	def is_correct_password(self, plaintext):
+		return bcrypt.check_password_hash(self._password, plaintext)
 
 	def is_active(self):
 		return True
