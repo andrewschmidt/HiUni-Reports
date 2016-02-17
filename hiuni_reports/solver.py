@@ -1,6 +1,6 @@
 # Functions to help build pathways.
 
-from data_model import *
+from models import *
 import data_helper
 
 from decorators import async
