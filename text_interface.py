@@ -26,7 +26,9 @@ def print_student_info(student):
 		income_string = student.income
 	print Style.DIM + "  Income:", income_string
 	print Style.DIM + "  Budget: ", "$" + str(student.budget)
-	print Style.DIM + "  Database ID:", str(student.id)
+	print Style.DIM + "  Latitude:", str(student.latitude)
+	print Style.DIM + "  Longitude:", str(student.longitude)
+	# print Style.DIM + "  Database ID:", str(student.id)
 	print ""
 
 
@@ -275,6 +277,8 @@ def show_pathways_for_student(student):
 			print Style.DIM + "          Acceptance rate:", Style.NORMAL + str(step.program.school.admission_rate) + "%"
 			# print Style.DIM + "          Kind:", Style.NORMAL + step.program.school.kind
 			# print Style.DIM + "          Located:", Style.NORMAL + step.program.school.city + ", " + step.program.school.state
+			print Style.DIM + "          Latitude: ", Style.NORMAL + str(step.program.school.latitude)
+			print Style.DIM + "          Longitude: ", Style.NORMAL + str(step.program.school.longitude)
 			print Style.DIM + "          Cost:", Style.NORMAL + "$" + str(step.cost)
 			print Style.DIM + "          Duration:", Style.NORMAL + str(step.duration()) + " years"
 			description = step.description()

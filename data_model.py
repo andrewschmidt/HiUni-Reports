@@ -3,17 +3,23 @@
 from peewee import *
 from playhouse.postgres_ext import *
 
+from geopy.geocoders import Nominatim
+
 from config import DATABASE as db
 
-database = PostgresqlExtDatabase(
+
+# DATABASE	
+
+database = PostgresqlExtDatabase( # To log in from command line: psql --host=hiuni.cygnxnxnzo7j.us-west-1.rds.amazonaws.com --port=5432 --username=andrew --password --dbname=hiuni_database
 	db["name"],
 	host = db["host"],
 	port = db["port"],
 	user = db["user"],
 	password = db["password"]
 )
-# To log in from command line: psql --host=hiuni.cygnxnxnzo7j.us-west-1.rds.amazonaws.com --port=5432 --username=andrew --password --dbname=hiuni_database
 
+
+# MODELS
 
 class BaseModel(Model):
 	class Meta:
@@ -64,7 +70,8 @@ class School(BaseModel):
 	# Location:
 	city = CharField()
 	state = CharField()
-	location = HStoreField()
+	latitude = DoubleField(null = True) # Don't forget to "CREATE EXTENSION cube, earthdistance;" to enable querying by location.
+	longitude = DoubleField(null = True)
 	
 	# Cost:
 	total_price = HStoreField() # To setup, run "CREATE EXTENSION hstore;" for hiuni_database from psql.
@@ -94,9 +101,18 @@ class Student(Model):
 	
 	city = CharField()
 	state = CharField()
-	location = HStoreField(null = True) # For storing latitude and longitude keys.
+	latitude = DoubleField(null = True)
+	longitude = DoubleField(null = True)
 
 	customer = ForeignKeyField(Customer, related_name = "students")
+
+	def save(self, *args, **kwargs):
+		if self.latitude is None:
+			geolocator = Nominatim()
+			location = geolocator.geocode(str(self.city + ", " + self.state))
+			self.latitude, self.longitude = location.latitude, location.longitude
+
+		return super(Student, self).save(*args, **kwargs)
 
 	class Meta:
 		database = database
