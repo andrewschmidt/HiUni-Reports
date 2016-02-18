@@ -43,7 +43,6 @@ class User(BaseModel):
 	customer = ForeignKeyField(Customer, related_name = "users", null = True)
 	employee = ForeignKeyField(Employee, related_name = "users", null = True)
 
-	# The rest is required by Flask-Login
 	authenticated = BooleanField(default = False)
 	email = TextField(unique = True, primary_key = True)
 	_password = CharField()
@@ -59,6 +58,7 @@ class User(BaseModel):
 	def is_correct_password(self, plaintext):
 		return bcrypt.check_password_hash(self._password, plaintext)
 
+	# The rest is required by Flask-Login
 	def is_active(self):
 		return True
 
