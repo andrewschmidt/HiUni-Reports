@@ -31,4 +31,4 @@ Please let me know! I’m new to development and always learning.
 
 ## Can I hire you?
 
-Yes, please.
+Sure!
