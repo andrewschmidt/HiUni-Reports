@@ -2,8 +2,11 @@
 .elasticbeanstalk/*
 !.elasticbeanstalk/*.cfg.yml
 !.elasticbeanstalk/*.global.yml
+.ebignore
 
 *.pyc
 
 instance/
 *.config
+
+school_data/
