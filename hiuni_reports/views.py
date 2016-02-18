@@ -1,5 +1,5 @@
 from hiuni_reports import application
-from flask import render_template, redirect, request, abort, flash, session
+from flask import render_template, redirect, request, abort, flash, session, url_for
 
 from flask.ext.login import login_required, login_user, logout_user, current_user
 

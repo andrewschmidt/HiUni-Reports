@@ -2,9 +2,8 @@
 # This includes importing data.
 # But it should not include ROI/sorting algorithms.
 
-
-
 from models import * # The data model & the database connection.
+import os
 import csv # For reading CSVs.
 from decorators import async
 
@@ -454,7 +453,7 @@ def import_recipe_from_file(file_name):
 	if ".csv" not in file_name:
 		file_name += ".csv"
 
-	folder = "Career Recipes/"
+	folder = "recipes/"
 	folder += file_name
 
 	print "\nSearching for", file_name + "..."
@@ -533,13 +532,14 @@ def import_school_data_from_sheets(cost_sheet, salary_sheet):
 
 
 def import_school_data(): # A hands-off version of import_school_data_from_sheets().
-	folder = "School Data Sources/"
+	folder = os.path.dirname(os.path.realpath(__file__)) + "/school_data/"
+
 	ipeds = folder+ipeds_file
 	payscale = folder+payscale_file
 
 	cost_sheet = get_csv_sheet(ipeds)
 	salary_sheet = get_csv_sheet(payscale)
-	print "\nLet's import!"
+	print "\nLet's import, from:", folder
 	import_school_data_from_sheets(cost_sheet, salary_sheet = salary_sheet)
 
 
