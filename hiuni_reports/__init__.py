@@ -6,7 +6,6 @@ from flask.ext.bcrypt import Bcrypt
 
 
 # START THE APPLICATION
-# static = os.path.dirname(os.path.realpath(__file__)) + "/static"
 cwd = os.getcwd()
 static = cwd + "/static"
 print "Current working directory:", cwd
