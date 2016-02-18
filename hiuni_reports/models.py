@@ -3,8 +3,8 @@
 from peewee import *
 from playhouse.postgres_ext import *
 
-from hiuni_reports import app
-db = app.config["DATABASE"]
+from hiuni_reports import application
+db = application.config["DATABASE"]
 
 from geopy.geocoders import Nominatim
 from . import bcrypt

@@ -4,12 +4,12 @@ import config
 from flask.ext.bcrypt import Bcrypt
 
 
-# START THE APP
-app = Flask(__name__, instance_relative_config = True) # AWS expects this to be "application," not "app"
-app.config.from_object("config")
-app.config.from_pyfile("config.py")
+# START THE APPLICATION
+application = Flask(__name__, instance_relative_config = True) # AWS expects this to be "application," not "app"
+application.config.from_object("config")
+application.config.from_pyfile("config.py")
 
-bcrypt = Bcrypt(app)
+bcrypt = Bcrypt(application)
 
 
 # LOGIN MANAGER
@@ -17,7 +17,7 @@ from flask.ext.login import LoginManager
 from models import *
 
 login_manager = LoginManager()
-login_manager.init_app(app)
+login_manager.init_app(application)
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -31,12 +31,12 @@ def load_user(user_id):
 
 
 # REQUEST HANDLERS
-@app.before_request
+@application.before_request
 def before_request():
 	g.db = database
 	g.db.connect()
 
-@app.after_request
+@application.after_request
 def after_request(response):
 	g.db.close()
 	return response
@@ -67,8 +67,8 @@ def create_admin():
 		employee = Employee()
 		employee.save()
 		user = User.create(
-			email = app.config["ADMINEMAIL"],
-			password = app.config["ADMINPASS"],
+			email = application.config["ADMINEMAIL"],
+			password = application.config["ADMINPASS"],
 			employee = employee
 		)
 		user.save()

@@ -1,4 +1,4 @@
-from hiuni_reports import app
+from hiuni_reports import application
 from flask import render_template, redirect, request, abort, flash, session
 
 from flask.ext.login import login_required, login_user, logout_user, current_user
@@ -16,8 +16,8 @@ from forms import *
 
 # VIEWS
 
-@app.route("/")
-@app.route("/index")
+@application.route("/")
+@application.route("/index")
 def index():
 	if current_user.is_authenticated:
 		return redirect("/students")
@@ -27,7 +27,7 @@ def index():
 	return render_template("index.html", title = "Home")
 
 
-@app.route("/login", methods = ["GET", "POST"])
+@application.route("/login", methods = ["GET", "POST"])
 def login():
 	form = Login_Form()
 	
@@ -46,7 +46,7 @@ def login():
 	return render_template("login.html", form = form)
 
 
-@app.route("/register", methods = ["GET", "POST"])
+@application.route("/register", methods = ["GET", "POST"])
 def register():
 	form = Registration_Form()
 	
@@ -76,7 +76,7 @@ def register():
 	return render_template("register.html", form = form)
 
 
-@app.route("/register_employee", methods = ["GET", "POST"])
+@application.route("/register_employee", methods = ["GET", "POST"])
 @login_required
 def register_employee():
 	if current_user.employee:
@@ -101,7 +101,7 @@ def register_employee():
 	else: return redirect("/")
 
 
-@app.route("/manage_schools", methods = ["GET", "POST"])
+@application.route("/manage_schools", methods = ["GET", "POST"])
 @login_required
 def manage_schools():
 	if current_user.employee:
@@ -117,14 +117,14 @@ def manage_schools():
 	else: return redirect("/")
 
 
-@app.route("/logout")
+@application.route("/logout")
 def logout():
 	if current_user.is_authenticated:
 		logout_user()
 	return redirect("/index")
 
 
-@app.route("/questions", methods = ['GET', 'POST'])
+@application.route("/questions", methods = ['GET', 'POST'])
 @login_required
 def questions():
 	if current_user.customer is None:
@@ -166,7 +166,7 @@ def questions():
 	return render_template("questions.html", form = form)
 
 
-@app.route("/add_report", methods = ["GET", "POST"])
+@application.route("/add_report", methods = ["GET", "POST"])
 @login_required
 def add_report():
 	form = Add_Report()
@@ -186,7 +186,7 @@ def add_report():
 	return render_template("add_report.html", form = form)
 
 
-@app.route("/students", methods = ["GET", "POST"])
+@application.route("/students", methods = ["GET", "POST"])
 @login_required
 def list_students():
 	# Create a query for the user's students.
@@ -218,7 +218,7 @@ def list_students():
 	return render_template("students.html", form = form)
 
 
-@app.route("/reports/<student_id>", methods = ["GET", "POST"])
+@application.route("/reports/<student_id>", methods = ["GET", "POST"])
 @login_required
 def list_reports(student_id):
 	student = Student.get(id = student_id)
@@ -247,7 +247,7 @@ def list_reports(student_id):
 	return render_template("reports.html", title = student.name + "'s Reports", student = student, form = form)
 
 
-@app.route("/report/<student_id>_<report_id>", methods = ["GET", "POST"])
+@application.route("/report/<student_id>_<report_id>", methods = ["GET", "POST"])
 def report(student_id, report_id):
 	try:
 		student = Student.get(id = student_id)
@@ -276,7 +276,7 @@ def report(student_id, report_id):
 	return render_template("report.html", title = student.name + "'s Report", student = student, report = report)
 
 
-@app.route("/confirmation")
+@application.route("/confirmation")
 @login_required
 def confirmation():
 	return render_template("confirmation.html", title = "Thank you!")
