@@ -67,8 +67,8 @@ def create_admin():
 		employee = Employee()
 		employee.save()
 		user = User.create(
-			email = "admin@gohiuni.com",
-			password = "admin",
+			email = app.config["ADMINEMAIL"],
+			password = app.config["ADMINPASS"],
 			employee = employee
 		)
 		user.save()
