@@ -1,4 +1,5 @@
 # Run this.
 
-from hiuni_reports import app as application
-application.run()
+from hiuni_reports import app
+application = app
+app.run()
