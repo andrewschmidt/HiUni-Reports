@@ -8,13 +8,24 @@ from flask.ext.bcrypt import Bcrypt
 # START THE APPLICATION
 cwd = os.getcwd()
 static = cwd + "/static"
-print "Current working directory:", cwd
-print "Searching for the HiUni logo at", static
+
 application = Flask(__name__, instance_relative_config = True, static_folder = static) # AWS expects this to be "application," not "app"
 application.config.from_object("config")
 application.config.from_pyfile("config.py")
 
 bcrypt = Bcrypt(application)
+
+
+# REQUEST HANDLERS
+@application.before_request
+def before_request():
+	g.db = database
+	g.db.connect()
+
+@application.after_request
+def after_request(response):
+	g.db.close()
+	return response
 
 
 # LOGIN MANAGER
@@ -35,23 +46,11 @@ def load_user(user_id):
 	return user
 
 
-# REQUEST HANDLERS
-@application.before_request
-def before_request():
-	g.db = database
-	g.db.connect()
-
-@application.after_request
-def after_request(response):
-	g.db.close()
-	return response
-
-
 # VIEWS
 import hiuni_reports.views
 
 
-# SAFETY CHECK
+# TABLES
 def create_tables():
 	Customer.create_table(True)
 	Employee.create_table(True)
