@@ -7,10 +7,11 @@ from flask.ext.bcrypt import Bcrypt
 
 # START THE APPLICATION
 # static = os.path.dirname(os.path.realpath(__file__)) + "/static"
-# cwd = os.getcwd()
-# print "Current working directory:", cwd
-# print "Searching for the HiUni logo at", static
-application = Flask(__name__, instance_relative_config = True) #, static_folder = static) # AWS expects this to be "application," not "app"
+cwd = os.getcwd()
+static = cwd + "/static"
+print "Current working directory:", cwd
+print "Searching for the HiUni logo at", static
+application = Flask(__name__, instance_relative_config = True, static_folder = static) # AWS expects this to be "application," not "app"
 application.config.from_object("config")
 application.config.from_pyfile("config.py")
 

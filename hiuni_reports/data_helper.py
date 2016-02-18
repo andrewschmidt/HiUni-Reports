@@ -532,7 +532,8 @@ def import_school_data_from_sheets(cost_sheet, salary_sheet):
 
 
 def import_school_data(): # A hands-off version of import_school_data_from_sheets().
-	folder = os.path.dirname(os.path.realpath(__file__)) + "/school_data/"
+	cwd = os.getcwd()
+	folder = cwd + "/school_data/"
 
 	ipeds = folder+ipeds_file
 	payscale = folder+payscale_file
