@@ -528,6 +528,7 @@ def import_school_data_from_sheets(cost_sheet, salary_sheet):
 
 		# Change its type to "Community College" if we believe it is one:
 		if ipeds_id in ids_of_community_colleges:
+			print "Updating", school.name + "'s kind to 'Community College'."
 			school.kind = "Community College"
 			school.save()
 		
