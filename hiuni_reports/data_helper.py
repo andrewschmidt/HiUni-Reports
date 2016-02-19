@@ -522,8 +522,15 @@ def import_school_data_from_sheets(cost_sheet, salary_sheet):
 	for ipeds_id in ids_from_sheets:
 		# Make or update the school for the ID:
 		update_school_with_ipeds_id(ipeds_id, from_cost_sheet = cost_sheet)
+		
 		# Get the school:
 		school = School.get(School.ipeds_id == ipeds_id)
+
+		# Change its type to "Community College" if we believe it is one:
+		if ipeds_id in ids_of_community_colleges:
+			school.kind = "Community College"
+			school.save()
+		
 		# Make or update its programs:
 		update_programs_for_school(school, from_salary_sheet = salary_sheet)
 
