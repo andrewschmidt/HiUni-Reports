@@ -453,7 +453,9 @@ def import_recipe_from_file(file_name):
 	if ".csv" not in file_name:
 		file_name += ".csv"
 
-	folder = "recipes/"
+	cwd = os.getcwd()
+	folder = cwd + "/recipes/"
+
 	folder += file_name
 
 	print "\nSearching for", file_name + "..."
@@ -522,8 +524,16 @@ def import_school_data_from_sheets(cost_sheet, salary_sheet):
 	for ipeds_id in ids_from_sheets:
 		# Make or update the school for the ID:
 		update_school_with_ipeds_id(ipeds_id, from_cost_sheet = cost_sheet)
+		
 		# Get the school:
 		school = School.get(School.ipeds_id == ipeds_id)
+
+		# Change its type to "Community College" if we believe it is one:
+		if ipeds_id in ids_of_community_colleges:
+			print "Updating", school.name + "'s kind to 'Community College'."
+			school.kind = "Community College"
+			school.save()
+		
 		# Make or update its programs:
 		update_programs_for_school(school, from_salary_sheet = salary_sheet)
 
@@ -547,6 +557,25 @@ def import_school_data(): # A hands-off version of import_school_data_from_sheet
 @async
 def import_school_data_async():
 	import_school_data()
+
+
+def import_recipes_for_career_named(name):
+	i = 1	
+	while True:
+		file_name = name + " Recipe " + str(i) # Recipes should follow the naming convention "Career Recipe 1.csv"
+		
+		try:
+			import_recipe_from_file(file_name)
+			recipes_made += 1
+		except Exception:
+			break
+		
+		i += 1
+
+
+@async
+def import_career_async(name):
+	import_recipes_for_career_named(name)
 
 
 

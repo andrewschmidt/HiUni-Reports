@@ -1,0 +1,22 @@
+{% extends "sidebar.html" %}
+{% set sidebar_active = True %}
+{% set active_page = "manage_careers" %}
+
+{% block right_content %}
+
+	<div class="panel panel-primary">
+		
+		<div class="panel-heading"><h4>Manage careers</h4></div>
+		
+		<div class="panel-body">
+			<h3><b>{{ career_count }}</b> careers in the database, with <b>{{ recipe_count }}</b> recipes.</h3>
+			<br>
+			<form action = "/manage_careers" method = "post">
+				<button class = "btn btn-warning btn-lg" name = "update">Update all</button>
+			</form>
+
+		</div>
+
+	</div>
+
+{% endblock %}

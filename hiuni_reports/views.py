@@ -117,6 +117,27 @@ def manage_schools():
 	else: return redirect("/")
 
 
+@application.route("/manage_careers", methods = ["GET", "POST"])
+@login_required
+def manage_careers():
+	if current_user.employee:
+		
+		if request.method == "POST":
+			
+			if "update" in request.form:
+				careers = Career.select()
+				for career in careers:
+					data_helper.import_career_async(career.name)
+				flash("Updating careers...")
+
+		career_count = str(Career.select().count())
+		recipe_count = str(Recipe.select().count())
+
+		return render_template("manage_careers.html", career_count = career_count, recipe_count = recipe_count)
+
+	else: return redirect("/")
+
+
 @application.route("/logout")
 def logout():
 	if current_user.is_authenticated:

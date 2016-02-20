@@ -2,8 +2,9 @@
 
 from models import *
 import data_helper
-
 from decorators import async
+
+from geopy.distance import great_circle
 
 
 unsafe_search_allowed = True
@@ -109,28 +110,61 @@ def check_school_kind(program, step):
 		return False
 
 
-def programs_by_distance_for_cip(cip, school_kind, student, only_reportable):
-	# This is hacky right now. It returns all schools in the same city, instead of finding them by distance.
-	if only_reportable:
-		query = (
-			(Program.cip == cip) & 
-			(Program.reportable == True) & 
-			(School.city == student.city) & # Replace city & state with an actual distance algorithm.
-			(School.state == student.state) & 
-			(School.kind == school_kind))
-	else:
-		query = (
-			(Program.cip == cip) & 
-			(School.city == student.city) & # Replace city & state with an actual distance algorithm.
-			(School.state == student.state) & 
-			(School.kind == school_kind))
+def find_programs_near(latitude, longitude, distance, kind, cip):
+	latitude_str = str(latitude)
+	longitude_str = str(longitude)
+
+	long_lat = str(longitude_str + ", " + latitude_str)
+	distance = str(distance)
+
+	query_string = "SELECT * FROM school WHERE earth_box(ll_to_earth("+long_lat+"), "+distance+") @> ll_to_earth(longitude, latitude) AND kind = '"+kind+"' ORDER BY earth_distance(ll_to_earth("+long_lat+"), ll_to_earth(longitude, latitude));"
 	
+	schools = School.raw(query_string)
 	programs = []
 
-	for p in Program.select().join(School).where(query):
-		programs.append(p)
+	for school in schools:
+		try:
+			program = Program.select().join(School).where((Program.cip == cip) & (School.ipeds_id == school.ipeds_id)).get()
+			programs.append(program)
+		except Exception:
+			print "\nDidn't find the right program at nearby school", school.name + "."
 
 	return programs
+
+
+def distance_between(place_1, place_2):
+	point_1 = (place_1.latitude, place_1.longitude)
+	point_2 = (place_2.latitude, place_2.longitude)
+
+	distance = great_circle(point_1, point_2).miles	
+	return distance
+
+
+def programs_by_distance_for_cip(cip, school_kind, student, only_reportable):	
+	if only_reportable:
+		possible_programs = find_programs_near(latitude = student.latitude, longitude = student.longitude, distance = 7500, kind = school_kind, cip = cip)
+		programs = []
+		
+		for program in possible_programs:
+			if program.reportable:
+				programs.append(program)
+
+	else:
+		programs = find_programs_near(latitude = student.latitude, longitude = student.longitude, distance = 7500, kind = school_kind, cip = cip)
+
+	checked_programs = []
+	for program in programs:
+		if distance_between(student, program.school) < 30.0:
+			checked_programs.append(program)
+	
+	checked_programs.sort(key = lambda p: distance_between(student, p.school)) # Put them in order of closest to furthest.
+	
+	print "\nSorted:"
+	for program in checked_programs:
+		print "   - " + program.school.name + " -- " + str(distance_between(student, program.school)) + "miles"
+	print " "
+	
+	return checked_programs
 
 
 def programs_by_roi_for_step(step, student):
@@ -203,7 +237,7 @@ def get_excluded_schools(report):
 	for pathway in report.pathways:
 		for step in pathway.pathway_steps:
 			school = step.program.school
-			if school.kind != "Degree-granting, associate's and certificates": # It's OK to reuse community colleges.
+			if school.kind != "Community College": # It's OK to reuse community colleges.
 				schools.append(step.program)
 	return schools
 
