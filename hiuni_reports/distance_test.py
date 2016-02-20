@@ -21,13 +21,13 @@ def find_programs_near(latitude, longitude, distance, kind, cip):
 	
 	for school in School.raw(query_string):
 		try:
-			desired_program = Program.select().join(School).where((Program.cip == cip) & (School.ipeds_id == school.ipeds_id)).get()
+			program = Program.select().join(School).where((Program.cip == cip) & (School.ipeds_id == school.ipeds_id)).get()
 			print "   -", program.name, "at", program.school.name
 		except Exception:
 			print "   - Didn't find the right program at nearby school", school.name
 
-student_latitude = 32.7150
-student_longitude = -117.1625
+student_latitude = 34.0500
+student_longitude = -118.2500
 distance = 7500
 school_kind = "Community College"
 
