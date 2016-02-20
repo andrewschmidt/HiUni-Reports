@@ -1,6 +1,6 @@
 # HiUni Reports
 
-*HiUni Reports* is an automated college advisor that treats higher education like an investment — because it is one.
+*HiUni Reports* is an automated college advisor that treats higher education like an investment — because it is one!
 
 ## What’s it do?
 
@@ -13,9 +13,9 @@ For a high school student, using *HiUni Reports* looks something like this:
 
 ## What’s a report?
 
-A report consists of three pathways. Each pathway is a step-by-step walkthrough of a high-value route you could take through higher education. 
+A report consists of three pathways. Each pathway is a step-by-step walkthrough of a different route you could take through higher education. These routes are carefully chosen to have a high return on investment (ROI).
 
-A pathway is rarely as simple as attending one university for four years. For example, you might complete your general studies at community college, finish your degree at a university, then complete career-specific licensing via an online school. A pathway would detail all of that, choosing a school at each step with a particularly high return on investment (ROI).
+A pathway is rarely as simple as attending one university for four years. For example, you might complete your general studies at community college, finish your degree at a university, then complete career-specific licensing via an online course.
 
 ## Could I run this myself?
 
