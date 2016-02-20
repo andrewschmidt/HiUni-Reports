@@ -79,5 +79,3 @@ def create_admin():
 
 create_tables()
 create_admin()
-
-import distance_test

@@ -453,7 +453,9 @@ def import_recipe_from_file(file_name):
 	if ".csv" not in file_name:
 		file_name += ".csv"
 
-	folder = "recipes/"
+	cwd = os.getcwd()
+	folder = cwd + "/recipes/"
+
 	folder += file_name
 
 	print "\nSearching for", file_name + "..."
@@ -555,6 +557,25 @@ def import_school_data(): # A hands-off version of import_school_data_from_sheet
 @async
 def import_school_data_async():
 	import_school_data()
+
+
+def import_recipes_for_career_named(name):
+	i = 1	
+	while True:
+		file_name = name + " Recipe " + str(i) # Recipes should follow the naming convention "Career Recipe 1.csv"
+		
+		try:
+			import_recipe_from_file(file_name)
+			recipes_made += 1
+		except Exception:
+			break
+		
+		i += 1
+
+
+@async
+def import_career_async(name):
+	import_recipes_for_career_named(name)
 
 
 

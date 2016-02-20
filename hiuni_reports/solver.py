@@ -109,33 +109,39 @@ def check_school_kind(program, step):
 		return False
 
 
+def find_programs_near(latitude, longitude, distance, kind, cip):
+	latitude_str = str(latitude)
+	longitude_str = str(longitude)
 
+	long_lat = str(longitude_str + ", " + latitude_str)
+	distance = str(distance)
 
-
-def programs_by_distance_for_cip(cip, school_kind, student, only_reportable):
-	# This is hacky right now. It returns all schools in the same city, instead of finding them by distance.
+	query_string = "SELECT * FROM school WHERE earth_box(ll_to_earth("+long_lat+"), "+distance+") @> ll_to_earth(longitude, latitude) AND kind = '"+kind+"' ORDER BY earth_distance(ll_to_earth("+long_lat+"), ll_to_earth(longitude, latitude));"
 	
-	# The real query will be something like: 
-	# query_string = "SELECT name, city, state, latitude, longitude FROM school WHERE earth_box(ll_to_earth(\(student.longitude), \(student.latitude)), 7500) @> ll_to_earth(longitude, latitude) AND kind = 'Community College' ORDER BY earth_distance(ll_to_earth(\(student.longitude), \(student.latitude)), ll_to_earth(longitude, latitude));"
-	
-	if only_reportable:
-		query = (
-			(Program.cip == cip) & 
-			(Program.reportable == True) & 
-			(School.city == student.city) & # Replace city & state with an actual distance algorithm.
-			(School.state == student.state) & 
-			(School.kind == school_kind))
-	else:
-		query = (
-			(Program.cip == cip) & 
-			(School.city == student.city) & # Replace city & state with an actual distance algorithm.
-			(School.state == student.state) & 
-			(School.kind == school_kind))
-	
+	schools = School.raw(query_string)
 	programs = []
 
-	for p in Program.select().join(School).where(query):
-		programs.append(p)
+	for school in schools:
+		try:
+			program = Program.select().join(School).where((Program.cip == cip) & (School.ipeds_id == school.ipeds_id)).get()
+			programs.append(program)
+		except Exception:
+			print "Didn't find the right program at nearby school", school.name + "."
+
+	return programs
+
+
+def programs_by_distance_for_cip(cip, school_kind, student, only_reportable):	
+	if only_reportable:
+		possible_programs = find_programs_near(latitude = student.latitude, longitude = student.longitude, distance = 7500, kind = school_kind, cip = cip)
+		programs = []
+		
+		for program in possible_programs:
+			if program.reportable:
+				programs.append(program)
+
+	else:
+		programs = find_programs_near(latitude = student.latitude, longitude = student.longitude, distance = 7500, kind = school_kind, cip = cip)
 
 	return programs
 
