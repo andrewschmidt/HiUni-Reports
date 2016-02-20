@@ -109,11 +109,14 @@ def check_school_kind(program, step):
 		return False
 
 
+
+
+
 def programs_by_distance_for_cip(cip, school_kind, student, only_reportable):
 	# This is hacky right now. It returns all schools in the same city, instead of finding them by distance.
 	
 	# The real query will be something like: 
-	# SELECT name, city FROM school WHERE earth_box(ll_to_earth(-118.2500, 34.0500), 25000) @> ll_to_earth(longitude, latitude) AND kind = 'Community College';
+	# query_string = "SELECT name, city, state, latitude, longitude FROM school WHERE earth_box(ll_to_earth(\(student.longitude), \(student.latitude)), 7500) @> ll_to_earth(longitude, latitude) AND kind = 'Community College' ORDER BY earth_distance(ll_to_earth(\(student.longitude), \(student.latitude)), ll_to_earth(longitude, latitude));"
 	
 	if only_reportable:
 		query = (
