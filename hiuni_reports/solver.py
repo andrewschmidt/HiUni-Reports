@@ -2,8 +2,9 @@
 
 from models import *
 import data_helper
-
 from decorators import async
+
+from geopy.distance import great_circle
 
 
 unsafe_search_allowed = True
@@ -126,9 +127,17 @@ def find_programs_near(latitude, longitude, distance, kind, cip):
 			program = Program.select().join(School).where((Program.cip == cip) & (School.ipeds_id == school.ipeds_id)).get()
 			programs.append(program)
 		except Exception:
-			print "Didn't find the right program at nearby school", school.name + "."
+			print "\nDidn't find the right program at nearby school", school.name + "."
 
 	return programs
+
+
+def distance_between(place_1, place_2):
+	point_1 = (place_1.latitude, place_1.longitude)
+	point_2 = (place_2.latitude, place_2.longitude)
+
+	distance = great_circle(point_1, point_2).miles	
+	return distance
 
 
 def programs_by_distance_for_cip(cip, school_kind, student, only_reportable):	
@@ -143,7 +152,19 @@ def programs_by_distance_for_cip(cip, school_kind, student, only_reportable):
 	else:
 		programs = find_programs_near(latitude = student.latitude, longitude = student.longitude, distance = 7500, kind = school_kind, cip = cip)
 
-	return programs
+	checked_programs = []
+	for program in programs:
+		if distance_between(student, program.school) < 30.0:
+			checked_programs.append(program)
+	
+	checked_programs.sort(key = lambda p: distance_between(student, p.school)) # Put them in order of closest to furthest.
+	
+	print "\nSorted:"
+	for program in checked_programs:
+		print "   - " + program.school.name + " -- " + str(distance_between(student, program.school)) + "miles"
+	print " "
+	
+	return checked_programs
 
 
 def programs_by_roi_for_step(step, student):
@@ -216,7 +237,7 @@ def get_excluded_schools(report):
 	for pathway in report.pathways:
 		for step in pathway.pathway_steps:
 			school = step.program.school
-			if school.kind != "Degree-granting, associate's and certificates": # It's OK to reuse community colleges.
+			if school.kind != "Community College": # It's OK to reuse community colleges.
 				schools.append(step.program)
 	return schools
 
