@@ -108,6 +108,16 @@ class Career(BaseModel):
 class Student(Model):
 	name = CharField()
 	email = CharField()
+	_photo = BlobField(null = True)
+
+	@property
+	def photo(self):
+		return self._photo
+
+	@photo.setter
+	def photo(self, image):
+		compressed_image = image # Replace with image compression! Bytea max size is 1GB.
+		self._photo = compressed_image
 	
 	income = CharField()
 	budget = IntegerField()
