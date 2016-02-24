@@ -8,6 +8,8 @@ from geopy.distance import great_circle
 
 
 unsafe_search_allowed = True
+max_distance = 30.0
+budget_leeway = 80000
 
 
 def calculate_roi(cost, gains):
@@ -154,7 +156,7 @@ def programs_by_distance_for_cip(cip, school_kind, student, only_reportable):
 
 	checked_programs = []
 	for program in programs:
-		if distance_between(student, program.school) < 30.0:
+		if distance_between(student, program.school) < max_distance:
 			checked_programs.append(program)
 	
 	checked_programs.sort(key = lambda p: distance_between(student, p.school)) # Put them in order of closest to furthest.
@@ -343,7 +345,7 @@ def make_pathways_for_student(student, report, how_many):
 	# Prepopulate the excluded schools list with schools from any preexisting pathways:
 	excluded_schools = get_excluded_schools(report)
 	budget_modifier = 0
-	budget_leeway = 80000
+	budget_leeway = budget_leeway
 
 	good_pathways = []
 	failed = False
