@@ -1,5 +1,6 @@
 # Form imports:
 from flask.ext.wtf import Form
+from flask.ext.wtf.file import FileField, FileAllowed
 from wtforms import StringField, SelectField, PasswordField, BooleanField as WTFBooleanField # Peewee also has a "BooleanField," so this was necessary.
 from wtforms.fields.html5 import EmailField
 from wtforms.validators import Email, Required, EqualTo
@@ -73,6 +74,7 @@ class Questionnaire_Form(Form):
 	first_name = StringField("First name:", validators = [Required("Please enter your first name.")])
 	last_name = StringField("Last name:", validators = [Required("Please enter your last name.")])
 	email = EmailField("Email:", validators = [Required("Please enter your email."), Email("Please enter a valid email address.")])
+	photo = FileField("Photo:", validators = [FileAllowed(["jpg", "png"], "Your photo needs to be either a JPEG or PNG. Sorry!")])
 	career = SelectQueryField("Career:", query = Career.select(), get_label = "name", allow_blank = True, blank_text = " ", validators = [Required("Please choose a career.")])
 	income = SelectField("What's your family's income level?", choices = income_choices, validators = [Required("Please select your family's income level.")])
 	budget = SelectField("What's your budget for higher education?", choices = budget_choices, validators = [Required("Please enter a budget.")])

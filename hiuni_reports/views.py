@@ -155,11 +155,17 @@ def questions():
 	form = Questionnaire_Form(email = current_user.email)
 
 	if form.validate_on_submit():
+		photo = None
+		if form.photo.data is not None:
+			photofile = form.photo.data
+			photo = photofile.read()
+
 		try:
 			with database.atomic(): # This will fail, and rollback any commits, if the student isn't unique.
 				student = Student.create(
 					name = form.first_name.data + " " + form.last_name.data,
 					email = form.email.data,
+					photo = photo,
 					income = form.income.data,
 					budget = int(form.budget.data),
 					city = form.city.data,
@@ -237,6 +243,17 @@ def list_students():
 		return redirect("/reports/" + str(student.id))
 
 	return render_template("students.html", form = form)
+
+
+@application.route("/students/photo/<student_id>", methods = ["GET"])
+@login_required
+def student_photo(student_id):
+	try:
+		student = Student.get(id = student_id)
+	except Exception:
+		return None
+
+	return application.response_class(student.photo, mimetype = "application/octet-stream")
 
 
 @application.route("/reports/<student_id>", methods = ["GET", "POST"])

@@ -13,7 +13,7 @@
 			<div class="panel panel-primary">
 				
 				<div class="panel-heading">
-					<h3>{{ student.name}}</h3>
+					<h3>{{ student.name }}</h3><img src="{{ url_for("student_photo", student_id = student.id) }}">
 				</div>
 				
 				<div class="panel-body">
