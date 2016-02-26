@@ -161,7 +161,7 @@ def programs_by_distance_for_cip(cip, school_kind, student, only_reportable):
 	
 	print "\nSorted:"
 	for program in checked_programs:
-		print "   - " + program.school.name + " -- " + str(distance_between(student, program.school)) + "miles"
+		print "   - " + program.school.name + " -- " + str(distance_between(student, program.school)) + " miles away"
 	print " "
 	
 	return checked_programs

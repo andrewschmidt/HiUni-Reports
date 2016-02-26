@@ -8,6 +8,8 @@ db = application.config["DATABASE"]
 
 from geopy.geocoders import Nominatim
 from . import bcrypt
+from StringIO import StringIO
+from PIL import Image
 
 
 # DATABASE	
@@ -116,7 +118,9 @@ class Student(Model):
 
 	@photo.setter
 	def photo(self, image):
-		compressed_image = image # Replace with image compression! Bytea max size is 1GB.
+		image_file = StringIO(image)
+		photo = Image.open(image_file)
+		compressed_image = photo.thumbnail((500,500), Image.ANTIALIAS) # Replace with image compression! Bytea max size is 1GB.
 		self._photo = compressed_image
 	
 	income = CharField()
