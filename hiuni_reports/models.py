@@ -120,7 +120,7 @@ class Student(Model):
 	@photo.setter
 	def photo(self, image_file):
 		image = Image.open(image_file)
-		image.thumbnail((500,500), Image.ANTIALIAS) # Replace with image compression! Bytea max size is 1GB.
+		image.thumbnail((1000,1000), Image.ANTIALIAS) # Replace with image compression! Bytea max size is 1GB.
 		image.save("tmp.jpg")
 		tmp = open("tmp.jpg", "r")
 		self._photo = tmp.read()
