@@ -117,11 +117,17 @@ class Student(Model):
 		return self._photo
 
 	@photo.setter
-	def photo(self, image):
-		image_file = StringIO(image)
-		photo = Image.open(image_file)
-		compressed_image = photo.thumbnail((500,500), Image.ANTIALIAS) # Replace with image compression! Bytea max size is 1GB.
-		self._photo = compressed_image
+	def photo(self, image_file):
+		# image_file = StringIO(image)
+		# photo = Image.open(image_file)
+		image = Image.open(image_file)
+		image.show()
+		image.thumbnail((500,500), Image.ANTIALIAS) # Replace with image compression! Bytea max size is 1GB.
+		image.show()
+		# final_image = StringIO(compressed_image)
+		self._photo = image
+		
+		# self._photo = image
 	
 	income = CharField()
 	budget = IntegerField()

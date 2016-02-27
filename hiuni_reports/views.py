@@ -6,6 +6,8 @@ from flask.ext.login import login_required, login_user, logout_user, current_use
 from peewee import *
 from playhouse.postgres_ext import *
 
+from PIL import Image
+
 from models import * # Includes the "database" variable.
 import data_helper
 import solver
@@ -156,7 +158,7 @@ def questions():
 
 	if form.validate_on_submit():
 		photo = None
-		if form.photo.data is not None:
+		if form.photo.data:
 			photofile = form.photo.data
 			photo = photofile.read()
 
@@ -165,7 +167,7 @@ def questions():
 				student = Student.create(
 					name = form.first_name.data + " " + form.last_name.data,
 					email = form.email.data,
-					photo = photo,
+					photo = form.photo.data, #photo
 					income = form.income.data,
 					budget = int(form.budget.data),
 					city = form.city.data,
