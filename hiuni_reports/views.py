@@ -6,8 +6,6 @@ from flask.ext.login import login_required, login_user, logout_user, current_use
 from peewee import *
 from playhouse.postgres_ext import *
 
-from PIL import Image
-
 from models import * # Includes the "database" variable.
 import data_helper
 import solver
