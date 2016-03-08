@@ -1,16 +1,18 @@
 <html>
 	
 	<head>
-		
 		<!-- Latest compiled and minified CSS -->
-		<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
-		<!-- jQuery library -->
+
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<!--  <link rel="icon" href="img/favicon.ico"> -->
+
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
 		<!-- Latest compiled JavaScript -->
 		<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
 
 		<meta name="viewport" content="width=device-width, initial-scale=1">
-		
 		{% if title %}
 			<title>{{ title }} - HiUni</title>
 		{% else %}
@@ -21,27 +23,17 @@
 
 	<body>
 
-		<div class="container">
 			
-			<nav class="navbar">
-				<div class="container-fluid">
 					
-					<div class="navbar-header">
-						<a class="pull-left" href="/"><img class="img-responsive" src="{{ url_for('static', filename='hiunismall.png') }}"  width="100px"></a>
-					</div>
 					
 					<ul class="nav navbar-nav navbar-right">
 						{% if current_user.is_authenticated %}
-							<li><a href="/logout"><span class="glyphicon glyphicon-log-out"></span> Sign out</a></li>
 						{% else %}
 							<li><a href="/register"><span class="glyphicon glyphicon-user"></span> Sign up</a></li>
 							<li><a href="/login"><span class="glyphicon glyphicon-log-in"></span> Log in</a></li>
 						{% endif %}
 					</ul>
-				
 				</div>
-			</nav>
-			
 
 			<!-- Flashed messages -->
 			{% with messages = get_flashed_messages() %}
@@ -53,13 +45,10 @@
 	        		</ul>
 	      		{% endif %}
 	    	{% endwith %}
-			
 
 			<!-- Content! -->
-			<br>
 			{% block content %}{% endblock %}
 
 		</div>
-	</body>
 
 </html>
