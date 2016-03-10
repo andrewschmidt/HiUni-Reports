@@ -21,7 +21,7 @@ A pathway is rarely as simple as attending one university for four years. For ex
 
 Not quite. You need sources for a ton of data points about schools.
 
-Some of this is easy to come by — BLS’s IPEDS system offers tons of info you can download (since it’s publically available and free, I’ve included the CSV file we use). 
+Some of this is easy to come by — BLS’s IPEDS system offers some info you can download (since it’s publically available and free, I’ve included the CSV file we use). 
 
 But median salaries by major are much harder to find. We license that data where possible, and research the rest ourselves.
 
