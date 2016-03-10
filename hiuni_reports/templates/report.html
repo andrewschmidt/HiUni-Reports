@@ -1,126 +1,230 @@
-{% extends "sidebar.html" %}
-{% set sidebar_active = True %}
+{% extends "base.html" %}
 {% set active_page = "students" %}
 
-{% block right_content %}
+{% block content %}
+
+	<!-- Publish button for employees: -->
+	<div class = "container" style="margin-bottom: 10px;">
+		{% if current_user.employee != None %}
+			<form action = "/report/{{ student.id }}_{{ report.id }}" method = "post">
+				{% if not report.published %}
+					<button class = "btn btn-success btn-lg pull-left" name = "publish">Publish</button>
+				{% else %}
+					<button class = "btn btn-danger btn-lg pull-left" name = "unpublish">Unpublish</button>
+				{% endif %}
+			</form>
+		{% endif %}
+	</div>
+	
+
+	<!-- REPORT -->
+
+	<div class="row report">
 
 
-<!-- Student info first -->
-	<div class="row">
-	    <div class="col-sm-1"></div>
+		<!-- STUDENT INFO -->
+		<div class="report-header">
 
-	    <div class="col-sm-10">
-			<div class="panel panel-primary">
+			<div class="report-header-bg col-sm-12" style="background: url('{{ url_for('static', filename='img/programmer-bg.jpg') }}') no-repeat right;">
+
+				<div class="report-header-student student absolute full z-index-3 table col-sm-12">
+					<div class="inner table-cell vert-mid">
+						
+						<h3 class="report-header-student-name strong white"><b>{{ student.name }}</b></h3>
+						<h4 class="report-header-student-career white">{{ report.career.name }}</h4>
+						
+						<ul class="report-header-student-details student-details white">
+							
+							<!-- Employee-only data points -->
+							{% if current_user.employee != None %}
+								{% if student.income != "over 110,000" %}
+									{% set income = "$" + student.income %}
+								{% else %}
+									{% set income = "over $110,000" %}
+								{% endif %}
+								<li><i class="fa fa-credit-card-alt white"></i>Budget: ${{ student.budget }}</li>
+								<li><i class="fa fa-home white"></i>Income: {{ income }}</li>
+							{% endif %}
+							
+							<!-- User-facing data points -->
+							<li><i class="fa fa-map-marker white"></i>{{ student.city }}, {{ student.state }}</li>
+							{% if student.gpa %}
+								<li><i class="fa fa-graduation-cap white"></i>GPA</li>
+							{% endif %}
+							{% if student.sat %}
+								<li><i class="fa fa-pencil white"></i>SAT</li>
+							{% endif %}
+
+						</ul>
+					</div>
+
+					<div class="profile-image right z-index-6"><img src="{{ url_for("student_photo", student_id = student.id) }}" alt=""></div>
 				
-				<div class="panel-heading">
-					<h3>{{ student.name }}</h3>{% if student.photo != None %}<img class="img_responsive" src="{{ url_for("student_photo", student_id = student.id) }}" width="400px">{% endif %}
 				</div>
 				
-				<div class="panel-body">
-					<ul>
-						{% if student.income != "over 110,000" %}
-							{% set income = "$" + student.income %}
-						{% else %}
-							{% set income = "over $110,000" %}
-						{% endif %}
-						<li>Location: <b>{{ student.city }}, {{ student.state }}</b></li>
-						<li>Career: <b>{{ report.career.name }}</b></li>
-						<li>Income: <b>{{ income }}</b></li>
-						<li>Budget: <b>${{ student.budget }}</b></li>
-					</ul>
-				</div>
+				<div class="report-header-overlay absolute full z-index-1 col-sm-12"></div>
+				<div class="report-header-overlay-duplicate absolute full z-index-2 col-sm-12"></div>
+			
 			</div>
-
-			<!-- Publish button for employees: -->
-			{% if current_user.employee != None %}
-				<form action = "/report/{{ student.id }}_{{ report.id }}" method = "post">
-					{% if not report.published %}
-						<button class = "btn btn-success btn-lg pull-right" name = "publish">Publish</button>
-					{% else %}
-						<button class = "btn btn-danger btn-lg pull-right" name = "unpublish">Unpublish</button>
-					{% endif %}
-				</form>
-			{% endif %}
-
 		</div>
 
-		<div class="col-sm-1"></div>
-	</div>
-	<br><br>
+
+		<!-- REPORT BODY -->
+		<div class="report-body">
+			<div> 
 
 
-<!-- Tabs -->
-	{% set active_pathway = report.pathways[0] %}
-	<ul class="nav nav-tabs nav-justified">
-		{% for pathway in report.pathways %}
-			{% if pathway == active_pathway %}
-				<li class="active"><a data-toggle="tab" href="#{{ loop.index }}"><h4>Pathway {{ loop.index }}</h4></a></li>
-			{% else %}
-				<li><a data-toggle="tab" href="#{{ loop.index }}"><h4>Pathway {{ loop.index }}</h4></a></li>
-			{% endif %}
-		{% endfor %}
-
-
-	</ul>
-
-
-<!-- Pathway Details -->
-
-	<div class="tab-content">
-		{% for pathway in report.pathways %}
-			
-			{% if pathway == active_pathway %}
-				{% set tab_class = "tab-pane fade in active" %}
-			{% else %}
-				{% set tab_class = "tab-pane fade" %}
-			{% endif %}
-
-			<div id="{{ loop.index }}" class="{{ tab_class }}">
-
-
-				<!-- Pathway Content -->
-				<br>
-				{% if current_user.employee != None and not report.published %}
-					<form action = "/report/{{ student.id }}_{{ report.id }}" method = "post">
-						<button class="btn btn-danger btn-md" type="delete" value="{{ pathway.id }}" name="delete">Delete</button>
-					</form>
-					<br>
-				{% endif %}
+				<!-- TABS -->
+				<div class="tabbable tabs-animated">
 					
-				<div class="panel panel-default">
-<!-- 					<div class="panel-heading"><h5><center>Details</center></h5></div>
- -->					<div class="panel-footer">
-							{% if pathway.low_data == True and current_user.employee != None and not report.published %}
-								<li><b>This pathway uses programs with low salary data.</b></li>
+					<ul class="nav nav-tabs textcenter">
+						{% set active_pathway = report.pathways[0] %}
+						
+						{% for pathway in report.pathways %}
+							{% if pathway == active_pathway %}
+								<!-- Active tab -->
+								<li class="active col-xs-4 light-blue"><a class="active" href="#{{ loop.index }}" data-toggle="tab"><h5>Pathway {{ loop.index }}</h5></a></li>
+							{% else %}
+								<!-- Inactive tabs -->
+								<li class="col-xs-4"><a href="#{{ loop.index }}" data-toggle="tab"><h5>Pathway {{ loop.index }}</h5></a></li>
 							{% endif %}
-							<li>Total Cost: <b>${{ pathway.cost() }}</b></li>
-							<li>Time: <b>{{ pathway.duration() }} years</b></li>
-							<li>Median Salary: <b>${{ pathway.median_salary() }}</b></li>
-							<li>ROI: <b>{{ pathway.roi() }}%</b></li>
+						{% endfor %}
+					</ul>
+					
+
+					<!-- PATHWAYS -->
+					<div class="tab-content">
+						{% for pathway in report.pathways %}
+				
+							{% if pathway == active_pathway %}
+								{% set tab_class = "tab-pane fade in active" %}
+							{% else %}
+								{% set tab_class = "tab-pane fade" %}
+							{% endif %}
+
+							<div class="{{ tab_class }}" id="{{ loop.index }}">
+								
+
+								<!-- PATHWAY TAGLINE -->
+								<div class="container">
+									<div class="row">
+										<div class="col-sm-12">        
+											<div class="pathway table">
+												<div class="inner table-cell vert-mid">
+
+													<!-- Tagline -->
+													<h3 class="pathway-title strong light dark-gray line-height-1-4">Make <b class="light darker-gray">${{ (pathway.roi())|round|int }}</b> for every <b class="light darker-gray">$1</b> spent on tuition.</h3>
+													<div class="hr light-blue-bg" style="height: 10px; width: 300px;"></div>
+												
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+
+
+								<!-- PATHWAY DETAILS -->
+								<div class="container">
+									<div class="row summary light-blue-bg">
+
+										<!-- For Employees -->
+										{% if pathway.low_data == True and current_user.employee != None and not report.published %}
+											<h5 class="b white">This pathway uses programs with low salary data.</h5>
+											<br>
+										{% endif %}
+
+										<div class="col-sm-12">
+											<!-- Cost -->
+											<div class="summary-category col-xs-4 col-xs-offset-0 col-sm-3 col-sm-offset-1 light-blue-bg textcenter">    
+												<h3 class="strong light white">${{ pathway.cost() }}</h3>
+												<h5 class="caps b white">Cost</h5>
+											</div>
+											<!-- Time --> 
+											<div class="summary-category col-xs-4 col-sm-3 light-blue-bg textcenter">        
+												<h3 class="strong light white">{{ pathway.duration() }} years</h3>
+												<h5 class="caps b white">Time</h5>
+											</div>
+											<!-- Salary -->
+											<div class="summary-category col-xs-4 col-sm-3 light-blue-bg textcenter">        
+												<h3 class="strong light white">${{ pathway.median_salary() }}</h3>
+												<h5 class="caps b white">Salary</h5>
+											</div>    
+										</div>
+
+									</div>
+								</div>
+
+
+								<!-- PATHWAY STEPS -->
+								<div class="steps">
+
+									{% set step_colors = ["", "light-blue", "medium-blue", "dark-blue"] %}
+									{% set step_icons = ["", "img/step-number-1-2x.png", "img/step-number-2-2x.png", "img/step-number-3-2x.png"] %}
+									
+									{% for step in pathway.sorted_steps() %}
+										
+										<div class="container step-wrapper">
+											
+											<div class="row">
+												
+												<div class="step step-{{ step_colors[step.number] }} col-xs-offset-1 col-xs-10 col-sm-offset-2 col-sm-10 col-md-offset-2 col-md-8"> 
+
+													<div class="step-number absolute z-index-5">
+														<img src="{{ url_for('static', filename=step_icons[step.number]) }}" alt="Step icon">
+													</div>
+										 
+													<div class="inner">
+														
+														<!-- Step Title -->
+														<h1 class="light {{ step_colors[step.number] }}">{{ step.title() }}</h1>
+														
+														<img src="{{ url_for('static', filename='img/dots-blues.png') }}" alt="Divider" class="step-divider hidden-xs">
+														<img src="{{ url_for('static', filename='img/dots-blue-xs.png') }}" alt="Divider" class="step-divider visible-xs" style="width: 221px;">
+														
+														<!-- School -->
+														<h4 class="strong dark-gray">{{ step.program.school.name }}</h4>
+														
+														<!-- School Details -->
+														<ul class="step-details dark-gray">
+															<li><i class="fa fa-money {{ step_colors[step.number] }}"></i>${{ step.cost }}</li>
+															<li><i class="fa fa-clock-o {{ step_colors[step.number] }}"></i>{{ step.duration() }} years</li>
+															<li><i class="fa fa-map-marker {{ step_colors[step.number] }}"></i>{{ step.program.school.city }}</li>
+															{% if step.program.school.admission_rate != None %}
+																<li><i class="fa fa-check-circle {{ step_colors[step.number] }}"></i>{{ step.program.school.admission_rate }}% Acceptance rate</li>
+															{% endif %}
+														</ul>
+														
+														<!-- Step Description -->
+														<div class="step-description">
+															<p class="dark-gray">{{ step.description() }}</p>
+														</div>
+
+													</div>
+												
+												</div>     
+											</div>
+										</div>
+
+									{% endfor %}
+
+								</div>
+							</div>
+
+						{% endfor %}
+
 					</div>
+
 				</div>
-
-				{% for step in pathway.sorted_steps() %}
-					<div class="panel panel-info">
-						<div class="panel-heading"><h4>Step #{{ step.number }}: <b>{{ step.title() }}</b></h4></div>
-						<div class="panel-body">
-							{% if step.program.name != "General Studies" %}
-								<li>Major: <b>{{ step.program.name }}</b></li>
-							{% endif %}
-								<li>School: <b>{{ step.program.school.name }}</b></li>
-								<li>Cost: <b>${{ step.cost }}</b></li>
-								<li>Duration: <b>{{ step.duration() }} years</b></li>
-							{% if step.program.school.admission_rate != None %}
-								<li>Acceptance Rate: <b>{{ step.program.school.admission_rate }}%</b></li>
-							{% endif %}
-							<br><br><i>{{ step.description() }}</i>
-						</div>
-					</div>
-
-				{% endfor %}
-
 			</div>
-			
-		{% endfor %}	
+
+			<!-- Bottom banner -->
+			<div class="container">
+				<div class="row dark-blue-bg">
+					<div class="report-footer col-sm-12 textcenter"></div>   
+				</div>
+			</div>
+
+		</div>
 	</div>
+			
 {% endblock %}

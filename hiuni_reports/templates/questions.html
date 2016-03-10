@@ -1,10 +1,9 @@
-{% extends "sidebar.html" %}
+{% extends "base.html" %}
 {% set active_page = "questions" %}
 
-<!-- For signup flow reasons, customers that aren't organizations shouldn't be able to see the sidebar when they're here. -->
-{% set sidebar_active = current_user.customer.is_organization %}
-
-{% block right_content %}
+{% block content %}
+	<div class="col-sm-1"></div>
+	<div class="col-sm-10">
 		<div class="panel panel-primary">
 			<div class="panel-heading"><h4>We have some questions...</h4></div>
 			<div class="panel-body">
@@ -24,4 +23,5 @@
 			</div>
 		</div>
 	</div>
+	<div class="col-sm-1"></div>
 {% endblock %}
