@@ -48,9 +48,13 @@
 							
 							<!-- User-facing data points -->
 							<li><i class="fa fa-map-marker white"></i>{{ student.city }}, {{ student.state }}</li>
-							<li><i class="fa fa-graduation-cap white"></i>GPA</li>
-							<li><i class="fa fa-pencil white"></i>SAT</li>
-							
+							{% if student.gpa %}
+								<li><i class="fa fa-graduation-cap white"></i>GPA</li>
+							{% endif %}
+							{% if student.sat %}
+								<li><i class="fa fa-pencil white"></i>SAT</li>
+							{% endif %}
+
 						</ul>
 					</div>
 
@@ -109,7 +113,7 @@
 												<div class="inner table-cell vert-mid">
 
 													<!-- Tagline -->
-													<h3 class="pathway-title strong light dark-gray line-height-1-4">Make <b class="light darker-gray">$76</b> a year for every <b class="light darker-gray">$1</b> spent on tuition.</h3>
+													<h3 class="pathway-title strong light dark-gray line-height-1-4">Make <b class="light darker-gray">${{ (pathway.roi())|round|int }}</b> for every <b class="light darker-gray">$1</b> spent on tuition.</h3>
 													<div class="hr light-blue-bg" style="height: 10px; width: 300px;"></div>
 												
 												</div>
