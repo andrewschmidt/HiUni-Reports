@@ -54,8 +54,9 @@ def register():
 		customer = Customer()
 		
 		if form.organization.data != "":
-			customer.is_organization = True
 			customer.organization = form.organization.data
+			customer.is_organization = True
+			customer.is_student = False # Default is True, so we just flop that.
 		
 		customer.save()
 
@@ -130,6 +131,11 @@ def manage_careers():
 					data_helper.import_career_async(career.name)
 				flash("Updating careers...")
 
+				defaults = ["Computer Programming", "Designer", "Architect", "Ecologist", "Journalism"]
+				for name in defaults:
+					data_helper.import_career_async(name)
+				flash("Importing careers...")
+
 		career_count = str(Career.select().count())
 		recipe_count = str(Recipe.select().count())
 
@@ -155,23 +161,21 @@ def questions():
 	form = Questionnaire_Form(email = current_user.email)
 
 	if form.validate_on_submit():
-		photo = None
-		if form.photo.data:
-			photofile = form.photo.data
-			photo = photofile.read()
-
 		try:
 			with database.atomic(): # This will fail, and rollback any commits, if the student isn't unique.
 				student = Student.create(
 					name = form.first_name.data + " " + form.last_name.data,
+					first_name = form.first_name.data,
+					last_name = form.last_name.data,
 					email = form.email.data,
-					photo = form.photo.data, #photo
+					photo = form.photo.data,
 					income = form.income.data,
 					budget = int(form.budget.data),
 					city = form.city.data,
 					state = form.state.data,
 					customer = current_user.customer
 				)
+				
 				report = Report.create(
 					student = student,
 					career = form.career.data

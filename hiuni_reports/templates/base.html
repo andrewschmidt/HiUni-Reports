@@ -17,7 +17,7 @@
 		
 		<!-- Set the title -->
 		{% if title %}
-			<title>{{ title }} - HiUni</title>
+			<title>{{ title }}</title>
 		{% else %}
 			<title>HiUni</title>
 		{% endif %}
@@ -58,7 +58,7 @@
 					("/add_report", "add_report", "Get a new report")
 				] -%}
 				{% set student = current_user.customer.students[0] %}
-				{% set name = student.name %}
+				{% set name = student.first_name %}
 			
 			{% endif %}
 		

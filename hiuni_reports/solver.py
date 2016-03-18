@@ -235,7 +235,7 @@ def programs_for_step(step, student):
 def get_excluded_schools(report):
 	schools = []
 	for pathway in report.pathways:
-		for step in pathway.pathway_steps:
+		for step in pathway.steps:
 			school = step.program.school
 			if school.kind != "Community College": # It's OK to reuse community colleges.
 				schools.append(step.program)
@@ -244,7 +244,7 @@ def get_excluded_schools(report):
 
 def pathway_complete(pathway, recipe):
 	# Check if we made enough pathway steps:
-	if len(pathway.pathway_steps) != len(recipe.steps):
+	if len(pathway.steps) != len(recipe.steps):
 		return False
 	else:
 		return True
@@ -256,7 +256,7 @@ def pathway_schools_conflict(pathway_1, pathway_2):
 
 	for pathway in pathways:
 		schools = []
-		for step in pathway.sorted_steps():
+		for step in pathway.steps:
 			schools.append(step.program.school)
 		school_sets.append(schools)
 
@@ -274,7 +274,9 @@ def make_pathway_from_recipe(recipe, student, report, excluded_schools, budget_m
 
 	# Working through the steps backwards prioritizes the final step --
 	# which is the step whose salary matters most.
-	steps = recipe.sorted_steps()
+	steps = []
+	for step in recipe.steps:
+		steps.append(step)
 	steps.reverse()
 
 	# Make as many pathway steps as we can:
@@ -313,6 +315,11 @@ def make_pathway_from_recipe(recipe, student, report, excluded_schools, budget_m
 	if not pathway_complete(pathway, recipe):
 		pathway.delete_instance(recursive = True)
 		return None
+
+	# Assign the default pathway tagline.
+	# I'd like to add Markdown support to this at some point.
+	rounded_roi = int(round(pathway.roi()))
+	pathway.tagline = "Make <b class='light darker-gray'>$" + str(rounded_roi) + "</b> for every <b class='light darker-gray'>$1</b> spent on tuition."
 	
 	return pathway
 

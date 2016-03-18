@@ -34,6 +34,7 @@ class BaseModel(Model):
 # USER AUTHENTICATION-RELATED MODELS
 
 class Customer(BaseModel):
+	is_student = BooleanField(default = True)
 	is_organization = BooleanField(default = False)
 	organization = TextField(null = True)
 
@@ -110,6 +111,8 @@ class Career(BaseModel):
 
 class Student(Model):
 	name = CharField()
+	first_name = CharField()
+	last_name = CharField()
 	email = CharField()
 	_photo = BlobField(null = True)
 
@@ -119,12 +122,15 @@ class Student(Model):
 
 	@photo.setter
 	def photo(self, image_file):
-		image = Image.open(image_file)
-		image.thumbnail((1000,1000), Image.ANTIALIAS) # Replace with image compression! Bytea max size is 1GB.
-		image.save("tmp.jpg")
-		tmp = open("tmp.jpg", "r")
-		self._photo = tmp.read()
-		remove("tmp.jpg")
+		try:
+			image = Image.open(image_file)
+			image.thumbnail((1000,1000), Image.ANTIALIAS) # Replace with image compression! Bytea max size is 1GB.
+			image.save("tmp.jpg")
+			tmp = open("tmp.jpg", "r")
+			self._photo = tmp.read()
+			remove("tmp.jpg")
+		except Exception:
+			self._photo = None
 	
 	income = CharField()
 	budget = IntegerField()
@@ -159,12 +165,6 @@ class Recipe(BaseModel):
 			duration += step.duration
 		return duration
 
-	def sorted_steps(self): # Steps aren't returned in any particular order; this sorts them.
-		steps = []
-		for step in self.steps:
-			steps.append(step)
-		return steps
-
 
 class Step(BaseModel):
 	recipe = ForeignKeyField(Recipe, related_name = "steps")
@@ -198,28 +198,24 @@ class Report(BaseModel):
 class Pathway(BaseModel):
 	report = ForeignKeyField(Report, related_name = "pathways")
 	low_data = BooleanField(default = False)
-
-	def sorted_steps(self): # Steps aren't returned in any particular order; this sorts them.
-		steps = []
-		for step in self.pathway_steps:
-			steps.append(step)
-		return steps
+	tagline = CharField(null = True)
 
 	def cost(self):
 		cost = 0
-		for step in self.pathway_steps:
+		for step in self.steps:
 			cost += step.cost
 		return cost
 
 	def duration(self):
 		duration = 0
-		for pathway_step in self.pathway_steps:
-			duration += pathway_step.duration()
+		for step in self.steps:
+			duration += step.duration
 		return duration
 
 	def median_salary(self):
-		pathway_steps = self.sorted_steps()
-		salary = pathway_steps[-1].median_salary()
+		salary = 0
+		for step in self.steps:
+			salary = step.median_salary
 		return salary
 
 	def roi(self):
@@ -231,24 +227,37 @@ class Pathway(BaseModel):
 
 
 class Pathway_Step(BaseModel):
-	pathway = ForeignKeyField(Pathway, related_name = "pathway_steps")
+	pathway = ForeignKeyField(Pathway, related_name = "steps")
 	program = ForeignKeyField(Program)
 	step = ForeignKeyField(Step)
 
 	number = IntegerField()
+	title = CharField(null = True)
 	cost = IntegerField()
+	duration = IntegerField(null = True)
+	median_salary = IntegerField(null = True)
+	description = TextField(null = True)
 
-	def title(self):
-		return self.step.title
+	# def title(self):
+	# 	return self.step.title
 
-	def description(self):
-		return self.step.description
+	# def description(self):
+	# 	return self.step.description
 
-	def duration(self):
-		return self.step.duration
+	# def duration(self):
+	# 	return self.step.duration
 
-	def median_salary(self):
-		return self.program.median_salary
+	# def median_salary(self):
+	# 	return self.program.median_salary
+
+	def save(self, *args, **kwargs):
+		if self.title is None: self.title = self.step.title
+		if self.duration is None: self.duration = self.step.duration
+		if self.median_salary is None: self.median_salary = self.program.median_salary
+		if self.description is None: self.description = self.step.description
+		
+		return super(Pathway_Step, self).save(*args, **kwargs)
+
 
 	class Meta:
 		order_by = ("number",)
