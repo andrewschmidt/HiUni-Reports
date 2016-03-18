@@ -235,7 +235,7 @@ def programs_for_step(step, student):
 def get_excluded_schools(report):
 	schools = []
 	for pathway in report.pathways:
-		for step in pathway.pathway_steps:
+		for step in pathway.steps:
 			school = step.program.school
 			if school.kind != "Community College": # It's OK to reuse community colleges.
 				schools.append(step.program)
@@ -244,7 +244,7 @@ def get_excluded_schools(report):
 
 def pathway_complete(pathway, recipe):
 	# Check if we made enough pathway steps:
-	if len(pathway.pathway_steps) != len(recipe.steps):
+	if len(pathway.steps) != len(recipe.steps):
 		return False
 	else:
 		return True
