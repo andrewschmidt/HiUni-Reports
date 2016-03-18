@@ -43,7 +43,7 @@
 								{% else %}
 									{% set income = "over $110,000" %}
 								{% endif %}
-								<li><i class="fa fa-credit-card-alt white"></i>Budget: ${{ student.budget }}</li>
+								<li><i class="fa fa-credit-card-alt white"></i>Budget: ${{ '{0:,}'.format(student.budget) }}</li>
 								<li><i class="fa fa-home white"></i>Income: {{ income }}</li>
 							{% endif %}
 							
@@ -137,7 +137,7 @@
 										<div class="col-sm-12">
 											<!-- Cost -->
 											<div class="summary-category col-xs-4 col-xs-offset-0 col-sm-3 col-sm-offset-1 light-blue-bg textcenter">    
-												<h3 class="strong light white">${{ pathway.cost() }}</h3>
+												<h3 class="strong light white">${{ '{0:,}'.format(pathway.cost()) }}</h3>
 												<h5 class="caps b white">Cost</h5>
 											</div>
 											<!-- Time --> 
@@ -147,7 +147,7 @@
 											</div>
 											<!-- Salary -->
 											<div class="summary-category col-xs-4 col-sm-3 light-blue-bg textcenter">        
-												<h3 class="strong light white">${{ pathway.median_salary() }}</h3>
+												<h3 class="strong light white">${{ '{0:,}'.format(pathway.median_salary()) }}</h3>
 												<h5 class="caps b white">Salary</h5>
 											</div>    
 										</div>
@@ -187,7 +187,7 @@
 														
 														<!-- School Details -->
 														<ul class="step-details dark-gray">
-															<li><i class="fa fa-money {{ step_colors[step.number] }}"></i>${{ step.cost }}</li>
+															<li><i class="fa fa-money {{ step_colors[step.number] }}"></i>${{ '{0:,}'.format(step.cost) }}</li>
 															<li><i class="fa fa-clock-o {{ step_colors[step.number] }}"></i>{{ step.duration }} years</li>
 															<li><i class="fa fa-map-marker {{ step_colors[step.number] }}"></i>{{ step.program.school.city }}</li>
 															{% if step.program.school.admission_rate != None %}
