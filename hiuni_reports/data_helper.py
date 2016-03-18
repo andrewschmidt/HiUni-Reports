@@ -560,18 +560,17 @@ def import_school_data_async():
 
 
 def import_recipes_for_career_named(name):
-	i = 1	
+	i = 1
 	while True:
 		file_name = name + " Recipe " + str(i) # Recipes should follow the naming convention "Career Recipe 1.csv"
-		
+
 		try:
 			import_recipe_from_file(file_name)
-			recipes_made += 1
 		except Exception:
 			break
 		
 		i += 1
-
+		
 
 @async
 def import_career_async(name):

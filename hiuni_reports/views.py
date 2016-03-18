@@ -131,6 +131,11 @@ def manage_careers():
 					data_helper.import_career_async(career.name)
 				flash("Updating careers...")
 
+				defaults = ["Computer Programming", "Designer", "Architect", "Ecologist", "Journalism"]
+				for name in defaults:
+					data_helper.import_career_async(name)
+				flash("Importing careers...")
+
 		career_count = str(Career.select().count())
 		recipe_count = str(Recipe.select().count())
 

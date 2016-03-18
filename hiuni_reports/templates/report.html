@@ -161,7 +161,7 @@
 									{% set step_colors = ["", "light-blue", "medium-blue", "dark-blue"] %}
 									{% set step_icons = ["", "img/step-number-1-2x.png", "img/step-number-2-2x.png", "img/step-number-3-2x.png"] %}
 									
-									{% for step in pathway.pathway_steps %}
+									{% for step in pathway.steps %}
 										
 										<div class="container step-wrapper">
 											
@@ -176,7 +176,7 @@
 													<div class="inner">
 														
 														<!-- Step Title -->
-														<h1 class="light {{ step_colors[step.number] }}">{{ step.title() }}</h1>
+														<h1 class="light {{ step_colors[step.number] }}">{{ step.title }}</h1>
 														
 														<img src="{{ url_for('static', filename='img/dots-blues.png') }}" alt="Divider" class="step-divider hidden-xs">
 														<img src="{{ url_for('static', filename='img/dots-blue-xs.png') }}" alt="Divider" class="step-divider visible-xs" style="width: 221px;">
@@ -187,7 +187,7 @@
 														<!-- School Details -->
 														<ul class="step-details dark-gray">
 															<li><i class="fa fa-money {{ step_colors[step.number] }}"></i>${{ step.cost }}</li>
-															<li><i class="fa fa-clock-o {{ step_colors[step.number] }}"></i>{{ step.duration() }} years</li>
+															<li><i class="fa fa-clock-o {{ step_colors[step.number] }}"></i>{{ step.duration }} years</li>
 															<li><i class="fa fa-map-marker {{ step_colors[step.number] }}"></i>{{ step.program.school.city }}</li>
 															{% if step.program.school.admission_rate != None %}
 																<li><i class="fa fa-check-circle {{ step_colors[step.number] }}"></i>{{ step.program.school.admission_rate }}% Acceptance rate</li>
@@ -196,7 +196,7 @@
 														
 														<!-- Step Description -->
 														<div class="step-description">
-															<p class="dark-gray">{{ step.description() }}</p>
+															<p class="dark-gray">{{ step.description }}</p>
 														</div>
 
 													</div>

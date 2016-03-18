@@ -238,11 +238,11 @@ class Pathway_Step(BaseModel):
 	step = ForeignKeyField(Step)
 
 	number = IntegerField()
-	title = CharField(default = self.step.title)
+	title = CharField(null = True)
 	cost = IntegerField()
-	duration = IntegerField(default = self.step.duration)
-	median_salary = IntegerField(default = self.program.median_salary)
-	description = TextField(default = self.step.description)
+	duration = IntegerField(null = True)
+	median_salary = IntegerField(null = True)
+	description = TextField(null = True)
 
 	# def title(self):
 	# 	return self.step.title
@@ -255,6 +255,15 @@ class Pathway_Step(BaseModel):
 
 	# def median_salary(self):
 	# 	return self.program.median_salary
+
+	def save(self, *args, **kwargs):
+		if self.title is None: self.title = self.step.title
+		if self.duration is None: self.duration = self.step.duration
+		if self.median_salary is None: self.median_salary = self.program.median_salary
+		if self.description is None: self.description = self.step.description
+		
+		return super(Pathway_Step, self).save(*args, **kwargs)
+
 
 	class Meta:
 		order_by = ("number",)
