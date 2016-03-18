@@ -161,23 +161,21 @@ def questions():
 	form = Questionnaire_Form(email = current_user.email)
 
 	if form.validate_on_submit():
-		photo = None
-		if form.photo.data:
-			photofile = form.photo.data
-			photo = photofile.read()
-
 		try:
 			with database.atomic(): # This will fail, and rollback any commits, if the student isn't unique.
 				student = Student.create(
 					name = form.first_name.data + " " + form.last_name.data,
+					first_name = form.first_name.data,
+					last_name = form.last_name.data,
 					email = form.email.data,
-					photo = form.photo.data, #photo
+					photo = form.photo.data,
 					income = form.income.data,
 					budget = int(form.budget.data),
 					city = form.city.data,
 					state = form.state.data,
 					customer = current_user.customer
 				)
+				
 				report = Report.create(
 					student = student,
 					career = form.career.data

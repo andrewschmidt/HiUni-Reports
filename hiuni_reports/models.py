@@ -111,6 +111,8 @@ class Career(BaseModel):
 
 class Student(Model):
 	name = CharField()
+	first_name = CharField()
+	last_name = CharField()
 	email = CharField()
 	_photo = BlobField(null = True)
 
@@ -120,12 +122,15 @@ class Student(Model):
 
 	@photo.setter
 	def photo(self, image_file):
-		image = Image.open(image_file)
-		image.thumbnail((1000,1000), Image.ANTIALIAS) # Replace with image compression! Bytea max size is 1GB.
-		image.save("tmp.jpg")
-		tmp = open("tmp.jpg", "r")
-		self._photo = tmp.read()
-		remove("tmp.jpg")
+		try:
+			image = Image.open(image_file)
+			image.thumbnail((1000,1000), Image.ANTIALIAS) # Replace with image compression! Bytea max size is 1GB.
+			image.save("tmp.jpg")
+			tmp = open("tmp.jpg", "r")
+			self._photo = tmp.read()
+			remove("tmp.jpg")
+		except Exception:
+			self._photo = None
 	
 	income = CharField()
 	budget = IntegerField()
@@ -159,12 +164,6 @@ class Recipe(BaseModel):
 		for step in self.steps:
 			duration += step.duration
 		return duration
-
-	# def sorted_steps(self): # Steps aren't returned in any particular order; this sorts them.
-	# 	steps = []
-	# 	for step in self.steps:
-	# 		steps.append(step)
-	# 	return steps
 
 
 class Step(BaseModel):
@@ -201,27 +200,22 @@ class Pathway(BaseModel):
 	low_data = BooleanField(default = False)
 	tagline = CharField(null = True)
 
-	# def sorted_steps(self): # Steps aren't returned in any particular order; this sorts them.
-	# 	steps = []
-	# 	for step in self.pathway_steps:
-	# 		steps.append(step)
-	# 	return steps
-
 	def cost(self):
 		cost = 0
-		for step in self.pathway_steps:
+		for step in self.steps:
 			cost += step.cost
 		return cost
 
 	def duration(self):
 		duration = 0
-		for pathway_step in self.pathway_steps:
-			duration += pathway_step.duration()
+		for step in self.steps:
+			duration += step.duration
 		return duration
 
 	def median_salary(self):
-		pathway_steps = self.sorted_steps()
-		salary = pathway_steps[-1].median_salary()
+		salary = 0
+		for step in self.steps:
+			salary = step.median_salary
 		return salary
 
 	def roi(self):
