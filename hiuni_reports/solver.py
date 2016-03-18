@@ -320,6 +320,7 @@ def make_pathway_from_recipe(recipe, student, report, excluded_schools, budget_m
 	# I'd like to add Markdown support to this at some point.
 	rounded_roi = int(round(pathway.roi()))
 	pathway.tagline = "Make <b class='light darker-gray'>$" + str(rounded_roi) + "</b> for every <b class='light darker-gray'>$1</b> spent on tuition."
+	pathway.save()
 	
 	return pathway
 

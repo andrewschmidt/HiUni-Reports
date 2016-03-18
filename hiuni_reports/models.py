@@ -238,18 +238,6 @@ class Pathway_Step(BaseModel):
 	median_salary = IntegerField(null = True)
 	description = TextField(null = True)
 
-	# def title(self):
-	# 	return self.step.title
-
-	# def description(self):
-	# 	return self.step.description
-
-	# def duration(self):
-	# 	return self.step.duration
-
-	# def median_salary(self):
-	# 	return self.program.median_salary
-
 	def save(self, *args, **kwargs):
 		if self.title is None: self.title = self.step.title
 		if self.duration is None: self.duration = self.step.duration
@@ -257,7 +245,6 @@ class Pathway_Step(BaseModel):
 		if self.description is None: self.description = self.step.description
 		
 		return super(Pathway_Step, self).save(*args, **kwargs)
-
 
 	class Meta:
 		order_by = ("number",)
