@@ -34,6 +34,7 @@ class BaseModel(Model):
 # USER AUTHENTICATION-RELATED MODELS
 
 class Customer(BaseModel):
+	is_student = BooleanField(default = True)
 	is_organization = BooleanField(default = False)
 	organization = TextField(null = True)
 
@@ -159,11 +160,11 @@ class Recipe(BaseModel):
 			duration += step.duration
 		return duration
 
-	def sorted_steps(self): # Steps aren't returned in any particular order; this sorts them.
-		steps = []
-		for step in self.steps:
-			steps.append(step)
-		return steps
+	# def sorted_steps(self): # Steps aren't returned in any particular order; this sorts them.
+	# 	steps = []
+	# 	for step in self.steps:
+	# 		steps.append(step)
+	# 	return steps
 
 
 class Step(BaseModel):
@@ -198,12 +199,13 @@ class Report(BaseModel):
 class Pathway(BaseModel):
 	report = ForeignKeyField(Report, related_name = "pathways")
 	low_data = BooleanField(default = False)
+	tagline = CharField(null = True)
 
-	def sorted_steps(self): # Steps aren't returned in any particular order; this sorts them.
-		steps = []
-		for step in self.pathway_steps:
-			steps.append(step)
-		return steps
+	# def sorted_steps(self): # Steps aren't returned in any particular order; this sorts them.
+	# 	steps = []
+	# 	for step in self.pathway_steps:
+	# 		steps.append(step)
+	# 	return steps
 
 	def cost(self):
 		cost = 0
@@ -231,24 +233,28 @@ class Pathway(BaseModel):
 
 
 class Pathway_Step(BaseModel):
-	pathway = ForeignKeyField(Pathway, related_name = "pathway_steps")
+	pathway = ForeignKeyField(Pathway, related_name = "steps")
 	program = ForeignKeyField(Program)
 	step = ForeignKeyField(Step)
 
 	number = IntegerField()
+	title = CharField(default = self.step.title)
 	cost = IntegerField()
+	duration = IntegerField(default = self.step.duration)
+	median_salary = IntegerField(default = self.program.median_salary)
+	description = TextField(default = self.step.description)
 
-	def title(self):
-		return self.step.title
+	# def title(self):
+	# 	return self.step.title
 
-	def description(self):
-		return self.step.description
+	# def description(self):
+	# 	return self.step.description
 
-	def duration(self):
-		return self.step.duration
+	# def duration(self):
+	# 	return self.step.duration
 
-	def median_salary(self):
-		return self.program.median_salary
+	# def median_salary(self):
+	# 	return self.program.median_salary
 
 	class Meta:
 		order_by = ("number",)

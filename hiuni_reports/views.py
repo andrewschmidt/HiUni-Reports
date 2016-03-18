@@ -54,8 +54,9 @@ def register():
 		customer = Customer()
 		
 		if form.organization.data != "":
-			customer.is_organization = True
 			customer.organization = form.organization.data
+			customer.is_organization = True
+			customer.is_student = False # Default is True, so we just flop that.
 		
 		customer.save()
 
