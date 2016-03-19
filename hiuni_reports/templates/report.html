@@ -80,18 +80,19 @@
 					
 					<ul class="nav nav-tabs textcenter">
 						{% set active_pathway = report.pathways[0] %}
+						{% set tab_width = (12/report.pathways|count)|round|int %}
 						
 						{% for pathway in report.pathways %}
 							{% if pathway == active_pathway %}
 								<!-- Active tab -->
-								<li class="active col-xs-4 light-blue"><a class="active" href="#{{ loop.index }}" data-toggle="tab"><h5>Pathway {{ loop.index }}</h5></a></li>
+								<li class="active col-xs-{{ tab_width }}"><a href="#{{ loop.index }}" data-toggle="tab"><h5>Pathway {{ loop.index }}</h5></a></li>
 							{% else %}
 								<!-- Inactive tabs -->
-								<li class="col-xs-4"><a href="#{{ loop.index }}" data-toggle="tab"><h5>Pathway {{ loop.index }}</h5></a></li>
+								<li class="col-xs-{{ tab_width }}"><a href="#{{ loop.index }}" data-toggle="tab"><h5>Pathway {{ loop.index }}</h5></a></li>
 							{% endif %}
 						{% endfor %}
-					</ul>
 					
+					</ul>
 
 					<!-- PATHWAYS -->
 					<div class="tab-content">
@@ -116,7 +117,12 @@
 													<!-- Tagline -->
 													<h3 class="pathway-title strong light dark-gray line-height-1-4">{{ pathway.tagline|safe }}</h3>
 													<div class="hr light-blue-bg" style="height: 10px; width: 300px;"></div>
-												
+													
+													{% if current_user.employee != None and not report.published %}
+														<form action="/report/{{ student.id }}_{{ report.id }}" method="post">
+															<button class="btn btn-danger btn-lg pull-right pull-bottom" type="delete" value="{{ pathway.id }}" name="delete">Delete pathway</button>
+														</form>
+													{% endif %}
 												</div>
 											</div>
 										</div>
@@ -130,7 +136,7 @@
 
 										<!-- For Employees -->
 										{% if pathway.low_data == True and current_user.employee != None and not report.published %}
-											<h5 class="b white">This pathway uses programs with low salary data.</h5>
+											<h5 class="b white pull-center">This pathway uses programs with low salary data.</h5>
 											<br>
 										{% endif %}
 
@@ -149,9 +155,8 @@
 											<div class="summary-category col-xs-4 col-sm-3 light-blue-bg textcenter">        
 												<h3 class="strong light white">${{ '{0:,}'.format(pathway.median_salary()) }}</h3>
 												<h5 class="caps b white">Salary</h5>
-											</div>    
+											</div>
 										</div>
-
 									</div>
 								</div>
 

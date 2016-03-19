@@ -60,13 +60,15 @@ def register():
 		
 		customer.save()
 
-		user = User.create(
-			email = form.email.data,
-			password = form.password.data,
-			customer = customer
-		)
-
-		user.save()
+		try:
+			user = User.create(
+				email = form.email.data,
+				password = form.password.data,
+				customer = customer
+			)
+		except Exception:
+			flash("Looks like somebody's already registered with that email!")
+			return redirect("/register")
 
 		# Log them in!
 		user.authenticated = True
@@ -186,7 +188,7 @@ def questions():
 			flash("It looks like you've already created a profile. Try logging in!")
 			return redirect("/index")
 
-		solver.make_pathways_async(student = student, report = report, how_many = 6) # This *should* be asynchronous.
+		solver.make_pathways_async(student = student, report = report, how_many = 6)
 		return redirect("/confirmation")
 
 	else:
