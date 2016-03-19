@@ -52,12 +52,18 @@
 				{% set name = current_user.customer.organization %}
 			
 			{% elif current_user.customer.students[0] %}
-				
-				{% set sidebar = [
-					("/students", "students", "My Reports"),
-					("/add_report", "add_report", "Get a new report")
-				] -%}
 				{% set student = current_user.customer.students[0] %}
+				{% if student.reports|count > 1 %}
+					{% set sidebar = [
+						("/students", "students", "My Reports"),
+						("/add_report", "add_report", "Get a new report")
+					] -%}
+				{% else %}
+					{% set sidebar = [
+						("/students", "students", "My Report"),
+						("/add_report", "add_report", "Get a new report")
+					] -%}
+				{% endif %}
 				{% set name = student.first_name %}
 			
 			{% endif %}
