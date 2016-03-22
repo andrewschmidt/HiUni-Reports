@@ -27,6 +27,7 @@ database = PostgresqlExtDatabase(
 	password = db["password"]
 )
 
+
 # S3
 s3 = boto.connect_s3(application.config["AWS_ACCESS_KEY_ID"], application.config["AWS_SECRET_ACCESS_KEY"])
 
