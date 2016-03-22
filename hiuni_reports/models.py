@@ -4,16 +4,20 @@ from peewee import *
 from playhouse.postgres_ext import *
 
 from hiuni_reports import application
-db = application.config["DATABASE"]
 
 from geopy.geocoders import Nominatim
 from . import bcrypt
+
+import boto
+from boto.s3.key import Key
+from werkzeug import secure_filename
 
 from os import remove
 from PIL import Image
 
 
 # DATABASE	
+db = application.config["DATABASE"]
 
 database = PostgresqlExtDatabase(
 	db["name"],
@@ -22,6 +26,20 @@ database = PostgresqlExtDatabase(
 	user = db["user"],
 	password = db["password"]
 )
+
+# S3
+s3 = boto.connect_s3(application.config["AWS_ACCESS_KEY_ID"], application.config["AWS_SECRET_ACCESS_KEY"])
+
+# Get a handle to the S3 bucket:
+try:
+	bucket = s3.get_bucket(application.config["BUCKET"])
+except Exception:
+	print "An error occurred connecting to the S3 bucket."
+
+if bucket is None:
+	bucket = s3.create_bucket(application.config["BUCKET"])
+	print "Creating an S3 bucket called '" + application.config["BUCKET"] + "'."
+
 
 
 # MODELS
@@ -105,8 +123,27 @@ class Program(BaseModel):
 
 class Career(BaseModel):
 	name = CharField()
-	nicknames = ArrayField(CharField, null = True) # Neither of these are being imported yet.
+	nicknames = ArrayField(CharField, null = True)
+	image_url = CharField(null = True)
 	description = TextField(null = True)
+
+	@property
+	def image(self):
+		return self.image_url # I should return the file from S3 here, but for now I'm just returning the image_url.
+
+	@image.setter
+	def image(self, file):
+		filename = self.name + file.filename[-4:]
+		filename = secure_filename(filename)
+		data = file.read()
+
+		key = bucket.get_key("career_images/" + filename)
+		if key is None:
+			key = bucket.new_key("career_images/" + filename)
+
+		key.set_contents_from_string(data)
+		key.set_acl('public-read')
+		self.image_url = key.generate_url(expires_in = 0, query_auth = False)
 
 
 class Student(Model):
