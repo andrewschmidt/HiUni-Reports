@@ -1,8 +1,9 @@
 import os
 from flask import Flask, g
-import config
+# import config # I *think* I can get rid of this...
 
 from flask.ext.bcrypt import Bcrypt
+
 
 
 # START THE APPLICATION
@@ -10,7 +11,7 @@ cwd = os.getcwd()
 static = cwd + "/static"
 
 application = Flask(__name__, instance_relative_config = True, static_folder = static) # AWS expects this to be "application," not "app"
-application.config.from_object("config")
+# application.config.from_object("config") # I *think* I can get rid of this...
 application.config.from_pyfile("config.py")
 
 bcrypt = Bcrypt(application)

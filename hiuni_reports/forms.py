@@ -38,6 +38,10 @@ class Add_Report(Form):
 	career = SelectQueryField("Choose a career:", query = Career.select(), get_label = "name", allow_blank = True, blank_text = " ", validators = [Required()])
 
 
+class Add_Career(Form):
+	banner_image = FileField("Banner image:", validators = [FileAllowed(["jpg", "png"], "You sure that's an image file? Upload a JPEG or PNG!")])
+
+
 class Questionnaire_Form(Form):
 	# Let's hardcode some data.
 	# First, income levels:
