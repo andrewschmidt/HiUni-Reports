@@ -2,6 +2,7 @@ from hiuni_reports import application
 from flask import render_template, redirect, request, abort, flash, session, url_for
 
 from flask.ext.login import login_required, login_user, logout_user, current_user
+from werkzeug import secure_filename
 
 import boto
 from boto.s3.key import Key
@@ -157,25 +158,27 @@ def add_career():
 
 		if form.validate_on_submit():
 
+			filename = secure_filename(form.image.data.filename)
+
 		# This should all move to a function in data_helper -- and probably be async.
 
-			# Connect to Amazon S3:
-			s3 = boto.connect_s3(application.config["AWS_ACCESS_KEY_ID"], application.config["AWS_SECRET_ACCESS_KEY"])
+			# # Connect to Amazon S3:
+			# s3 = boto.connect_s3(application.config["AWS_ACCESS_KEY_ID"], application.config["AWS_SECRET_ACCESS_KEY"])
 
-			# Get a handle to the S3 bucket:
-			try:
-				s3.create_bucket(application.config["BUCKET"]) # Hopefully this won't create a new bucket each time I run the app...
-			except:
-				print "The S3 bucket '" + application.config["BUCKET"] + "' already exists. Getting a connection to it now..."
-				bucket = s3.get_bucket(application.config["BUCKET"])
+			# # Get a handle to the S3 bucket:
+			# try:
+			# 	s3.create_bucket(application.config["BUCKET"]) # Hopefully this won't create a new bucket each time I run the app...
+			# except:
+			# 	print "The S3 bucket '" + application.config["BUCKET"] + "' already exists. Getting a connection to it now..."
+			# 	bucket = s3.get_bucket(application.config["BUCKET"])
 			
-			# Get our key, or create it:
-			key = bucket.get_key("career_images/" + career.name)
-			if key is None:
-				key = bucket.new_key("career_images/" + career.name)
+			# # Get our key, or create it:
+			# key = bucket.get_key("career_images/" + career.name)
+			# if key is None:
+			# 	key = bucket.new_key("career_images/" + career.name)
 
 
-			flash("Uploading the photo...")
+			flash("Uploading the photo named " + filename + "...")
 
 		else:
 			for field, errors in form.errors.items():

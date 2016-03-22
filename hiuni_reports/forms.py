@@ -39,7 +39,7 @@ class Add_Report(Form):
 
 
 class Add_Career(Form):
-	banner_image = FileField("Banner image:", validators = [FileAllowed(["jpg", "png"], "You sure that's an image file? Upload a JPEG or PNG!")])
+	image = FileField("Banner image:", validators = [FileAllowed(["jpg", "png"], "You sure that's an image file? Upload a JPEG or PNG!")])
 
 
 class Questionnaire_Form(Form):
