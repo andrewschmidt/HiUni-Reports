@@ -162,7 +162,7 @@ class Student(Model):
 	def photo(self, image_file):
 		try:
 			image = Image.open(image_file)
-			image.thumbnail((1000,1000), Image.ANTIALIAS) # Replace with image compression! Bytea max size is 1GB.
+			image.thumbnail((1000,1000), Image.ANTIALIAS)
 			image.save("tmp.jpg")
 			tmp = open("tmp.jpg", "r")
 			self._photo = tmp.read()

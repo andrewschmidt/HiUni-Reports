@@ -1,12 +1,31 @@
 # Form imports:
 from flask.ext.wtf import Form
 from flask.ext.wtf.file import FileField, FileAllowed
-from wtforms import StringField, SelectField, PasswordField, BooleanField as WTFBooleanField # Peewee also has a "BooleanField," so this was necessary.
+from wtforms import Field, StringField, SelectField, PasswordField, TextAreaField, BooleanField as WTFBooleanField # Peewee also has a "BooleanField," so this was necessary.
 from wtforms.fields.html5 import EmailField
+from wtforms.widgets import TextInput
 from wtforms.validators import Email, Required, EqualTo
 from wtfpeewee.fields import SelectQueryField # Unlike a regular WTForms SelectField, this returns actual model classes.
 
 from models import *
+
+
+# CUSTOM FIELDS
+
+class ListField(Field):
+    widget = TextInput()
+
+    def _value(self):
+        if self.data:
+            return u', '.join(self.data)
+        else:
+            return u''
+
+    def process_formdata(self, valuelist):
+        if valuelist:
+            self.data = [x.strip() for x in valuelist[0].split(',')]
+        else:
+            self.data = []
 
 
 # FORMS
@@ -39,7 +58,10 @@ class Add_Report(Form):
 
 
 class Add_Career(Form):
-	image = FileField("Banner image:", validators = [FileAllowed(["jpg", "png"], "You sure that's an image file? Upload a JPEG or PNG!")])
+	name = StringField("Name", validators = [Required("Don't forget the career's name!")])
+	nicknames = StringField("Nicknames")
+	image = FileField("Banner image", validators = [FileAllowed(["jpg", "png"], "You sure that's an image file? Upload a JPEG or PNG!")])
+	description = TextAreaField("Description")
 
 
 class Questionnaire_Form(Form):

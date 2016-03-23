@@ -146,6 +146,16 @@ def manage_careers():
 	else: return redirect("/")
 
 
+@application.route("/career/<career_id>", methods = ["GET", "POST"])
+@login_required
+def career(career_id):
+	if current_user.employee:
+		career = Career.get(id = career_id)
+		return render_template("career.html", career = career)
+
+	else: return redirect("/")
+
+
 @application.route("/add_career", methods = ["GET", "POST"])
 @login_required
 def add_career():
@@ -155,15 +165,14 @@ def add_career():
 		if form.validate_on_submit():
 			with database.atomic(): # This will fail, and rollback any commits, if the career isn't unique.
 				career = Career.create(
-					name = "Test Career 6"
+					name = form.name.data,
+					nicknames = form.nicknames.data,
+					image = form.image.data,
+					description = form.description.data
 				)
 
-				career.image = form.image.data
-				career.save()
-
 				flash("Saving the career...")
-
-				return redirect(career.image_url)
+				return redirect("/career/" + career.id)
 
 		else:
 			for field, errors in form.errors.items():
@@ -171,6 +180,8 @@ def add_career():
 					flash(error)
 
 		return render_template("add_career.html", form = form)
+
+	else: return redirect("/")
 
 
 @application.route("/logout")
