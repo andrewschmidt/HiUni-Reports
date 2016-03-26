@@ -19,23 +19,6 @@
 					</div>
 
 					<div class="profile-image right z-index-6">
-{# 						<a href="#" class="btn btn-warning" type="button" onclick="document.getElementById('fileID').click(); return false;">Change image</a>
-						<input id="fileID" type="file" style="visibility: hidden; display: none;" /> #}
-
-						<form id="image_form" method="POST" action="" enctype="multipart/form-data">
-							<span class="btn btn-warning fileinput-button">
-								<span>Change image</span>
-								<input id="image_file" name="update_image" type="file">
-							</span>
-						</form>
-
-						<script>
-							document.getElementById("image_file").onchange = function() {
-							    document.getElementById("image_form").submit();
-							}
-						</script>
-
-
 					</div>
 				
 				</div>
@@ -53,12 +36,17 @@
 					
 					<div class="form-group">
 						
-						{% for field in form if field.widget.input_type != "hidden" and field.name != "image" %}
+						{% for field in form if field.widget.input_type != "hidden" %}
 							<label class="control-label" for="{{ field.id }}">{{ field.label }}</label>
 							{{ field(class="form-control")}} <br>
 						{% endfor %}
 						
-						<button class="btn btn-success" type="submit">Save</button>
+						<button class="btn btn-success" type="submit">Save</button> 
+						{% if career %}
+							<a href="/career/{{ career.id }}" class="btn btn-warning">Cancel</a>
+						{% else %}
+							<a href="/manage_careers" class="btn btn-warning">Cancel</a>
+						{% endif %}
 					
 					</div>
 				

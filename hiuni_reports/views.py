@@ -189,12 +189,6 @@ def edit_career(career_id):
 	if current_user.employee:
 		career = Career.get(id = career_id)
 		form = Add_Career(name = career.name, description = career.description)
-		print str(form.image)
-
-		if request.method == "POST":
-			if "image_form" in request.form:
-				career.image = request.files["image_file"]
-				return redirect("/edit_career/" + str(career.id))
 
 		if form.validate_on_submit():
 			career.name = form.name.data
