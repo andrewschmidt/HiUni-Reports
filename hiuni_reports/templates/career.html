@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% set active_page = "manage_careers" %}
+
+{% block content %}
+
+	<div class="row report">
+		<div class="report-header">
+
+			<div class="report-header-bg col-sm-12" style="background: url('{{ career.image }}') no-repeat right;">
+
+				<div class="report-header-student student absolute full z-index-3 table col-sm-12">
+					<div class="inner table-cell vert-mid">
+						
+						<h4 class="report-header-student-career white">Career:</h4>
+						<h3 class="report-header-student-name strong white"><b>{{career.name}}</b></h3>
+
+					</div>				
+				</div>
+				
+				<div class="report-header-overlay absolute full z-index-1 col-sm-12"></div>
+				<div class="report-header-overlay-duplicate absolute full z-index-2 col-sm-12"></div>
+			</div>
+		</div>
+
+		<div class="panel-body">
+
+			<br>
+			<b><h5>{{ career.description }}</h5></b>
+			<br><hr>
+			<a href="/edit_career/{{ career.id }}" class="btn btn-warning">Edit career</a>
+			
+		</div>
+	</div>
+
+{% endblock %}

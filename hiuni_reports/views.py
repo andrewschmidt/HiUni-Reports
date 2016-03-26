@@ -166,22 +166,56 @@ def add_career():
 			with database.atomic(): # This will fail, and rollback any commits, if the career isn't unique.
 				career = Career.create(
 					name = form.name.data,
-					nicknames = form.nicknames.data,
 					image = form.image.data,
 					description = form.description.data
 				)
 
-				flash("Saving the career...")
-				return redirect("/career/" + career.id)
+				flash("Saved the career.")
+				return redirect("/career/" + str(career.id))
 
 		else:
 			for field, errors in form.errors.items():
 				for error in errors:
 					flash(error)
 
-		return render_template("add_career.html", form = form)
+		return render_template("edit_career.html", form = form, career = None)
 
 	else: return redirect("/")
+
+
+@application.route("/edit_career/<career_id>", methods = ["GET", "POST"])
+@login_required
+def edit_career(career_id):
+	if current_user.employee:
+		career = Career.get(id = career_id)
+		form = Add_Career(name = career.name, description = career.description)
+		print str(form.image)
+
+		if request.method == "POST":
+			if "image_form" in request.form:
+				career.image = request.files["image_file"]
+				return redirect("/edit_career/" + str(career.id))
+
+		if form.validate_on_submit():
+			career.name = form.name.data
+			career.description = form.description.data
+			if form.image.data:
+				career.image = form.image.data
+
+			career.save()
+			flash("Updated the career!")
+
+			return redirect("/career/" + str(career.id))
+
+		else:
+			for field, errors in form.errors.items():
+				for error in errors:
+					flash(error)
+
+		return render_template("edit_career.html", form = form, career = career)
+
+	else: return redirect("/")
+
 
 
 @application.route("/logout")

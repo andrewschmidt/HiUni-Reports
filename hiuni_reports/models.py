@@ -134,7 +134,7 @@ class Career(BaseModel):
 
 	@image.setter
 	def image(self, file):
-		filename = self.name + file.filename[-4:]
+		filename = "career_" + str(self.id) + file.filename[-4:]
 		filename = secure_filename(filename)
 		data = file.read()
 
