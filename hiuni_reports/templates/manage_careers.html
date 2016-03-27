@@ -8,12 +8,38 @@
 		<div class="panel-heading"><h4>Manage careers</h4></div>
 		
 		<div class="panel-body">
-			<h4><b>{{ career_count }}</b> careers in the database, with <b>{{ recipe_count }}</b> recipes.</h4>
+			<h4><b>{{ careers|count }}</b> careers in the database, with <b>{{ recipe_count }}</b> recipes.</h4>
+			
 			<br>
-			<form action = "/manage_careers" method = "post">
-				<button class = "btn btn-warning btn-lg" name = "update">Update all</button>
-			</form>
-
+			
+			<table class="table">
+				<thead>
+					<tr>
+						<th>Career</th>
+						<th>Recipes</th>
+						<th>Reports</th>
+						<th></th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for career in careers %}
+						<tr>
+							<td><a href="career/{{ career.id }}">{{ career.name }}</a></td>
+							<td>{{ career.recipes|count }} recipes</td>
+							<td>{{ career.reports|count }} reports</td>
+							<td>
+								<form action = "/manage_careers" method = "post">
+									<div class="btn-group">
+										<a href="edit_career/{{ career.id }}" class="btn btm-sm btn-warning">Edit</a>
+										<button class="btn btn-sm btn-danger" name="delete" value="{{ career.id }}">Delete</button>
+									</div>
+								</form>
+							</td>
+						</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+		
 		</div>
 
 	</div>

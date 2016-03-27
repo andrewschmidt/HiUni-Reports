@@ -134,9 +134,17 @@ class Career(BaseModel):
 
 	@image.setter
 	def image(self, file):
-		filename = "career_" + str(self.id) + file.filename[-4:]
+		if file.filename[-5:] == ".jpeg":
+			filename = "career_" + str(self.id) + ".jpg"
+		else:
+			filename = "career_" + str(self.id) + file.filename[-4:]
 		filename = secure_filename(filename)
-		data = file.read()
+
+		image = Image.open(file)
+		image.thumbnail((1170,1000), Image.ANTIALIAS)
+		image.save(filename)
+		tmp = open(filename, "r")
+		data = tmp.read()
 
 		key = bucket.get_key("career_images/" + filename)
 		if key is None:
@@ -145,6 +153,8 @@ class Career(BaseModel):
 		key.set_contents_from_string(data)
 		key.set_acl('public-read')
 		self.image_url = key.generate_url(expires_in = 0, query_auth = False)
+
+		remove(filename)
 
 
 class Student(Model):
@@ -222,7 +232,7 @@ class Step(BaseModel):
 
 class Report(BaseModel):
 	student = ForeignKeyField(Student, related_name = "reports")
-	career = ForeignKeyField(Career)
+	career = ForeignKeyField(Career, related_name = "reports")
 	published = BooleanField(default = False)
 
 	def sorted_pathways(self): # Pathways aren't returned in any particular order; this sorts them by ROI.

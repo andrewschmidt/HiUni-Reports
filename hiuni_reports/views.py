@@ -124,24 +124,20 @@ def manage_schools():
 @login_required
 def manage_careers():
 	if current_user.employee:
-		
-		if request.method == "POST":
-			
-			if "update" in request.form:
-				careers = Career.select()
-				for career in careers:
-					data_helper.import_career_async(career.name)
-				flash("Updating careers...")
-
-				defaults = ["Computer Programming", "Designer", "Architect", "Ecologist", "Journalism"]
-				for name in defaults:
-					data_helper.import_career_async(name)
-				flash("Importing careers...")
-
-		career_count = str(Career.select().count())
 		recipe_count = str(Recipe.select().count())
+		careers = []
+		query = Career.select()
+		for career in query:
+			careers.append(career)
 
-		return render_template("manage_careers.html", career_count = career_count, recipe_count = recipe_count)
+		if request.method == "POST":
+			if "delete" in request.form:
+				career = Career.get(id = request.form["delete"])
+				print "Deleting career... " + career.name
+				career.delete_instance(recursive = True)
+				return redirect("/manage_careers")
+
+		return render_template("manage_careers.html", careers = careers, recipe_count = recipe_count)
 
 	else: return redirect("/")
 

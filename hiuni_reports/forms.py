@@ -40,7 +40,7 @@ class Add_Report(Form):
 
 class Add_Career(Form):
 	name = StringField("Name", validators = [Required("Don't forget the career's name!")])
-	image = FileField("Banner image", validators = [FileAllowed(["jpg", "png"], "You sure that's an image file? Upload a JPEG or PNG!")])
+	image = FileField("Banner image", validators = [FileAllowed(["jpg", "png", "jpeg"], "You sure that's an image file? Upload a JPEG or PNG!")])
 	description = TextAreaField("Description")
 
 
