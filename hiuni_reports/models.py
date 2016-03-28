@@ -162,23 +162,35 @@ class Student(Model):
 	first_name = CharField()
 	last_name = CharField()
 	email = CharField()
-	_photo = BlobField(null = True)
+	photo_url = CharField(null = True)
 
 	@property
 	def photo(self):
-		return self._photo
+		return self.photo_url
 
 	@photo.setter
-	def photo(self, image_file):
-		try:
-			image = Image.open(image_file)
-			image.thumbnail((1000,1000), Image.ANTIALIAS)
-			image.save("tmp.jpg")
-			tmp = open("tmp.jpg", "r")
-			self._photo = tmp.read()
-			remove("tmp.jpg")
-		except Exception:
-			self._photo = None
+	def photo(self, file):
+		if file.filename[-5:] == ".jpeg":
+			filename = "student_" + str(self.id) + ".jpg"
+		else:
+			filename = "student_" + str(self.id) + file.filename[-4:]
+		filename = secure_filename(filename)
+
+		image = Image.open(file)
+		image.thumbnail((1000,1000), Image.ANTIALIAS)
+		image.save(filename)
+		tmp = open(filename, "r")
+		data = tmp.read()
+
+		key = bucket.get_key("student_images/" + filename)
+		if key is None:
+			key = bucket.new_key("student_images/" + filename)
+
+		key.set_contents_from_string(data)
+		key.set_acl('public-read')
+		self.photo_url = key.generate_url(expires_in = 0, query_auth = False)
+
+		remove(filename)
 	
 	income = CharField()
 	budget = IntegerField()

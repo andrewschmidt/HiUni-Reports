@@ -59,7 +59,7 @@
 						</ul>
 					</div>
 
-					<div class="profile-image right z-index-6"><img src="{{ url_for("student_photo", student_id = student.id) }}" alt=""></div>
+					<div class="profile-image right z-index-6"><img src="{{ student.photo }}" alt=""></div>
 				
 				</div>
 				
@@ -73,7 +73,6 @@
 		<!-- REPORT BODY -->
 		<div class="report-body">
 			<div> 
-
 
 				<!-- TABS -->
 				<div class="tabbable tabs-animated">
@@ -96,7 +95,7 @@
 
 					<!-- PATHWAYS -->
 					<div class="tab-content">
-						{% for pathway in report.pathways %}
+						{% for pathway in report.sorted_pathways() %}
 				
 							{% if pathway == active_pathway %}
 								{% set tab_class = "tab-pane fade in active" %}

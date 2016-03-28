@@ -46,6 +46,14 @@ def login():
 	return render_template("login.html", form = form)
 
 
+
+@application.route("/logout")
+def logout():
+	if current_user.is_authenticated:
+		logout_user()
+	return redirect("/index")
+
+
 @application.route("/register", methods = ["GET", "POST"])
 def register():
 	form = Registration_Form()
@@ -167,7 +175,7 @@ def add_career():
 				)
 
 				flash("Saved the career.")
-				return redirect("/career/" + str(career.id))
+				return redirect("/manage_careers/")
 
 		else:
 			for field, errors in form.errors.items():
@@ -195,7 +203,7 @@ def edit_career(career_id):
 			career.save()
 			flash("Updated the career!")
 
-			return redirect("/career/" + str(career.id))
+			return redirect("/manage_careers/")
 
 		else:
 			for field, errors in form.errors.items():
@@ -205,14 +213,6 @@ def edit_career(career_id):
 		return render_template("edit_career.html", form = form, career = career)
 
 	else: return redirect("/")
-
-
-
-@application.route("/logout")
-def logout():
-	if current_user.is_authenticated:
-		logout_user()
-	return redirect("/index")
 
 
 @application.route("/questions", methods = ["GET", "POST"])
@@ -232,7 +232,6 @@ def questions():
 					first_name = form.first_name.data,
 					last_name = form.last_name.data,
 					email = form.email.data,
-					photo = form.photo.data,
 					income = form.income.data,
 					budget = int(form.budget.data),
 					city = form.city.data,
@@ -240,12 +239,15 @@ def questions():
 					customer = current_user.customer
 				)
 				
+				if form.photo.data:
+					student.photo = form.photo.data
+					student.save()
+				
 				report = Report.create(
 					student = student,
 					career = form.career.data
 				)
-				student.save()
-				report.save()
+
 		except IntegrityError:
 			flash("It looks like you've already created a profile. Try logging in!")
 			return redirect("/index")
@@ -311,17 +313,6 @@ def list_students():
 		return redirect("/reports/" + str(student.id))
 
 	return render_template("students.html", form = form)
-
-
-@application.route("/students/photo/<student_id>", methods = ["GET"])
-@login_required
-def student_photo(student_id):
-	try:
-		student = Student.get(id = student_id)
-	except Exception:
-		return None
-
-	return application.response_class(student.photo, mimetype = "application/octet-stream")
 
 
 @application.route("/reports/<student_id>", methods = ["GET", "POST"])
