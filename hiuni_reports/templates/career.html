@@ -25,7 +25,7 @@
 		<div class="panel-body">
 
 			<br>
-			<b><h5>{{ career.description }}</h5></b>
+			{{ career.description|markdown }}
 			<br><hr>
 			<a href="/edit_career/{{ career.id }}" class="btn btn-warning">Edit career</a>
 			

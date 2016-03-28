@@ -105,7 +105,7 @@ class School(BaseModel):
 	
 	# Location:
 	city = CharField()
-	state = CharField()
+	state = CharField(null = True)
 	latitude = DoubleField(null = True) # Don't forget to "CREATE EXTENSION cube, earthdistance;" to enable querying by location.
 	longitude = DoubleField(null = True)
 	

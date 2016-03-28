@@ -3,6 +3,7 @@ from flask import Flask, g
 # import config # I *think* I can get rid of this...
 
 from flask.ext.bcrypt import Bcrypt
+from flask.ext.markdown import Markdown
 
 
 
@@ -15,6 +16,7 @@ application = Flask(__name__, instance_relative_config = True, static_folder = s
 application.config.from_pyfile("config.py")
 
 bcrypt = Bcrypt(application)
+md = Markdown(application)
 
 
 # REQUEST HANDLERS

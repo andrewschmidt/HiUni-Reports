@@ -1,4 +1,4 @@
-from hiuni_reports import application
+from hiuni_reports import application, md
 from flask import render_template, redirect, request, abort, flash, session, url_for
 
 from flask.ext.login import login_required, login_user, logout_user, current_user
@@ -175,7 +175,7 @@ def add_career():
 				)
 
 				flash("Saved the career.")
-				return redirect("/manage_careers/")
+				return redirect("/career/" + str(career.id))
 
 		else:
 			for field, errors in form.errors.items():
@@ -203,7 +203,7 @@ def edit_career(career_id):
 			career.save()
 			flash("Updated the career!")
 
-			return redirect("/manage_careers/")
+			return redirect("/career/" + str(career.id))
 
 		else:
 			for field, errors in form.errors.items():
