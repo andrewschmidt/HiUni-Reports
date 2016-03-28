@@ -78,10 +78,11 @@
 				<div class="tabbable tabs-animated">
 					
 					<ul class="nav nav-tabs textcenter">
-						{% set active_pathway = report.pathways[0] %}
-						{% set tab_width = (12/report.pathways|count)|round|int %}
+						{% set pathways = report.sorted_pathways() %}
+						{% set active_pathway = pathways[0] %}
+						{% set tab_width = (12/pathways|count)|round|int %}
 						
-						{% for pathway in report.pathways %}
+						{% for pathway in pathways %}
 							{% if pathway == active_pathway %}
 								<!-- Active tab -->
 								<li class="active col-xs-{{ tab_width }}"><a href="#{{ loop.index }}" data-toggle="tab"><h5>Pathway {{ loop.index }}</h5></a></li>
@@ -95,7 +96,7 @@
 
 					<!-- PATHWAYS -->
 					<div class="tab-content">
-						{% for pathway in report.sorted_pathways() %}
+						{% for pathway in pathways %}
 				
 							{% if pathway == active_pathway %}
 								{% set tab_class = "tab-pane fade in active" %}
