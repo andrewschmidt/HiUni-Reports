@@ -61,6 +61,20 @@
 							{{ form.career(class="form-control") }}
 						</div>
 						<br>
+
+						<p style="font-size: 16px; line-height: 1"><b>Why does this career appeal to you?</b></p>
+						<p style="font-size: 14px; font-weight: 300; line-height: 1.5">What part of the job sounds most fun? Why is it a fit for you — are you good at math, smart about biology, quick with words?</p>
+						<div class="form-group">
+							{{ form.appeal(class="form-control") }}
+						</div>
+						<br>
+
+						<p style="font-size: 16px; line-height: 1"><b>Do you have any experiences related to the career you chose?</b></p>
+						<p style="font-size: 14px; font-weight: 300; line-height: 1.5">Internships, jobs, hobbies, or even personal experiences — the more you tell us, the better!</p>
+						<div class="form-group">
+							{{ form.experience(class="form-control") }}
+						</div>
+						<br>
 						
 						<hr>
 						<br>
@@ -79,7 +93,21 @@
 						</div>
 						<br>
 
-						<p style="font-size: 16px; line-height: 1"><b>What's your total budget for college?</b></p>
+						<p style="font-size: 16px; line-height: 1"><b>How do you plan to pay for college?</b></p>
+						<p style="font-size: 14px; font-weight: 300; line-height: 1.5">Savings? Loans? Help from parents or relatives?</p>
+						<div class="form-group">
+							{{ form.payment() }}
+						</div>
+						<br>
+
+						<p style="font-size: 16px; line-height: 1"><b>If you're expecting to receive scholarships or private grants, how much do you expect total?</b></p>
+						<p style="font-size: 14px; font-weight: 300; line-height: 1.5">This doesn't have to be exact.</p>
+						<div class="form-group">
+							{{ form.scholarships(class="form-control") }}
+						</div>
+						<br>
+
+						<p style="font-size: 16px; line-height: 1"><b>OK, now that you've thought it through: What's your total budget for college?</b></p>
 						<p style="font-size: 14px; font-weight: 300; line-height: 1.5">Add it all together — including the loans you're willing to take out.</p>
 						<div class="form-group">
 							{{ form.budget(class="form-control") }}

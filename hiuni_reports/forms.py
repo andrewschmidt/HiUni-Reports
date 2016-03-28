@@ -1,12 +1,19 @@
 # Form imports:
 from flask.ext.wtf import Form
 from flask.ext.wtf.file import FileField, FileAllowed
-from wtforms import StringField, SelectField, PasswordField, TextAreaField, BooleanField as WTFBooleanField # Peewee also has a "BooleanField," so this was necessary.
+from wtforms import widgets, StringField, SelectField, SelectMultipleField, PasswordField, TextAreaField, BooleanField as WTFBooleanField # Peewee also has a "BooleanField," so this was necessary.
 from wtforms.fields.html5 import EmailField
 from wtforms.validators import Email, Required, EqualTo
 from wtfpeewee.fields import SelectQueryField # Unlike a regular WTForms SelectField, this returns actual model classes.
 
 from models import *
+
+
+# CUSTOM FIELDS
+
+class MultiCheckboxField(SelectMultipleField):
+    widget = widgets.ListWidget(prefix_label=False)
+    option_widget = widgets.CheckboxInput()
 
 
 # FORMS
@@ -86,3 +93,13 @@ class Questionnaire_Form(Form):
 	budget = SelectField("What's your budget for higher education?", choices = budget_choices, validators = [Required("Please enter a budget.")])
 	city = StringField("What city do you live in?", validators = [Required("Please enter the city you live in.")])
 	state = SelectField("What state do you live in?", choices = state_choices, validators = [Required("Please enter the state you live in.")])
+
+	# Additional fields:
+	appeal = TextAreaField("Why does this career appeal to you?")
+	experience = TextAreaField("Do you have any experiences related to the career you chose?")
+	scholarships = StringField("If you're expecting to receive scholarships or private grants, how much do you expect total?")
+	
+	list_of_choices = ["Personal savings", "Student loans", "Help from parents or relatives", "Federal grants", "Scholarships or private grants"]
+	choices = [(x, x) for x in list_of_choices]
+	payment = MultiCheckboxField("How do you plan to pay for college?", choices = choices)
+
