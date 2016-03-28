@@ -5,21 +5,111 @@
 	<div class="col-sm-1"></div>
 	<div class="col-sm-10">
 		<div class="panel panel-primary">
-			<div class="panel-heading"><h4>We have some questions...</h4></div>
+			
+
+			<!-- Header -->
+			
+			<div class="panel-heading">
+				<h3>We have questions</h3>
+			</div>
+			
+
+			<!-- Questions -->
+			
 			<div class="panel-body">
-				<form class="form" role="form" method="post" action="" enctype="multipart/form-data">
-					
-						{{ form.hidden_tag() }}
-						
-						<div class="form-group">
-							{% for field in form if field.widget.input_type != "hidden" %}
-								<label class="control-label" for="{{ field.id }}">{{ field.label }}</label>
-								{{ field(class="form-control")}} <br>
-							{% endfor %}
-							<button class="btn btn-success" type="submit">Submit</button>
-						</div>
+
+
+				<!-- Intro text -->
+
+				<br>
+				<p style="font-size: 16px; font-weight: 400; line-height: 1.5">Some are easy, some are hard. But even the hard questions (like how to pay for college) are super important.</p>
 				
-				</form>
+				<p style="font-size: 16px; font-weight: 400; line-height: 1.5">Talk it out with your mentors, family and friends. The better your answers, the better we can help!</p>
+				<br>
+				<br>
+
+ 				<div class="col-sm-12">
+					<form class="form" role="form" method="post" action="" enctype="multipart/form-data">
+						{{ form.hidden_tag() }}
+
+
+						<!-- Basic questions -->
+
+						<p style="font-size: 16px"><b>First, the easy stuff. What's your name?</b></p>
+						<div class="form-group form-inline">
+							{{ form.first_name(class="form-control", placeholder="First name") }}
+							{{ form.last_name(class="form-control", placeholder="Last name") }}
+						</div>
+						<br>
+
+						<p style="font-size: 16px"><b>And your email?</b></p>
+						<div class="form-group">
+							{{ form.email(class="form-control") }}
+						</div>
+						<br>
+
+						<p style="font-size: 16px; line-height: 1"><b>Pick a photo</b></p>
+						<p style="font-size: 14px; font-weight: 300; line-height: 1.5">Square photos work best!</p>
+						<div class="form-group">
+							{{ form.photo(class="form-control", placeholder="") }}
+						</div>
+						<br>
+
+						<p style="font-size: 16px; line-height: 1"><b>What career are you interested in?</b></p>
+						<p style="font-size: 14px; font-weight: 300; line-height: 1.5">Basically: "What do you want to be when you grow up?"</p>
+						<div class="form-group">
+							{{ form.career(class="form-control") }}
+						</div>
+						<br>
+						
+						<hr>
+						<br>
+
+						
+						<!-- Budget questions -->
+
+						<h4>Let's talk money.</h4>
+						<p style="font-size: 16px; font-weight: 400; line-height: 1.5">This section may take some homework. Remember: reach out to anyone who you think can help! You don't have to do this alone.</p>
+						<br>
+						
+						<p style="font-size: 16px; line-height: 1"><b>What's your family's annual income?</b></p>
+						<p style="font-size: 14px; font-weight: 300; line-height: 1.5">This helps us get more precise about how much college will cost you.</p>
+						<div class="form-group">
+							{{ form.income(class="form-control") }}
+						</div>
+						<br>
+
+						<p style="font-size: 16px; line-height: 1"><b>What's your total budget for college?</b></p>
+						<p style="font-size: 14px; font-weight: 300; line-height: 1.5">Add it all together — including the loans you're willing to take out.</p>
+						<div class="form-group">
+							{{ form.budget(class="form-control") }}
+						</div>
+						<br>
+
+						<hr>
+						<br>
+
+						
+						<!-- Misc. questions -->
+
+						<h4>Phew! That's it for the hard part.</h4>
+						<p style="font-size: 16px; font-weight: 400; line-height: 1.5">It's all downhill from here on out.</p>
+						<br>
+
+						<p style="font-size: 16px; line-height: 1"><b>Last but not least: where do you live?</b></p>
+						<p style="font-size: 14px; font-weight: 300; line-height: 1.5">Be extra careful to get your city right!</p>
+						<div class="form-group form-inline">
+							{{ form.city(class="form-control", placeholder="City") }}
+							{{ form.state(class="form-control", placeholder="State") }}
+						</div>
+						<br>
+
+						<br>
+
+						<button class="btn btn-success" type="submit">Submit</button>
+
+					</form>
+				</div>
 			</div>
 		</div>
 	</div>
