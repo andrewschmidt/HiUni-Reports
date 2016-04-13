@@ -225,8 +225,15 @@ def questions():
 	form = Questionnaire_Form(email = current_user.email)
 
 	if form.validate_on_submit():
+		experience = {}
+		appeal = {}
+
 		try:
 			with database.atomic(): # This will fail, and rollback any commits, if the student isn't unique.
+				career = form.career.data
+				experience[career.name] = form.experience.data
+				appeal[career.name] = form.appeal.data
+
 				student = Student.create(
 					name = form.first_name.data + " " + form.last_name.data,
 					first_name = form.first_name.data,
@@ -236,16 +243,18 @@ def questions():
 					budget = int(form.budget.data),
 					city = form.city.data,
 					state = form.state.data,
+					experience = experience,
+					appeal = appeal,
 					customer = current_user.customer
 				)
-				
+
 				if form.photo.data:
 					student.photo = form.photo.data
 					student.save()
 				
 				report = Report.create(
 					student = student,
-					career = form.career.data
+					career = career
 				)
 
 		except IntegrityError:
@@ -349,28 +358,99 @@ def report(student_id, report_id):
 	try:
 		student = Student.get(id = student_id)
 		report = Report.get(id = report_id)
+
+		if not report.published and current_user.employee is None:
+			return redirect("/confirmation")
+		elif not report.published and current_user.employee is not None:
+			return redirect("/edit_report/" + str(student.id) + "_" + str(report.id))
+
+		if request.method == "POST" and current_user.employee is not None:
+			
+			if "unpublish" in request.form:
+				report.published = False
+				report.save()
+				return redirect("/edit_report/" + str(student.id) + "_" + str(report.id))
+
+		return render_template("report.html", title = student.name + "'s Report", student = student, report = report)
+	
 	except DoesNotExist:
 		abort(404)
 
-	if not report.published and current_user.employee is None:
-		return redirect("/confirmation")
 
-	if request.method == "POST" and current_user.employee is not None:
+@application.route("/edit_report/<student_id>_<report_id>", methods = ["GET", "POST"])
+@login_required
+def edit_report(student_id, report_id):
+	if current_user.employee:
+		try:
+			student = Student.get(id = student_id)
+			report = Report.get(id = report_id)
 
-		if "delete" in request.form:
-			pathway_id = request.form["delete"]
+			if request.method == "POST" and current_user.employee is not None:
+
+				if "delete" in request.form:
+					pathway_id = request.form["delete"]
+					pathway = Pathway.get(id = pathway_id)
+					pathway.delete_instance(recursive = True)
+
+				if "unpublish" in request.form:
+					report.published = False
+					report.save()
+				
+				elif "publish" in request.form:
+					report.published = True
+					report.save()
+					return redirect("/report/" + str(student.id) + "_" + str(report.id))
+
+			return render_template("edit_report.html", title = student.name + "'s Report", student = student, report = report)
+
+		except DoesNotExist:
+			abort(404)
+
+	else: return redirect("/")
+
+
+@application.route("/edit_report/<student_id>_<report_id>/pathway/<pathway_id>/tagline", methods = ["GET", "POST"])
+@login_required
+def edit_report_tagline(student_id, report_id, pathway_id):
+	if current_user.employee:
+		try:
 			pathway = Pathway.get(id = pathway_id)
-			pathway.delete_instance(recursive = True)
-		
-		elif "publish" in request.form:
-			report.published = True
-			report.save()
 
-		elif "unpublish" in request.form:
-			report.published = False
-			report.save()
+			form = Edit(text = pathway.tagline)
 
-	return render_template("report.html", title = student.name + "'s Report", student = student, report = report)
+			if form.validate_on_submit():
+				pathway.tagline = form.text.data
+				pathway.save()
+				return redirect("/edit_report/" + student_id + "_" + report_id)
+
+			return render_template("edit.html", title = "Edit tagline", form = form, rows = "2")
+
+		except DoesNotExist:
+			abort(404)
+	
+	else: return redirect("/")
+
+
+@application.route("/edit_report/<student_id>_<report_id>/step/<step_id>", methods = ["GET", "POST"])
+@login_required
+def edit_pathway_step(student_id, report_id, step_id):
+	if current_user.employee:
+		try:
+			step = Pathway_Step.get(id = step_id)
+
+			form = Edit(text = step.description)
+
+			if form.validate_on_submit():
+				step.description = form.text.data
+				step.save()
+				return redirect("/edit_report/" + student_id + "_" + report_id)
+
+			return render_template("edit.html", title = "Edit description", form = form, rows = "15")
+
+		except DoesNotExist:
+			abort(404)
+
+	else: return redirect("/")
 
 
 @application.route("/confirmation")

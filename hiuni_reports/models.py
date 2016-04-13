@@ -5,7 +5,7 @@ from playhouse.postgres_ext import *
 
 from hiuni_reports import application
 
-from geopy.geocoders import Nominatim
+from geopy.geocoders import Nominatim, GoogleV3
 from . import bcrypt
 
 import boto
@@ -40,6 +40,11 @@ except Exception:
 if bucket is None:
 	bucket = s3.create_bucket(application.config["BUCKET"])
 	print "Creating an S3 bucket called '" + application.config["BUCKET"] + "'."
+
+
+# Geolocator service
+geolocator = GoogleV3() # Nominatim()
+
 
 
 
@@ -196,18 +201,32 @@ class Student(Model):
 	budget = IntegerField()
 	
 	city = CharField()
-	state = CharField()
+	_state = CharField()
 	latitude = DoubleField(null = True)
 	longitude = DoubleField(null = True)
+
+	@property
+	def state(self):
+		return self._state
+
+	@state.setter
+	def state(self, state_name):
+		# When the state is set, we want to update the latitude and longitude.
+		if self._state is None or self._state != state_name:
+			self._state = state_name
+			location = geolocator.geocode(str(self.city + ", " + self._state))
+			self.latitude, self.longitude = location.latitude, location.longitude
+
+	experience = HStoreField(null = True) # Search this list by career name.
+	appeal = HStoreField(null = True) # Likewise.
 
 	customer = ForeignKeyField(Customer, related_name = "students")
 
 	def save(self, *args, **kwargs):
-		if self.latitude is None:
-			geolocator = Nominatim()
-			location = geolocator.geocode(str(self.city + ", " + self.state))
-			self.latitude, self.longitude = location.latitude, location.longitude
-
+		# if self.latitude is None:
+		# 	geolocator = Nominatim()
+		# 	location = geolocator.geocode(str(self.city + ", " + self.state))
+		# 	self.latitude, self.longitude = location.latitude, location.longitude
 		return super(Student, self).save(*args, **kwargs)
 
 	class Meta:

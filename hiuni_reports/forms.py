@@ -51,6 +51,10 @@ class Add_Career(Form):
 	description = TextAreaField("Description")
 
 
+class Edit(Form):
+	text = TextAreaField("Text")
+
+
 class Questionnaire_Form(Form):
 	# Let's hardcode some data.
 	# First, income levels:
