@@ -443,7 +443,7 @@ def edit_report(student_id, report_id):
 					student.delete_instance(recursive = True)
 					return redirect("/students")
 
-			return render_template("edit_report.html", title = student.name + "'s Report", student = student, report = report)
+			return render_template("edit_report.html", title = student.name + "'s Report", student = student, report = report, adminemail = application.config["ADMINEMAIL"])
 
 		except DoesNotExist:
 			abort(404)

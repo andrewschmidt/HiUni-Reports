@@ -13,7 +13,9 @@
 						<button class = "btn btn-success btn-lg" name = "publish"><i class="fa fa-check-circle"></i>publish</button>
 						<button class = "btn btn-danger btn-lg" name = "delete_report"><i class="fa fa-trash"></i>report</button>
 					</div>
-					<button class = "btn btn-danger btn-lg pull-right" name = "delete_student"><i class="fa fa-trash"></i>student</button>
+					{% if current_user.email == adminemail %}
+						<button class = "btn btn-danger btn-lg pull-right" name = "delete_student"><i class="fa fa-trash"></i>student</button>
+					{% endif %}
 				{% else %}
 					<button class = "btn btn-danger btn-lg pull-left" name = "unpublish"><i class="fa fa-times-circle"></i>unpublish</button>
 				{% endif %}
