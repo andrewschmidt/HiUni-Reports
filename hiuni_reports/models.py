@@ -5,7 +5,7 @@ from playhouse.postgres_ext import *
 
 from hiuni_reports import application
 
-from geopy.geocoders import Nominatim
+from geopy.geocoders import Nominatim, GoogleV3
 from . import bcrypt
 
 import boto
@@ -40,6 +40,11 @@ except Exception:
 if bucket is None:
 	bucket = s3.create_bucket(application.config["BUCKET"])
 	print "Creating an S3 bucket called '" + application.config["BUCKET"] + "'."
+
+
+# Geolocator service
+geolocator = GoogleV3() # Nominatim()
+
 
 
 
@@ -200,14 +205,16 @@ class Student(Model):
 	latitude = DoubleField(null = True)
 	longitude = DoubleField(null = True)
 
+	experience = HStoreField(null = True) # Search this list by career name.
+	appeal = HStoreField(null = True) # Likewise.
+
 	customer = ForeignKeyField(Customer, related_name = "students")
 
 	def save(self, *args, **kwargs):
 		if self.latitude is None:
-			geolocator = Nominatim()
 			location = geolocator.geocode(str(self.city + ", " + self.state))
 			self.latitude, self.longitude = location.latitude, location.longitude
-
+			
 		return super(Student, self).save(*args, **kwargs)
 
 	class Meta:

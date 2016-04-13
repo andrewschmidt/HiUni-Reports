@@ -7,15 +7,17 @@
 	<!-- Publish button for employees: -->
 	<div class = "container" style="margin-bottom: 10px;">
 		{% if current_user.employee != None %}
-			{% if report.published %}
-				<form action = "/report/{{ student.id }}_{{ report.id }}" method = "post">
+			<form action = "/edit_report/{{ student.id }}_{{ report.id }}" method = "post">
+				{% if not report.published %}
+					<button class = "btn btn-success btn-lg pull-left" name = "publish">Publish</button>
+				{% else %}
 					<button class = "btn btn-danger btn-lg pull-left" name = "unpublish">Unpublish</button>
-				</form>
-			{% endif %}
+				{% endif %}
+			</form>
 		{% endif %}
 	</div>
 	
-	
+
 
 	<!-- REPORT -->
 
@@ -35,12 +37,25 @@
 						
 						<ul class="report-header-student-details student-details white">
 							
+							
+							<!-- User-facing data points -->
 							<li><i class="fa fa-map-marker white"></i>{{ student.city }}, {{ student.state }}</li>
 							{% if student.gpa %}
 								<li><i class="fa fa-graduation-cap white"></i>GPA</li>
 							{% endif %}
 							{% if student.sat %}
 								<li><i class="fa fa-pencil white"></i>SAT</li>
+							{% endif %}
+
+							<!-- Employee-only data points -->
+							{% if current_user.employee != None %}
+								{% if student.income != "over 110,000" %}
+									{% set income = "$" + student.income %}
+								{% else %}
+									{% set income = "over $110,000" %}
+								{% endif %}
+								<li><i class="fa fa-credit-card-alt white"></i>Budget: ${{ '{0:,}'.format(student.budget) }}</li>
+								<li><i class="fa fa-home white"></i>Income: {{ income }}</li>
 							{% endif %}
 
 						</ul>
@@ -58,6 +73,15 @@
 			</div>
 		</div>
 
+		<!-- Extra info for employees: -->
+		<div class = "panel panel-primary">
+			<div class = "panel-heading">
+				<hr>
+				<li><b>What experience do you have?</b><br>{{ student.experience[report.career.name] }}</li>
+				<br>
+				<li><b>Why does this career appeal to you?</b><br>{{ student.appeal[report.career.name] }}</li>
+			</div>
+		</div>
 
 		<!-- REPORT BODY -->
 		<div class="report-body">
@@ -99,14 +123,29 @@
 								<!-- PATHWAY TAGLINE -->
 								<div class="container">
 									<div class="row">
-										<div class="col-sm-12">        
+										<div class="col-sm-12">  
+											<br>      
+											{% if current_user.employee != None and not report.published %}
+												<form action="/edit_report/{{ student.id }}_{{ report.id }}" method="post">
+													<button class="btn btn-danger btn-lg pull-right pull-top" type="delete" value="{{ pathway.id }}" name="delete"><i class="fa fa-trash"></i>pathway</button>
+												</form>
+												<br><br>
+											{% endif %}
+
 											<div class="pathway table">
 												<div class="inner table-cell vert-mid">
 
 													<!-- Tagline -->
-													<h3 class="pathway-title strong light dark-gray line-height-1-4">{{ pathway.tagline|safe }}</h3>
-													<div class="hr light-blue-bg" style="height: 10px; width: 300px;"></div>
+													<h3 class="pathway-title strong light dark-gray line-height-1-4">{{ pathway.tagline|safe }}
 													
+													{% if current_user.employee != None and not report.published %}
+														<form action="/edit_report/{{ student.id }}_{{ report.id }}/pathway/{{ pathway.id }}/tagline" method="get">
+															<button class="btn btn-link btn-sm"><i class="fa fa-pencil-square"></i>edit</button>
+														</form>
+													{% endif %}
+													</h3>
+
+											<!-- <div class="hr light-blue-bg" style="height: 10px; width: 300px;"></div> -->													
 												</div>
 											</div>
 										</div>
@@ -117,6 +156,13 @@
 								<!-- PATHWAY DETAILS -->
 								<div class="container">
 									<div class="row summary light-blue-bg">
+
+										<!-- For Employees -->
+										{% if pathway.low_data == True and current_user.employee != None and not report.published %}
+											<h5 class="b white pull-center">This pathway uses programs with low salary data.</h5>
+											<br>
+										{% endif %}
+
 										<div class="col-sm-12">
 											<!-- Cost -->
 											<div class="summary-category col-xs-4 col-xs-offset-0 col-sm-3 col-sm-offset-1 light-blue-bg textcenter">    
@@ -180,7 +226,15 @@
 														<!-- Step Description -->
 														<div class="step-description">
 															<p class="dark-gray">{{ step.description|markdown }}</p>
+															
+															{% if current_user.employee != None and not report.published %}
+																<form action="/edit_report/{{ student.id }}_{{ report.id }}/step/{{ step.id }}" method="get">
+																	<button class="btn btn-link btn-sm pull-right"><i class="fa fa-pencil-square"></i>edit</button>
+																</form>
+															{% endif %}
+														
 														</div>
+
 
 													</div>
 												
