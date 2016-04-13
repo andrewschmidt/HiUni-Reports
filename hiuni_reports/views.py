@@ -216,13 +216,25 @@ def edit_career(career_id):
 
 
 @application.route("/questions", methods = ["GET", "POST"])
+@application.route("/questions/<student_id>", methods = ["GET", "POST"])
 @login_required
-def questions():
+def questions(student_id = None):
 	if current_user.customer is None:
 		flash("You have to be a customer to add students.")
 		return redirect("/")
 
-	form = Questionnaire_Form(email = current_user.email)
+	if student_id:
+		student = Student.get(id = student_id)
+		form = Questionnaire_Form(
+				first_name = student.first_name,
+				last_name = student.last_name,
+				email = student.email,
+				city = student.city,
+				state = student.state
+			)
+	else:
+		student = Student()
+		form = Questionnaire_Form(email = current_user.email)
 
 	if form.validate_on_submit():
 		experience = {}
@@ -234,21 +246,29 @@ def questions():
 				experience[career.name] = form.experience.data
 				appeal[career.name] = form.appeal.data
 
-				student = Student.create(
-					name = form.first_name.data + " " + form.last_name.data,
-					first_name = form.first_name.data,
-					last_name = form.last_name.data,
-					email = form.email.data,
-					income = form.income.data,
-					budget = int(form.budget.data),
-					city = form.city.data,
-					state = form.state.data,
-					experience = experience,
-					appeal = appeal,
-					customer = current_user.customer
-				)
+				student.name = form.first_name.data + " " + form.last_name.data
+				student.first_name = form.first_name.data
+				student.last_name = form.last_name.data
+				student.email = form.email.data
+				student.income = form.income.data
+				student.budget = int(form.budget.data)
+				student.city = form.city.data
+				student.state = form.state.data
+				student.customer = current_user.customer
+				
+				if student.experience:
+					student.experience.update(experience)
+				else:
+					student.experience = experience
+				
+				if student.appeal:
+					student.appeal.update(appeal)
+				else:
+					student.appeal = appeal
 
-				if form.photo.data:
+				student.save()
+
+				if form.photo.data: 
 					student.photo = form.photo.data
 					student.save()
 				
@@ -275,21 +295,47 @@ def questions():
 @application.route("/add_report", methods = ["GET", "POST"])
 @login_required
 def add_report():
-	form = Add_Report()
-	form.student.query = Student.select().where(Student.customer == current_user.customer)
+	if current_user.customer is not None:
+		query = Student.select().where(Student.customer == current_user.customer)
+		if query.count() == 1:
+			student = query.get()
+			return redirect("/questions/" + str(student.id))
+		elif query.count() == 0:
+			return redirect("/questions")
+
+	elif current_user.employee is not None:
+		query = Student.select()
+		student_query = Student.select()
+	
+	else:
+		flash("User is neither customer nor employee!")
+		print(current_user.customer)
+		return redirect("/logout")
+
+	form = Choose_Student()
+	form.student.query = query
 
 	if form.validate_on_submit():
 		student = form.student.data
+		return redirect("/questions/" + str(student.id))
 
-		report = Report.create(
-			student = student,
-			career = form.career.data
-		)
+	return render_template("students.html", form = form)
 
-		solver.make_pathways_async(student = student, report = report, how_many = 6)
-		return redirect("/confirmation")
+	# form = Add_Report()
+	# form.student.query = Student.select().where(Student.customer == current_user.customer)
 
-	return render_template("add_report.html", form = form)
+	# if form.validate_on_submit():
+	# 	student = form.student.data
+
+	# 	report = Report.create(
+	# 		student = student,
+	# 		career = form.career.data
+	# 	)
+
+	# 	solver.make_pathways_async(student = student, report = report, how_many = 6)
+	# 	return redirect("/confirmation")
+
+	# return render_template("add_report.html", form = form)
 
 
 @application.route("/students", methods = ["GET", "POST"])
@@ -303,7 +349,7 @@ def list_students():
 			student = query.get()
 			return redirect("/reports/" + str(student.id))
 		elif query.count() == 0:
-			return redirect("/questions")
+			return redirect("/")
 
 	elif current_user.employee is not None:
 		query = Student.select()
@@ -341,7 +387,7 @@ def list_reports(student_id):
 		if Report.select().join(Student).where(Student.id == student_id).count() > 0:
 			return redirect("/confirmation")
 		else:
-			return redirect("/")
+			return redirect("/questions")
 
 	form = Choose_Report()
 	form.report.query = query
@@ -387,19 +433,27 @@ def edit_report(student_id, report_id):
 
 			if request.method == "POST" and current_user.employee is not None:
 
-				if "delete" in request.form:
-					pathway_id = request.form["delete"]
-					pathway = Pathway.get(id = pathway_id)
-					pathway.delete_instance(recursive = True)
-
 				if "unpublish" in request.form:
 					report.published = False
 					report.save()
 				
-				elif "publish" in request.form:
+				if "publish" in request.form:
 					report.published = True
 					report.save()
 					return redirect("/report/" + str(student.id) + "_" + str(report.id))
+
+				if "delete_report" in request.form:
+					report.delete_instance(recursive = True)
+					return redirect("/reports/" + str(student.id))
+
+				if "delete_pathway" in request.form:
+					pathway_id = request.form["delete"]
+					pathway = Pathway.get(id = pathway_id)
+					pathway.delete_instance(recursive = True)
+
+				if "delete_student" in request.form:
+					student.delete_instance(recursive = True)
+					return redirect("/students")
 
 			return render_template("edit_report.html", title = student.name + "'s Report", student = student, report = report)
 

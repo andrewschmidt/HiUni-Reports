@@ -364,14 +364,13 @@ def update_recipe_from_sheet(sheet):
 
 	# Next either update the info for an existing recipe, or create a new one. This is based on the "recipe number":
 	try:
-		recipe = Recipe.select().join(Career).where((Recipe.number == recipe_number) & (Recipe.career == career)).get()
-		print "\nUpdating info for recipe #" + str(recipe.number), "for the career '" + career.name + ".'"
+		recipe = Recipe.select().join(Career).where((Recipe.id == recipe_number) & (Recipe.career == career)).get()
+		print "\nUpdating info for recipe #" + str(recipe.id), "for the career '" + career.name + ".'"
 	except Exception:
 		recipe = Recipe()
-		print "\nAdding recipe number", str(recipe_number) + ", for the career '" + career.name + ".'"
+		print "\nAdding a recipe for the career '" + career.name + ".'"
 
 	recipe.career = career
-	recipe.number = recipe_number
 
 	recipe.save()
 
@@ -444,7 +443,7 @@ def import_recipe_from_sheet(sheet):
 	update_recipe_from_sheet(sheet)
 
 	career_name, recipe_number = get_recipe_data_from_csv_sheet(sheet)
-	recipe = Recipe.select().join(Career).where((Recipe.number == recipe_number) & (Career.name == career_name)).get()
+	recipe = Recipe.select().join(Career).where((Recipe.id == recipe_number) & (Career.name == career_name)).get()
 
 	update_steps_for_recipe(recipe, from_sheet = sheet)
 

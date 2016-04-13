@@ -333,7 +333,7 @@ def make_pathway_for_every_recipe(student, report, excluded_schools, budget_modi
 	for recipe in recipes:
 		print "\nMaking a pathway."
 		print "  Career:", career.name
-		print "  Recipe:", recipe.number, "\n"
+		print "  Recipe:", recipe.id, "\n"
 		
 		pathway = make_pathway_from_recipe(recipe, student, report, excluded_schools, budget_modifier)
 

@@ -47,7 +47,6 @@ geolocator = GoogleV3() # Nominatim()
 
 
 
-
 # MODELS
 
 class BaseModel(Model):
@@ -224,7 +223,6 @@ class Student(Model):
 
 class Recipe(BaseModel):
 	career = ForeignKeyField(Career, related_name = "recipes")
-	number = IntegerField()
 
 	def duration(self):
 		duration = 0

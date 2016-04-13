@@ -9,9 +9,13 @@
 		{% if current_user.employee != None %}
 			<form action = "/edit_report/{{ student.id }}_{{ report.id }}" method = "post">
 				{% if not report.published %}
-					<button class = "btn btn-success btn-lg pull-left" name = "publish">Publish</button>
+					<div class = "btn-group pull-left">
+						<button class = "btn btn-success btn-lg" name = "publish"><i class="fa fa-check-circle"></i>publish</button>
+						<button class = "btn btn-danger btn-lg" name = "delete_report"><i class="fa fa-trash"></i>report</button>
+					</div>
+					<button class = "btn btn-danger btn-lg pull-right" name = "delete_student"><i class="fa fa-trash"></i>student</button>
 				{% else %}
-					<button class = "btn btn-danger btn-lg pull-left" name = "unpublish">Unpublish</button>
+					<button class = "btn btn-danger btn-lg pull-left" name = "unpublish"><i class="fa fa-times-circle"></i>unpublish</button>
 				{% endif %}
 			</form>
 		{% endif %}
@@ -127,7 +131,7 @@
 											<br>      
 											{% if current_user.employee != None and not report.published %}
 												<form action="/edit_report/{{ student.id }}_{{ report.id }}" method="post">
-													<button class="btn btn-danger btn-lg pull-right pull-top" type="delete" value="{{ pathway.id }}" name="delete"><i class="fa fa-trash"></i>pathway</button>
+													<button class="btn btn-danger btn-lg pull-right pull-top" value="{{ pathway.id }}" name="delete_pathway"><i class="fa fa-trash"></i>pathway</button>
 												</form>
 												<br><br>
 											{% endif %}
