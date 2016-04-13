@@ -201,21 +201,9 @@ class Student(Model):
 	budget = IntegerField()
 	
 	city = CharField()
-	_state = CharField()
+	state = CharField()
 	latitude = DoubleField(null = True)
 	longitude = DoubleField(null = True)
-
-	@property
-	def state(self):
-		return self._state
-
-	@state.setter
-	def state(self, state_name):
-		# When the state is set, we want to update the latitude and longitude.
-		if self._state is None or self._state != state_name:
-			self._state = state_name
-			location = geolocator.geocode(str(self.city + ", " + self._state))
-			self.latitude, self.longitude = location.latitude, location.longitude
 
 	experience = HStoreField(null = True) # Search this list by career name.
 	appeal = HStoreField(null = True) # Likewise.
@@ -223,10 +211,10 @@ class Student(Model):
 	customer = ForeignKeyField(Customer, related_name = "students")
 
 	def save(self, *args, **kwargs):
-		# if self.latitude is None:
-		# 	geolocator = Nominatim()
-		# 	location = geolocator.geocode(str(self.city + ", " + self.state))
-		# 	self.latitude, self.longitude = location.latitude, location.longitude
+		if self.latitude is None:
+			location = geolocator.geocode(str(self.city + ", " + self.state))
+			self.latitude, self.longitude = location.latitude, location.longitude
+			
 		return super(Student, self).save(*args, **kwargs)
 
 	class Meta:
