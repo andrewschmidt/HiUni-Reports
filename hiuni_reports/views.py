@@ -225,15 +225,19 @@ def questions(student_id = None):
 
 	if student_id:
 		student = Student.get(id = student_id)
+		hide_photo = True
 		form = Questionnaire_Form(
 				first_name = student.first_name,
 				last_name = student.last_name,
 				email = student.email,
 				city = student.city,
-				state = student.state
+				state = student.state,
+				income = student.income,
+				budget = student.budget
 			)
 	else:
 		student = Student()
+		hide_photo = False
 		form = Questionnaire_Form(email = current_user.email)
 
 	if form.validate_on_submit():
@@ -289,7 +293,7 @@ def questions(student_id = None):
 			for error in errors:
 				flash(error)
 
-	return render_template("questions.html", form = form)
+	return render_template("questions.html", form = form, hide_photo = hide_photo)
 
 
 @application.route("/add_report", methods = ["GET", "POST"])

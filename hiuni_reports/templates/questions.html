@@ -48,11 +48,16 @@
 						</div>
 						<br>
 
-						<p style="font-size: 16px; line-height: 1"><b>Pick a photo</b></p>
-						<p style="font-size: 14px; font-weight: 300; line-height: 1.5">Square photos work best!</p>
-						<div class="form-group">
-							{{ form.photo(class="form-control", placeholder="") }}
-						</div>
+						{% if not hide_photo %}
+							<p style="font-size: 16px; line-height: 1"><b>Pick a photo</b></p>
+							<p style="font-size: 14px; font-weight: 300; line-height: 1.5">Square photos work best!</p>
+							<div class="form-group">
+								{{ form.photo(class="form-control", placeholder="") }}
+							</div>
+							<br>
+						{% endif %}
+
+						<hr>
 						<br>
 
 						<p style="font-size: 16px; line-height: 1"><b>What career are you interested in?</b></p>
