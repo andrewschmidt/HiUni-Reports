@@ -325,22 +325,6 @@ def add_report():
 
 	return render_template("students.html", form = form)
 
-	# form = Add_Report()
-	# form.student.query = Student.select().where(Student.customer == current_user.customer)
-
-	# if form.validate_on_submit():
-	# 	student = form.student.data
-
-	# 	report = Report.create(
-	# 		student = student,
-	# 		career = form.career.data
-	# 	)
-
-	# 	solver.make_pathways_async(student = student, report = report, how_many = 6)
-	# 	return redirect("/confirmation")
-
-	# return render_template("add_report.html", form = form)
-
 
 @application.route("/students", methods = ["GET", "POST"])
 @login_required
