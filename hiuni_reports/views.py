@@ -451,7 +451,7 @@ def edit_report(student_id, report_id):
 					return redirect("/reports/" + str(student.id))
 
 				if "delete_pathway" in request.form:
-					pathway_id = request.form["delete"]
+					pathway_id = request.form["delete_pathway"]
 					pathway = Pathway.get(id = pathway_id)
 					pathway.delete_instance(recursive = True)
 
