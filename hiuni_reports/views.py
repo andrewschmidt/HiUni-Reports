@@ -337,7 +337,7 @@ def list_students():
 			student = query.get()
 			return redirect("/reports/" + str(student.id))
 		elif query.count() == 0:
-			return redirect("/")
+			return redirect("/questions")
 
 	elif current_user.employee is not None:
 		query = Student.select()
