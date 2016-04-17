@@ -95,17 +95,16 @@
 					<!-- TABS -->
 					<div class="tabbable tabs-animated">
 						
-						<ul class="nav nav-tabs textcenter">
+						<ul class="nav nav-tabs nav-justified textcenter">
 							{% set active_pathway = pathways[0] %}
-							{% set tab_width = (12/pathways|count)|round|int %}
 							
 							{% for pathway in pathways %}
 								{% if pathway == active_pathway %}
 									<!-- Active tab -->
-									<li class="active col-xs-{{ tab_width }}"><a href="#{{ loop.index }}" data-toggle="tab"><h5>Pathway {{ loop.index }}</h5></a></li>
+									<li class="active"><a href="#{{ loop.index }}" data-toggle="tab"><h5>Pathway {{ loop.index }}</h5></a></li>
 								{% else %}
 									<!-- Inactive tabs -->
-									<li class="col-xs-{{ tab_width }}"><a href="#{{ loop.index }}" data-toggle="tab"><h5>Pathway {{ loop.index }}</h5></a></li>
+									<li><a href="#{{ loop.index }}" data-toggle="tab"><h5>Pathway {{ loop.index }}</h5></a></li>
 								{% endif %}
 							{% endfor %}
 						
