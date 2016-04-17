@@ -31,12 +31,16 @@ def index():
 
 
 @application.route("/migrate")
+@login_required
 def migrations():
-	# migrate(
-	# 	migrator.add_column("employee", "is_admin", BooleanField(default = False))
-	# )
-	# print "Migrated!"
-	return redirect("/")
+	if current_user.employee.is_admin:
+		# migrate(
+		# 	migrator.add_column("employee", "is_admin", BooleanField(default = False))
+		# )
+		# print "Migrated!"
+		return redirect("/")
+	else:
+		return redirect("/")
 
 
 @application.route("/login", methods = ["GET", "POST"])
@@ -185,9 +189,11 @@ def add_career():
 			with database.atomic(): # This will fail, and rollback any commits, if the career isn't unique.
 				career = Career.create(
 					name = form.name.data,
-					image = form.image.data,
 					description = form.description.data
 				)
+				if form.image.data: 
+					career.image = form.photo.data
+					career.save()
 
 				flash("Saved the career.")
 				return redirect("/career/" + str(career.id))
