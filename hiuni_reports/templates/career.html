@@ -30,7 +30,7 @@
 			<p>{{ career.description|markdown }}</p>
 			<br><br>
 
-			<h4>Recipes</h4>
+			<h4>Recipes <a href="/add_recipe/{{ career.id }}" class="btn btm-sm btn-success pull-right"><i class="fa fa-plus-circle"></i>add recipe</a></h4>
 
 			<ul>
 				{% for recipe in career.recipes %}
