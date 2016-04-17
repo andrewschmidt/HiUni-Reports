@@ -62,142 +62,157 @@
 		<!-- REPORT BODY -->
 		<div class="report-body">
 			<div> 
+				{% set pathways = report.sorted_pathways() %}
+				{% if pathways|count > 0 %}
 
-				<!-- TABS -->
-				<div class="tabbable tabs-animated">
-					
-					<ul class="nav nav-tabs textcenter">
-						{% set pathways = report.sorted_pathways() %}
-						{% set active_pathway = pathways[0] %}
-						{% set tab_width = (12/pathways|count)|round|int %}
+					<!-- TABS -->
+					<div class="tabbable tabs-animated">
 						
-						{% for pathway in pathways %}
-							{% if pathway == active_pathway %}
-								<!-- Active tab -->
-								<li class="active col-xs-{{ tab_width }}"><a href="#{{ loop.index }}" data-toggle="tab"><h5>Pathway {{ loop.index }}</h5></a></li>
-							{% else %}
-								<!-- Inactive tabs -->
-								<li class="col-xs-{{ tab_width }}"><a href="#{{ loop.index }}" data-toggle="tab"><h5>Pathway {{ loop.index }}</h5></a></li>
-							{% endif %}
-						{% endfor %}
+						<ul class="nav nav-tabs textcenter">
+							{% set active_pathway = pathways[0] %}
+							{% set tab_width = (12/pathways|count)|round|int %}
+							
+							{% for pathway in pathways %}
+								{% if pathway == active_pathway %}
+									<!-- Active tab -->
+									<li class="active col-xs-{{ tab_width }}"><a href="#{{ loop.index }}" data-toggle="tab"><h5>Pathway {{ loop.index }}</h5></a></li>
+								{% else %}
+									<!-- Inactive tabs -->
+									<li class="col-xs-{{ tab_width }}"><a href="#{{ loop.index }}" data-toggle="tab"><h5>Pathway {{ loop.index }}</h5></a></li>
+								{% endif %}
+							{% endfor %}
+						
+						</ul>
+
+						<!-- PATHWAYS -->
+						<div class="tab-content">
+							{% for pathway in pathways %}
 					
-					</ul>
+								{% if pathway == active_pathway %}
+									{% set tab_class = "tab-pane fade in active" %}
+								{% else %}
+									{% set tab_class = "tab-pane fade" %}
+								{% endif %}
 
-					<!-- PATHWAYS -->
-					<div class="tab-content">
-						{% for pathway in pathways %}
-				
-							{% if pathway == active_pathway %}
-								{% set tab_class = "tab-pane fade in active" %}
-							{% else %}
-								{% set tab_class = "tab-pane fade" %}
-							{% endif %}
+								<div class="{{ tab_class }}" id="{{ loop.index }}">
+									
 
-							<div class="{{ tab_class }}" id="{{ loop.index }}">
-								
+									<!-- PATHWAY TAGLINE -->
+									<div class="container">
+										<div class="row">
+											<div class="col-sm-12">        
+												<div class="pathway table">
+													<div class="inner table-cell vert-mid">
 
-								<!-- PATHWAY TAGLINE -->
-								<div class="container">
-									<div class="row">
-										<div class="col-sm-12">        
-											<div class="pathway table">
-												<div class="inner table-cell vert-mid">
-
-													<!-- Tagline -->
-													<h3 class="pathway-title strong light dark-gray line-height-1-4">{{ pathway.tagline|safe }}</h3>
-													<div class="hr light-blue-bg" style="height: 10px; width: 300px;"></div>
-													
+														<!-- Tagline -->
+														<h3 class="pathway-title strong light dark-gray line-height-1-4">{{ pathway.tagline|safe }}</h3>
+														<div class="hr light-blue-bg" style="height: 10px; width: 300px;"></div>
+														
+													</div>
 												</div>
 											</div>
 										</div>
 									</div>
-								</div>
 
 
-								<!-- PATHWAY DETAILS -->
-								<div class="container">
-									<div class="row summary light-blue-bg">
-										<div class="col-sm-12">
-											<!-- Cost -->
-											<div class="summary-category col-xs-4 col-xs-offset-0 col-sm-3 col-sm-offset-1 light-blue-bg textcenter">    
-												<h3 class="strong light white">${{ '{0:,}'.format(pathway.cost()) }}</h3>
-												<h5 class="caps b white">Cost</h5>
-											</div>
-											<!-- Time --> 
-											<div class="summary-category col-xs-4 col-sm-3 light-blue-bg textcenter">        
-												<h3 class="strong light white">{{ pathway.duration() }} years</h3>
-												<h5 class="caps b white">Time</h5>
-											</div>
-											<!-- Salary -->
-											<div class="summary-category col-xs-4 col-sm-3 light-blue-bg textcenter">        
-												<h3 class="strong light white">${{ '{0:,}'.format(pathway.median_salary()) }}</h3>
-												<h5 class="caps b white">Salary</h5>
+									<!-- PATHWAY DETAILS -->
+									<div class="container">
+										<div class="row summary light-blue-bg">
+											<div class="col-sm-12">
+												<!-- Cost -->
+												<div class="summary-category col-xs-4 col-xs-offset-0 col-sm-3 col-sm-offset-1 light-blue-bg textcenter">    
+													<h3 class="strong light white">${{ '{0:,}'.format(pathway.cost()) }}</h3>
+													<h5 class="caps b white">Cost</h5>
+												</div>
+												<!-- Time --> 
+												<div class="summary-category col-xs-4 col-sm-3 light-blue-bg textcenter">        
+													<h3 class="strong light white">{{ pathway.duration() }} years</h3>
+													<h5 class="caps b white">Time</h5>
+												</div>
+												<!-- Salary -->
+												<div class="summary-category col-xs-4 col-sm-3 light-blue-bg textcenter">        
+													<h3 class="strong light white">${{ '{0:,}'.format(pathway.median_salary()) }}</h3>
+													<h5 class="caps b white">Salary</h5>
+												</div>
 											</div>
 										</div>
 									</div>
-								</div>
 
 
-								<!-- PATHWAY STEPS -->
-								<div class="steps">
+									<!-- PATHWAY STEPS -->
+									<div class="steps">
 
-									{% set step_colors = ["", "light-blue", "medium-blue", "dark-blue"] %}
-									{% set step_icons = ["", "img/step-number-1-2x.png", "img/step-number-2-2x.png", "img/step-number-3-2x.png"] %}
-									
-									{% for step in pathway.steps %}
+										{% set step_colors = ["", "light-blue", "medium-blue", "dark-blue"] %}
+										{% set step_icons = ["", "img/step-number-1-2x.png", "img/step-number-2-2x.png", "img/step-number-3-2x.png"] %}
 										
-										<div class="container step-wrapper">
+										{% for step in pathway.steps %}
 											
-											<div class="row">
+											<div class="container step-wrapper">
 												
-												<div class="step step-{{ step_colors[step.number] }} col-xs-offset-1 col-xs-10 col-sm-offset-2 col-sm-10 col-md-offset-2 col-md-8"> 
+												<div class="row">
+													
+													<div class="step step-{{ step_colors[step.number] }} col-xs-offset-1 col-xs-10 col-sm-offset-2 col-sm-10 col-md-offset-2 col-md-8"> 
 
-													<div class="step-number absolute z-index-5">
-														<img src="{{ url_for('static', filename=step_icons[step.number]) }}" alt="Step icon">
-													</div>
-										 
-													<div class="inner">
-														
-														<!-- Step Title -->
-														<h1 class="light {{ step_colors[step.number] }}">{{ step.title }}</h1>
-														
-														<img src="{{ url_for('static', filename='img/dots-blues.png') }}" alt="Divider" class="step-divider hidden-xs">
-														<img src="{{ url_for('static', filename='img/dots-blue-xs.png') }}" alt="Divider" class="step-divider visible-xs" style="width: 221px;">
-														
-														<!-- School -->
-														<h4 class="strong dark-gray">{{ step.program.school.name }}</h4>
-														
-														<!-- School Details -->
-														<ul class="step-details dark-gray">
-															<li><i class="fa fa-money {{ step_colors[step.number] }}"></i>${{ '{0:,}'.format(step.cost) }}</li>
-															<li><i class="fa fa-clock-o {{ step_colors[step.number] }}"></i>{{ step.duration }} years</li>
-															<li><i class="fa fa-map-marker {{ step_colors[step.number] }}"></i>{{ step.program.school.city }}</li>
-															{% if step.program.school.admission_rate != None %}
-																<li><i class="fa fa-check-circle {{ step_colors[step.number] }}"></i>{{ step.program.school.admission_rate }}% Acceptance rate</li>
-															{% endif %}
-														</ul>
-														
-														<!-- Step Description -->
-														<div class="step-description">
-															<p class="dark-gray">{{ step.description|markdown }}</p>
+														<div class="step-number absolute z-index-5">
+															<img src="{{ url_for('static', filename=step_icons[step.number]) }}" alt="Step icon">
 														</div>
+											 
+														<div class="inner">
+															
+															<!-- Step Title -->
+															<h1 class="light {{ step_colors[step.number] }}">{{ step.title }}</h1>
+															
+															<img src="{{ url_for('static', filename='img/dots-blues.png') }}" alt="Divider" class="step-divider hidden-xs">
+															<img src="{{ url_for('static', filename='img/dots-blue-xs.png') }}" alt="Divider" class="step-divider visible-xs" style="width: 221px;">
+															
+															<!-- School -->
+															<h4 class="strong dark-gray">{{ step.program.school.name }}</h4>
+															
+															<!-- School Details -->
+															<ul class="step-details dark-gray">
+																<li><i class="fa fa-money {{ step_colors[step.number] }}"></i>${{ '{0:,}'.format(step.cost) }}</li>
+																<li><i class="fa fa-clock-o {{ step_colors[step.number] }}"></i>{{ step.duration }} years</li>
+																<li><i class="fa fa-map-marker {{ step_colors[step.number] }}"></i>{{ step.program.school.city }}</li>
+																{% if step.program.school.admission_rate != None %}
+																	<li><i class="fa fa-check-circle {{ step_colors[step.number] }}"></i>{{ step.program.school.admission_rate }}% Acceptance rate</li>
+																{% endif %}
+															</ul>
+															
+															<!-- Step Description -->
+															<div class="step-description">
+																<p class="dark-gray">{{ step.description|markdown }}</p>
+															</div>
 
-													</div>
-												
-												</div>     
+														</div>
+													
+													</div>     
+												</div>
 											</div>
-										</div>
 
-									{% endfor %}
+										{% endfor %}
 
+									</div>
 								</div>
-							</div>
 
-						{% endfor %}
+							{% endfor %}
+
+						</div>
 
 					</div>
 
-				</div>
+				{% else %}
+					<div class="container">
+						<br>
+						<div class="well">
+							<br>
+							<h4>We were unable to find any schools for this report.</h4>
+							<h5>Please contact admin@gohiuni.com.</h5>
+							<br>
+						</div>
+						<br>
+					</div>
+				{% endif %}
+
 			</div>
 
 			<!-- Bottom banner -->
