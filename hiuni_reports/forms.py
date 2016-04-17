@@ -3,10 +3,19 @@ from flask.ext.wtf import Form
 from flask.ext.wtf.file import FileField, FileAllowed
 from wtforms import widgets, StringField, SelectField, SelectMultipleField, PasswordField, TextAreaField, BooleanField as WTFBooleanField # Peewee also has a "BooleanField," so this was necessary.
 from wtforms.fields.html5 import EmailField
-from wtforms.validators import Email, Required, EqualTo
+from wtforms.validators import Email, Required, EqualTo, ValidationError
 from wtfpeewee.fields import SelectQueryField # Unlike a regular WTForms SelectField, this returns actual model classes.
 
 from models import *
+
+
+# CUSTOM VALIDATORS
+
+def is_integer(form, field):
+	try:
+		int(field.data)
+	except Exception:
+		raise ValidationError("Must input a number.")
 
 
 # CUSTOM FIELDS
@@ -59,11 +68,21 @@ class Add_Career(Form):
 
 
 class Recipe_Step_Form(Form):
+
+	schools = School.select(School.kind).order_by(fn.COUNT(School.id)).distinct().order_by()
+	kind_choices = [("", "")]
+	for school in schools:
+		kind_choices.append((school.kind, school.kind))
+
+	sort_choices = [("", ""), ("Location", "Location"), ("ROI", "ROI")]
+
 	title = StringField("Title:", validators = [Required("Please enter a step title.")])
-	duration = StringField("Duration (in years):", validators = [Required("Please enter a duration in years.")])
+	duration = StringField("Duration (in years):", validators = [Required("Please enter a duration in years."), is_integer])
 	cips = StringField("Areas of study as CIPs (separated by commas):", validators = [Required("Please enter at least one CIP.")])
-	school_kind = SelectQueryField("Kind of school:", query = School.select(School.kind).order_by(fn.COUNT(School.id)).distinct().order_by(), get_label = "kind", allow_blank = True, blank_text = " ", validators = [Required("Please choose a kind of school.")])
-	sort_by = SelectQueryField("Sort by:", query = Step.select(Step.sort_by).distinct().order_by(), get_label = "sort_by", allow_blank = True, blank_text = " ", validators = [Required("Please choose a way to sort programs.")])
+
+	school_kind = SelectField("Kind of school:", choices = kind_choices, validators = [Required("Please choose a kind of school.")])
+	sort_by = SelectField("Sort by:", choices = sort_choices, validators = [Required("Please choose a way to sort programs.")])
+	
 	description = TextAreaField("Description")
 
 

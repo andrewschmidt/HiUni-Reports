@@ -150,7 +150,6 @@ def manage_careers():
 		if request.method == "POST":
 			if "delete" in request.form:
 				career = Career.get(id = request.form["delete"])
-				print "Deleting career... " + career.name
 				career.delete_instance(recursive = True)
 				return redirect("/manage_careers")
 
@@ -164,6 +163,13 @@ def manage_careers():
 def career(career_id):
 	if current_user.employee:
 		career = Career.get(id = career_id)
+
+		if request.method == "POST":
+			if "delete" in request.form:
+				recipe = Recipe.get(id = request.form["delete"])
+				recipe.delete_instance(recursive = True)
+				return redirect("/career/" + career_id)
+
 		return render_template("career.html", career = career)
 
 	else: return redirect("/")
@@ -231,13 +237,43 @@ def edit_recipe(career_id = None, recipe_id = None):
 	if current_user.employee:
 		if recipe_id:
 			recipe = Recipe.get(id = recipe_id)
+			career = recipe.career
 		else:
 			career = Career.get(id = career_id)
-			recipe = Recipe.create(career = career)
+			recipe = None
 
 		form = Recipe_Step_Form()
 
-		return render_template("edit_recipe.html", form = form, recipe = recipe)
+		if request.method == "POST":
+			if "delete" in request.form:
+				step = Step.get(id = request.form["delete"])
+				step.delete_instance(recursive = True)
+				return redirect("/edit_recipe/" + recipe_id)
+
+		if form.validate_on_submit():
+			if recipe == None:
+				recipe = Recipe.create(career = career)
+
+			number = recipe.steps.count() + 1
+			cips = [cip.strip() for cip in form.cips.data.split(',')]
+
+			try:
+				step = Step.create(
+					recipe = recipe,
+					number = number,
+					title = form.title.data,
+					duration = int(form.duration.data),
+					cips = cips,
+					school_kind = form.school_kind.data,
+					sort_by = form.sort_by.data,
+					description = form.description.data
+				)
+			except Exception:
+				flash("Error saving step.")
+
+			return redirect("/edit_recipe/" + str(recipe.id))
+
+		return render_template("edit_recipe.html", form = form, recipe = recipe, career = career)
 
 	else: return redirect("/")
 
@@ -248,15 +284,31 @@ def edit_recipe_step(recipe_id, step_id):
 	if current_user.employee:
 		try:
 			step = Step.get(id = step_id)
+			
+			cips = ", ".join(step.cips)
 
-			form = Edit(text = step.description)
+			form = Recipe_Step_Form(
+					title = step.title,
+					duration = step.duration,
+					cips = cips,
+					school_kind = step.school_kind,
+					sort_by = step.sort_by,
+					description = step.description
+				)
 
 			if form.validate_on_submit():
-				step.description = form.text.data
+				cips = [cip.strip() for cip in form.cips.data.split(',')]
+
+				step.title = form.title.data
+				step.duration = form.duration.data
+				step.cips = cips
+				step.school_kind = form.school_kind.data
+				step.description = form.description.data
 				step.save()
+
 				return redirect("/edit_recipe/" + recipe_id)
 
-			return render_template("edit.html", title = "Edit description", form = form, rows = "15")
+			return render_template("edit_recipe_step.html", form = form, step = step)
 
 		except DoesNotExist:
 			abort(404)

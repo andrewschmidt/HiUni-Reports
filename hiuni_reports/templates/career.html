@@ -37,12 +37,16 @@
 					<hr>
 					<li>
 						<a href="/edit_recipe/{{ recipe.id }}">{{ recipe.steps|count }}-step recipe</a>
-						<div class="btn-group pull-right">
-							<a href="/edit_recipe/{{ recipe.id }}" class="btn btn-sm btn-warning"><i class="fa fa-pencil-square"></i>edit</a>
-							{% if current_user.employee.is_admin %}
-								<button class="btn btn-sm btn-danger" name="delete" value="{{ recipe.id }}"><i class="fa fa-trash"></i>delete</button>
-							{% endif %}
-						</div>
+						
+						<form action = "/career/{{ career.id }}" method = "post" class="pull-right">
+							<div class="btn-group">
+								<a href="/edit_recipe/{{ recipe.id }}" class="btn btm-sm btn-warning"><i class="fa fa-pencil-square"></i>edit</a>
+								{% if current_user.employee.is_admin %}
+									<button class="btn btn-sm btn-danger" name="delete" value="{{ recipe.id }}"><i class="fa fa-trash"></i>delete</button>
+								{% endif %}
+							</div>
+						</form>
+
 					</li>
 				{% endfor %}
 			</ul>
