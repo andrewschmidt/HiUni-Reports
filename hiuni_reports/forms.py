@@ -32,6 +32,13 @@ class Registration_Form(Form):
 	organization = StringField("Name of organization:")
 
 
+class Employee_Form(Form):
+	name = StringField("First name:", validators = [Required("Don't forget your name!")])
+	email = EmailField("Email:", validators = [Required("Please enter an email."), Email("Please enter a valid email address.")])
+	password = PasswordField("Password:", validators = [Required("Please enter a password."), EqualTo("confirm_password", message = "Passwords must match.")])
+	confirm_password = PasswordField("Confirm password:", validators = [Required("Please confirm your password.")])
+
+
 class Choose_Student(Form):
 	student = SelectQueryField("Choose a student:", query = Student.select(), get_label = "name", allow_blank = True, blank_text = " ", validators = [Required()])
 
@@ -48,6 +55,15 @@ class Add_Report(Form):
 class Add_Career(Form):
 	name = StringField("Name", validators = [Required("Don't forget the career's name!")])
 	image = FileField("Banner image", validators = [FileAllowed(["jpg", "png", "jpeg"], "You sure that's an image file? Upload a JPEG or PNG!")])
+	description = TextAreaField("Description")
+
+
+class Recipe_Step_Form(Form):
+	title = StringField("Title:", validators = [Required("Please enter a step title.")])
+	duration = StringField("Duration (in years):", validators = [Required("Please enter a duration in years.")])
+	cips = StringField("Areas of study as CIPs (separated by commas):", validators = [Required("Please enter at least one CIP.")])
+	school_kind = SelectQueryField("Kind of school:", query = School.select(School.kind).order_by(fn.COUNT(School.id)).distinct().order_by(), get_label = "kind", allow_blank = True, blank_text = " ", validators = [Required("Please choose a kind of school.")])
+	sort_by = SelectQueryField("Sort by:", query = Step.select(Step.sort_by).distinct().order_by(), get_label = "sort_by", allow_blank = True, blank_text = " ", validators = [Required("Please choose a way to sort programs.")])
 	description = TextAreaField("Description")
 
 

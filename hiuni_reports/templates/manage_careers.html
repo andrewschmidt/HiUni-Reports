@@ -8,9 +8,10 @@
 		<div class="panel-heading"><h4>Manage careers</h4></div>
 		
 		<div class="panel-body">
-			<h4><b>{{ careers|count }}</b> careers in the database, with <b>{{ recipe_count }}</b> recipes.</h4>
+			<h4><b>{{ careers|count }}</b> careers in the database, with <b>{{ recipe_count }}</b> recipes. <a href="/add_career" class="btn btm-sm btn-success pull-right"><i class="fa fa-plus-circle"></i>new career</a></h4>
+
 			
-			<br>
+			<br><br>
 			
 			<table class="table">
 				<thead>
@@ -30,8 +31,10 @@
 							<td>
 								<form action = "/manage_careers" method = "post">
 									<div class="btn-group">
-										<a href="edit_career/{{ career.id }}" class="btn btm-sm btn-warning">Edit</a>
-										<button class="btn btn-sm btn-danger" name="delete" value="{{ career.id }}">Delete</button>
+										<a href="edit_career/{{ career.id }}" class="btn btm-sm btn-warning"><i class="fa fa-pencil-square"></i>edit</a>
+										{% if current_user.employee.is_admin %}
+											<button class="btn btn-sm btn-danger" name="delete" value="{{ career.id }}"><i class="fa fa-trash"></i>delete</button>
+										{% endif %}
 									</div>
 								</form>
 							</td>
@@ -39,7 +42,6 @@
 					{% endfor %}
 				</tbody>
 			</table>
-		
 		</div>
 
 	</div>

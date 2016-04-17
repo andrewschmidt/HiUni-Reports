@@ -13,6 +13,8 @@
 						
 						<h4 class="report-header-student-career white">Career:</h4>
 						<h3 class="report-header-student-name strong white"><b>{{career.name}}</b></h3>
+						<a href="/edit_career/{{ career.id }}" class="btn btn-warning"><i class="fa fa-pencil-square"></i>edit</a>
+
 
 					</div>				
 				</div>
@@ -25,9 +27,26 @@
 		<div class="panel-body">
 
 			<br>
-			{{ career.description|markdown }}
-			<br><hr>
-			<a href="/edit_career/{{ career.id }}" class="btn btn-warning">Edit career</a>
+			<p>{{ career.description|markdown }}</p>
+			<br><br>
+
+			<h4>Recipes</h4>
+
+			<ul>
+				{% for recipe in career.recipes %}
+					<hr>
+					<li>
+						<a href="/edit_recipe/{{ recipe.id }}">{{ recipe.steps|count }}-step recipe</a>
+						<div class="btn-group pull-right">
+							<a href="/edit_recipe/{{ recipe.id }}" class="btn btn-sm btn-warning"><i class="fa fa-pencil-square"></i>edit</a>
+							{% if current_user.employee.is_admin %}
+								<button class="btn btn-sm btn-danger" name="delete" value="{{ recipe.id }}"><i class="fa fa-trash"></i>delete</button>
+							{% endif %}
+						</div>
+					</li>
+				{% endfor %}
+			</ul>
+			<br>
 			
 		</div>
 	</div>

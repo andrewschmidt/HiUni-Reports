@@ -70,14 +70,14 @@ def create_tables():
 def create_admin():
 	if Employee.select().count() == 0:
 		print "Creating an admin."
-		employee = Employee()
-		employee.save()
+		employee = Employee.create(
+				is_admin = True
+			)
 		user = User.create(
 			email = application.config["ADMINEMAIL"],
 			password = application.config["ADMINPASS"],
 			employee = employee
 		)
-		user.save()
 
 create_tables()
 create_admin()

@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% set active_page = "manage_careers" %}
+
+{% block content %}
+
+	<div class="panel panel-primary">
+		
+		<div class="panel-heading">
+			{% if recipe.steps|count > 0 %}
+				<h4>Edit recipe</h4>
+			{% else %}
+				<h4>Add a <b>{{ recipe.career.name }}</b> recipe</h4>
+			{% endif %}
+		</div>
+		
+		<div class="panel-body">
+			
+			<!-- Existing steps: -->
+			{% if recipe.steps|count > 0 %}
+				{% for step in recipe.steps %}
+					<div class="panel panel-info">
+						<div class="panel-heading">
+							<h5>
+								<button class="btn btn-sm btn-danger pull-right" name="delete" value="{{ step.id }}"><i class="fa fa-trash"></i>delete</button>
+								Step {{ step.number }}:<br><b>{{ step.title }}</b>
+							</h5>
+						</div>
+						<div class="panel-body">
+							<ul>
+								<li><b>Duration:</b> {{ step.duration }} years</li>
+								<li><b>Type of school:</b> {{ step.school_kind }}</li>
+								<li><b>Areas of study (CIPs):</b> {% for cip in step.cips %}{{ cip }} {% endfor %}</li>
+								<li><b>Sort by:</b> {{ step.sort_by }}</li>
+								<hr>
+								<li><b>Description:</b><br>
+									{{ step.description|markdown }}
+									<a href="/edit_recipe/{{ recipe.id }}/step/{{ step.id }}" class="btn btn-link btn-sm pull-right"><i class="fa fa-pencil-square"></i>edit</a>
+								</li>
+							</ul>
+						</div>
+					</div>
+				{% endfor %}
+			{% endif %}
+
+			<!-- Add a step: -->
+			<div class="well">
+				<h5><b>Add a step</b></h5><hr>
+			
+				<form class="form" role="form" method="post" action="">
+					{{ form.hidden_tag() }}
+						
+					<div class="form-group-lg">
+						{% for field in form if field.widget.input_type != "hidden" and field != form.description %}
+							<label class="control-label" for="{{ field.id }}">{{ field.label }}</label>
+							{{ field(class="form-control" )}}
+							<br>
+						{% endfor %}
+						{{ form.description(class="form-control", rows=12) }}
+						<br>
+						<button class="btn btn-success" type="submit">Save</button>
+					</div>
+				</form>
+			</div>
+
+		</div>
+
+	</div>
+
+{% endblock %}

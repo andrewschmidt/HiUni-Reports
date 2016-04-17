@@ -13,7 +13,7 @@
 						<button class = "btn btn-success btn-lg" name = "publish"><i class="fa fa-check-circle"></i>publish</button>
 						<button class = "btn btn-danger btn-lg" name = "delete_report"><i class="fa fa-trash"></i>report</button>
 					</div>
-					{% if current_user.email == adminemail %}
+					{% if current_user.employee.is_admin %}
 						<button class = "btn btn-danger btn-lg pull-right" name = "delete_student"><i class="fa fa-trash"></i>student</button>
 					{% endif %}
 				{% else %}
@@ -145,9 +145,7 @@
 													<h3 class="pathway-title strong light dark-gray line-height-1-4">{{ pathway.tagline|safe }}
 													
 													{% if current_user.employee != None and not report.published %}
-														<form action="/edit_report/{{ student.id }}_{{ report.id }}/pathway/{{ pathway.id }}/tagline" method="get">
-															<button class="btn btn-link btn-sm"><i class="fa fa-pencil-square"></i>edit</button>
-														</form>
+														<a href="/edit_report/{{ student.id }}_{{ report.id }}/pathway/{{ pathway.id }}/tagline" class="btn btn-link btn-sm"><i class="fa fa-pencil-square"></i>edit</a>
 													{% endif %}
 													</h3>
 
@@ -238,9 +236,7 @@
 															<p class="dark-gray">{{ step.description|markdown }}</p>
 															
 															{% if current_user.employee != None and not report.published %}
-																<form action="/edit_report/{{ student.id }}_{{ report.id }}/step/{{ step.id }}" method="get">
-																	<button class="btn btn-link btn-sm pull-right"><i class="fa fa-pencil-square"></i>edit</button>
-																</form>
+																<a href="/edit_report/{{ student.id }}_{{ report.id }}/step/{{ step.id }}" class="btn btn-link btn-sm pull-right"><i class="fa fa-pencil-square"></i>edit</a>
 															{% endif %}
 														
 														</div>

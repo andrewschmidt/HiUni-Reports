@@ -30,19 +30,37 @@
 		{% if current_user.is_authenticated %}
 		
 			{% if current_user.employee != None %}
-				
-				{% set sidebar = [
-					("/students", "students", "Edit reports"),
-					("/register_employee", "register_employee", "Add an employee"),
-					("/manage_schools", "manage_schools", "Manage schools"),
-					("/manage_careers", "manage_careers", "Manage careers")
-				] -%}
-				{% if current_user.employee.name != None %}
-					{% set name = current_user.employee.name %}
-				{% else %}
+
+				<!-- If they're an employee who's the admin... -->
+				{% if current_user.employee.is_admin %}
+
+					{% set sidebar = [
+						("/students", "students", "Edit reports"),
+						("/register_employee", "register_employee", "Add an employee"),
+						("/manage_schools", "manage_schools", "Manage schools"),
+						("/manage_careers", "manage_careers", "Manage careers")
+					] -%}
+
 					{% set name = "Admin" %}
+
+				<!-- If they're just a regular employee... -->
+				{% else %}
+
+					{% set sidebar = [
+						("/students", "students", "Edit reports"),
+						("/manage_schools", "manage_schools", "Manage schools"),
+						("/manage_careers", "manage_careers", "Manage careers")
+					] -%}
+
+					{% if current_user.employee.name != None %}
+						{% set name = current_user.employee.name %}
+					{% else %}
+						{% set name = "Employee" %}
+					{% endif %}
+					
 				{% endif %}
-			
+				
+			<!-- If they're a customer who is an organiation... -->
 			{% elif current_user.customer.is_organization %}
 				
 				{% set sidebar = [
@@ -50,10 +68,13 @@
 					("/questions", "questions", "Add a student"),
 					("/add_report", "add_report", "Get another report")
 				] -%}
+				
 				{% set name = current_user.customer.organization %}
 			
+			<!-- If they're just a regular customer... -->
 			{% elif current_user.customer.students[0] %}
 				{% set student = current_user.customer.students[0] %}
+				
 				{% if student.reports|count > 1 %}
 					{% set sidebar = [
 						("/students", "students", "My Reports"),
@@ -65,6 +86,7 @@
 						("/add_report", "add_report", "Get a new report")
 					] -%}
 				{% endif %}
+				
 				{% set name = student.first_name %}
 			
 			{% endif %}

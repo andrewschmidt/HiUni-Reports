@@ -64,6 +64,7 @@ class Customer(BaseModel):
 
 class Employee(BaseModel):
 	name = TextField(null = True)
+	is_admin = BooleanField(default = False)
 
 
 class User(BaseModel):

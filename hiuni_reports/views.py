@@ -12,6 +12,9 @@ import solver
 
 from forms import *
 
+from playhouse.migrate import *
+migrator = PostgresqlMigrator(database)
+
 
 
 # VIEWS
@@ -25,6 +28,15 @@ def index():
 		return redirect("/login")
 
 	return render_template("index.html", title = "Home")
+
+
+@application.route("/migrate")
+def migrations():
+	# migrate(
+	# 	migrator.add_column("employee", "is_admin", BooleanField(default = False))
+	# )
+	# print "Migrated!"
+	return redirect("/")
 
 
 @application.route("/login", methods = ["GET", "POST"])
@@ -91,20 +103,17 @@ def register():
 @login_required
 def register_employee():
 	if current_user.employee:
-		form = Registration_Form()
+		form = Employee_Form()
 		
 		if form.validate_on_submit():
-			employee = Employee()
-			employee.save()
-			
+			employee = Employee.create(
+					name = form.name.data
+				)			
 			user = User.create(
 				email = form.email.data,
 				password = form.password.data,
 				employee = employee
-			)
-			
-			user.save()
-			
+			)			
 			return redirect("/students")
 
 		return render_template("register_employee.html", form = form)
@@ -211,6 +220,46 @@ def edit_career(career_id):
 					flash(error)
 
 		return render_template("edit_career.html", form = form, career = career)
+
+	else: return redirect("/")
+
+
+@application.route("/add_recipe/<career_id>", methods = ["GET", "POST"])
+@application.route("/edit_recipe/<recipe_id>", methods = ["GET", "POST"])
+@login_required
+def edit_recipe(career_id = None, recipe_id = None):
+	if current_user.employee:
+		if recipe_id:
+			recipe = Recipe.get(id = recipe_id)
+		else:
+			career = Career.get(id = career_id)
+			recipe = Recipe.create(career = career)
+
+		form = Recipe_Step_Form()
+
+		return render_template("edit_recipe.html", form = form, recipe = recipe)
+
+	else: return redirect("/")
+
+
+@application.route("/edit_recipe/<recipe_id>/step/<step_id>", methods = ["GET", "POST"])
+@login_required
+def edit_recipe_step(recipe_id, step_id):
+	if current_user.employee:
+		try:
+			step = Step.get(id = step_id)
+
+			form = Edit(text = step.description)
+
+			if form.validate_on_submit():
+				step.description = form.text.data
+				step.save()
+				return redirect("/edit_recipe/" + recipe_id)
+
+			return render_template("edit.html", title = "Edit description", form = form, rows = "15")
+
+		except DoesNotExist:
+			abort(404)
 
 	else: return redirect("/")
 
@@ -443,7 +492,7 @@ def edit_report(student_id, report_id):
 					student.delete_instance(recursive = True)
 					return redirect("/students")
 
-			return render_template("edit_report.html", title = student.name + "'s Report", student = student, report = report, adminemail = application.config["ADMINEMAIL"])
+			return render_template("edit_report.html", title = student.name + "'s Report", student = student, report = report)
 
 		except DoesNotExist:
 			abort(404)
