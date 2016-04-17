@@ -392,7 +392,7 @@ def questions(student_id = None):
 			flash("It looks like you've already created a profile. Try logging in!")
 			return redirect("/index")
 
-		solver.make_pathways_async(student = student, report = report, how_many = 6)
+		solver.make_pathways_async(student = student, report = report, how_many = 10)
 		return redirect("/confirmation")
 
 	else:
