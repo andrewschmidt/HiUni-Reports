@@ -471,15 +471,21 @@ def list_reports(student_id):
 
 	if query.count() == 1:
 		report = query.get()
-		return redirect("/report/" + str(student.id) + "_" + str(report.id))
+		if current_user.employee is None:
+			return redirect("/report/" + str(student.id) + "_" + str(report.id))
 	elif query.count() == 0:
 		if Report.select().join(Student).where(Student.id == student_id).count() > 0:
 			return redirect("/confirmation")
-		else:
-			return redirect("/questions")
+		elif current_user.employee is None:
+				return redirect("/questions")
 
 	form = Choose_Report()
 	form.report.query = query
+
+	if request.method == "POST" and current_user.employee.is_admin:
+		if "delete_student" in request.form:
+			student.delete_instance(recursive = True)
+			return redirect("/students")
 
 	if form.validate_on_submit():
 		report = form.report.data

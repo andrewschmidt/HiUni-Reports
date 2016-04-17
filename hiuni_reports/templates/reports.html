@@ -5,21 +5,30 @@
 	
 	<div class="panel panel-primary">
 		<div class="panel-heading"><h4>Reports</h4></div>
+		
 		<div class="panel-body">
 			<form class="form" role="form" method="post" action="">
+				{{ form.hidden_tag() }}
 				
-					{{ form.hidden_tag() }}
-					
-					<div class="form-group-lg">
-						{% for field in form if field.widget.input_type != "hidden" %}
-							<label class="control-label" for="{{ field.id }}">{{ field.label }}</label>
-							{{ field(class="form-control" )}} <br>
-						{% endfor %}
-						<button class="btn btn-success" type="submit">Submit</button>
-					</div>
+				<div class="form-group-lg">
+					{% for field in form if field.widget.input_type != "hidden" %}
+						<label class="control-label" for="{{ field.id }}">{{ field.label }}</label>
+						{{ field(class="form-control" )}} <br>
+					{% endfor %}
+					<button class="btn btn-success" type="submit">Submit</button>
+				</div>
 			
 			</form>
 		</div>
+		
 	</div>
+	
+	{% if current_user.employee != None %}
+		<form action = "/reports/{{ student.id }}" method = "post">
+			{% if current_user.employee.is_admin %}
+				<button class = "btn btn-danger btn-lg pull-right" name = "delete_student"><i class="fa fa-trash"></i>student</button>
+			{% endif %}
+		</form>
+	{% endif %}
 
 {% endblock %}
