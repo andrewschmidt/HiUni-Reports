@@ -31,4 +31,4 @@ Please let me know! I’m new to development and always learning.
 
 ## Can I hire you?
 
-Sure!
+Nope! I’ve just accepted an awesome job at [Slack](www.slack.com). Thanks anyway!
