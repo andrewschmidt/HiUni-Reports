@@ -141,6 +141,23 @@ def manage_schools():
 	else: return redirect("/")
 
 
+@application.route("/school/<school_id>", methods = ["GET", "POST"])
+@login_required
+def school(school_id):
+	if current_user.employee:
+		school = School.get(id = school_id)
+
+		if request.method == "POST":
+			if "delete" in request.form:
+				program = Program.get(id = request.form["delete"])
+				program.delete_instance(recursive = True)
+				return redirect("/school/" + school_id)
+
+		return render_template("school.html", school = school)
+
+	else: return redirect("/")
+
+
 @application.route("/manage_careers", methods = ["GET", "POST"])
 @login_required
 def manage_careers():

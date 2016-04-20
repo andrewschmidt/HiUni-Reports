@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% set active_page = "manage_schools" %}
+
+{% block content %}
+
+	<div class="row report">
+		<div class="report-header">
+
+			<div class="report-header-bg col-sm-12">
+
+				<div class="report-header-student student absolute full z-index-3 table col-sm-12">
+					<div class="inner table-cell vert-mid">
+						
+						<h3 class="report-header-student-name strong white"><b>{{school.name}}</b><a href="/edit_school/{{ school.id }}" class="btn btn-warning pull-right"><i class="fa fa-pencil-square"></i>edit</a></h3>
+
+						<ul class="report-header-student-details student-details white">
+							
+							<li><i class="fa fa-map-marker white"></i>{{ school.city }}, {{ school.state }}</li>
+							<li><i class="fa fa-building white"></i>{{ school.kind }}</li>
+							<li><i class="fa fa-percent white"></i>Admission: {{ school.admission_rate }}%</li>
+							<li><i class="fa fa-barcode white"></i>IPEDS ID: {{ school.ipeds_id }}</li>
+							<br>
+							{% if school.net_price["average"] %}
+								<li><i class="fa fa-usd white"></i>Average Net Price: ${{ '{0:,}'.format(school.net_price["average"]|int) }}</li>
+							{% endif %}
+							{% if school.kind == "Degree-granting, associate's and certificates" %}
+								{% if school.total_price["in-state students living off campus (with family)"] %}
+									<li><i class="fa fa-usd white"></i>In-state Cost: ${{ '{0:,}'.format(school.total_price["in-state students living off campus (with family)"]|int) }}</li>
+								{% endif %}
+							{% else %}
+								{% if school.total_price["in-state students living on campus"] %}
+									<li><i class="fa fa-usd white"></i>In-state Cost: ${{ '{0:,}'.format(school.total_price["in-state students living on campus"]|int) }}</li>
+								{% endif %}
+							{% endif %}
+							{% if school.total_price["out-of-state students living on campus"] %}
+								<li><i class="fa fa-usd white"></i>Out-of-state Cost: ${{ '{0:,}'.format(school.total_price["out-of-state students living on campus"]|int) }}</li>
+							{% endif %}
+
+						</ul>
+
+
+					</div>				
+				</div>
+				
+				<div class="report-header-overlay absolute full z-index-1 col-sm-12"></div>
+				<div class="report-header-overlay-duplicate absolute full z-index-2 col-sm-12"></div>
+			</div>
+		</div>
+
+		<div class="panel-body">
+			<br><br>
+			<h4>Programs offered <a href="/add_program/{{ school.id }}" class="btn btm-sm btn-success pull-right"><i class="fa fa-plus-circle"></i>add program</a></h4>
+
+			<ul>
+				{% for program in school.programs %}
+					<hr>
+					<li>
+						<a href="/edit_program/{{ program.id }}"><b>{{ program.name }}</b></a> — CIP: <b>{{ program.cip }}</b>
+						
+						<form action = "/school/{{ school.id }}" method = "post" class="pull-right">
+							<div class="btn-group">
+								<a href="/edit_program/{{ program.id }}" class="btn btm-sm btn-warning"><i class="fa fa-pencil-square"></i>edit</a>
+								{% if current_user.employee.is_admin %}
+									<button class="btn btn-sm btn-danger" name="delete" value="{{ program.id }}"><i class="fa fa-trash"></i>delete</button>
+								{% endif %}
+							</div>
+						</form>
+
+					</li>
+				{% endfor %}
+			</ul>
+			<br>
+			
+		</div>
+	</div>
+
+{% endblock %}
