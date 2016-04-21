@@ -1,20 +1,20 @@
 {% extends "base.html" %}
-{% set active_page = "manage_careers" %}
+{% set active_page = "manage_schools" %}
 
 {% block content %}
 
 	<div class="row report">
 		<div class="report-header">
 
-			<div class="report-header-bg col-sm-12" style="background: url('{{ career.image }}') no-repeat right;">
+			<div class="report-header-bg col-sm-12">
 
 				<div class="report-header-student student absolute full z-index-3 table col-sm-12">
 					<div class="inner table-cell vert-mid">
-						{% if career %}
-							<h4 class="report-header-student-career white">Edit career:</h4>
-							<h3 class="report-header-student-name strong white"><b>{{career.name}}</b></h3>
+						{% if school.name %}
+							<h4 class="report-header-student-career white">Edit school:</h4>
+							<h3 class="report-header-student-name strong white"><b>{{school.name}}</b></h3>
 						{% else %}
-							<h3 class="report-header-student-name strong white">Add a career</h3>
+							<h3 class="report-header-student-name strong white">Add a school</h3>
 						{% endif %}					
 					</div>
 
@@ -32,7 +32,7 @@
 			<div class="report-body">
 				<br>
 				<div class="well">
-				
+
 					<form class="form" role="form" method="post" action="" enctype="multipart/form-data">
 						{{ form.hidden_tag() }}
 						
@@ -44,7 +44,7 @@
 							{% endfor %}
 							
 							<button class="btn btn-success" type="submit">Save</button> 
-							{% if career %}
+							{% if school %}
 								<a href="/manage_careers" class="btn btn-warning">Cancel</a>
 							{% else %}
 								<a href="/manage_careers" class="btn btn-warning">Cancel</a>
@@ -53,8 +53,8 @@
 						</div>
 					
 					</form>
-				
 				</div>
+
 			</div>
 		</div>
 	</div>

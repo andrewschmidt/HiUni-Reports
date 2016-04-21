@@ -1,7 +1,7 @@
 # Form imports:
 from flask.ext.wtf import Form
 from flask.ext.wtf.file import FileField, FileAllowed
-from wtforms import widgets, StringField, SelectField, SelectMultipleField, PasswordField, TextAreaField, BooleanField as WTFBooleanField # Peewee also has a "BooleanField," so this was necessary.
+from wtforms import widgets, StringField, SelectField, SelectMultipleField, PasswordField, TextAreaField, RadioField, BooleanField as WTFBooleanField # Peewee also has a "BooleanField," so this was necessary.
 from wtforms.fields.html5 import EmailField
 from wtforms.validators import Email, Required, EqualTo, ValidationError
 from wtfpeewee.fields import SelectQueryField # Unlike a regular WTForms SelectField, this returns actual model classes.
@@ -15,7 +15,7 @@ def is_integer(form, field):
 	try:
 		int(field.data)
 	except Exception:
-		raise ValidationError("Must input a number.")
+		raise ValidationError("Please input numbers simply as numbers, without any extra punctuation (like commas or dollar signs).")
 
 
 # CUSTOM FIELDS
@@ -68,22 +68,37 @@ class Add_Career(Form):
 
 
 class Recipe_Step_Form(Form):
-
-	schools = School.select(School.kind).order_by(fn.COUNT(School.id)).distinct().order_by()
-	kind_choices = [("", "")]
-	for school in schools:
-		kind_choices.append((school.kind, school.kind))
-
 	sort_choices = [("", ""), ("Location", "Location"), ("ROI", "ROI")]
 
 	title = StringField("Title:", validators = [Required("Please enter a step title.")])
 	duration = StringField("Duration (in years):", validators = [Required("Please enter a duration in years."), is_integer])
 	cips = StringField("Areas of study as CIPs (separated by commas):", validators = [Required("Please enter at least one CIP.")])
 
-	school_kind = SelectField("Kind of school:", choices = kind_choices, validators = [Required("Please choose a kind of school.")])
+	school_kind = SelectField("Kind of school:", choices = [], validators = [Required("Please choose a kind of school.")])
 	sort_by = SelectField("Sort by:", choices = sort_choices, validators = [Required("Please choose a way to sort programs.")])
 	
 	description = TextAreaField("Description")
+
+
+class Add_School(Form):
+	name = StringField("Name:", validators = [Required("Please enter a name.")])
+	ipeds_id = StringField("NCES IPEDS ID:", validators = [Required("Please enter an IPEDS ID. You can find this via the NCES website. http://nces.ed.gov/globallocator/")])
+	
+	existing_kind = SelectField("Choose the kind of school:", choices = [], validators = [Required("Please choose a kind of school.")])
+	new_kind = StringField("Or, enter a custom kind:")
+	
+	admission_rate = StringField("Admission rate:", validators = [is_integer])
+
+	city = StringField("City:", validators = [Required("Please enter a city.")])
+	state = StringField("State:", validators = [Required("Please enter a state.")])
+	latitude = StringField("Latitude:")
+	longitude = StringField("Longitude:")
+
+	total_price_in_state = StringField("Total price, in-state students living on campus:", validators = [is_integer])
+	total_price_in_state_off_campus = StringField("Total price, in-state students living off campus:", validators = [is_integer])
+	total_price_out_of_state = StringField("Total price, out-of-state student:", validators = [Required("Please include out-of-state total cost, even if it's the same."), is_integer])
+
+	net_price_average = StringField("Average net price (after taking into account aid):", validators = [is_integer])
 
 
 class Edit(Form):
