@@ -148,12 +148,92 @@ def school(school_id):
 		school = School.get(id = school_id)
 
 		if request.method == "POST":
-			if "delete" in request.form:
+			if "delete_program" in request.form:
 				program = Program.get(id = request.form["delete"])
 				program.delete_instance(recursive = True)
 				return redirect("/school/" + school_id)
 
+			elif "delete_school" in request.form:
+				school.delete_instance(recursive = True)
+				return redirect("/manage_schools")
+
 		return render_template("school.html", school = school)
+
+	else: return redirect("/")
+
+
+@application.route("/add_school", methods = ["GET", "POST"])
+@application.route("/edit_school/<school_id>", methods = ["GET", "POST"])
+@login_required
+def edit_school(school_id = None):
+	if current_user.employee:
+		
+		if school_id:
+			school = School.get(id = school_id)
+
+			form = Add_School(
+					name = school.name,
+					ipeds_id = school.ipeds_id,
+					existing_kind = school.kind,
+					admission_rate = str(school.admission_rate),
+					city = school.city,
+					state = school.state,
+					longitude = school.longitude,
+					latitude = school.latitude,
+					total_price_in_state = str(school.total_price["in-state students living on campus"]),
+					total_price_in_state_off_campus = str(school.total_price["in-state students living off campus (with family)"]),
+					total_price_out_of_state = str(school.total_price["out-of-state students living on campus"]),
+					net_price_average = str(school.net_price["average"])
+				)
+		else:
+			school = School()
+			form = Add_School()
+
+		# Dynamically generate the choices for the "school kind" dropdown, based on what's in the database:
+		s = School.select(School.kind).order_by(fn.COUNT(School.id)).distinct().order_by()
+		kinds = [("", "")]
+		for x in s:
+			kinds.append((x.kind, x.kind))
+		kinds.append(("Custom", "Custom"))
+		form.existing_kind.choices = kinds
+
+		if form.validate_on_submit():
+			with database.atomic():
+				school.name = form.name.data
+				school.ipeds_id = form.ipeds_id.data
+				school.admission_rate = int(form.admission_rate.data)
+				
+				if form.existing_kind.data != "Custom":
+					school.kind = form.existing_kind.data
+				else:
+					school.kind = form.new_kind.data
+
+				school.city = form.city.data
+				school.state = form.state.data
+				if form.longitude.data: school.longitude = form.longitude.data
+				if form.latitude.data: school.latitude = form.latitude.data
+
+				if not school_id:
+					school.net_price = {}
+					school.total_price = {}
+					school.save()
+
+				if form.total_price_in_state.data: school.total_price["in-state students living on campus"] = form.total_price_in_state.data
+				if form.total_price_in_state_off_campus.data: school.total_price["in-state students living off campus (with family)"] = form.total_price_in_state_off_campus.data
+				if form.total_price_out_of_state.data: school.total_price["out-of-state students living on campus"] = form.total_price_out_of_state.data
+				if form.net_price_average.data: school.net_price["average"] = form.net_price_average.data
+
+				school.save()
+				flash("Updated", school.name)
+
+				return redirect("/school/" + str(school.id))
+
+		else:
+			for field, errors in form.errors.items():
+				for error in errors:
+					flash(error)
+
+		return render_template("edit_school.html", form = form, school = school)
 
 	else: return redirect("/")
 
@@ -267,6 +347,14 @@ def edit_recipe(career_id = None, recipe_id = None):
 
 		form = Recipe_Step_Form()
 
+		# Dynamically generate the choices for the "school kind" dropdown, based on what's in the database:
+		s = School.select(School.kind).order_by(fn.COUNT(School.id)).distinct().order_by()
+		kinds = [("", "")]
+		for x in s:
+			kinds.append((x.kind, x.kind))
+
+		form.school_kind.choices = kinds
+
 		if request.method == "POST":
 			if "delete" in request.form:
 				step = Step.get(id = request.form["delete"])
@@ -295,6 +383,11 @@ def edit_recipe(career_id = None, recipe_id = None):
 				flash("Error saving step.")
 
 			return redirect("/edit_recipe/" + str(recipe.id))
+
+		else:
+			for field, errors in form.errors.items():
+				for error in errors:
+					flash(error)
 
 		return render_template("edit_recipe.html", form = form, recipe = recipe, career = career)
 
@@ -330,6 +423,11 @@ def edit_recipe_step(recipe_id, step_id):
 				step.save()
 
 				return redirect("/edit_recipe/" + recipe_id)
+
+			else:
+				for field, errors in form.errors.items():
+					for error in errors:
+						flash(error)
 
 			return render_template("edit_recipe_step.html", form = form, step = step)
 

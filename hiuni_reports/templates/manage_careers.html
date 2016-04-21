@@ -26,7 +26,7 @@
 					{% for career in careers %}
 						<tr>
 							<td><a href="career/{{ career.id }}">{{ career.name }}</a></td>
-							<td>{{ career.recipes|count }} recipes</td>
+							<td><a href="career/{{ career.id }}">{{ career.recipes|count }} recipes</a></td>
 							<td>{{ career.reports|count }} reports</td>
 							<td>
 								<form action = "/manage_careers" method = "post">

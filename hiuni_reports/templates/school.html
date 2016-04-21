@@ -11,7 +11,16 @@
 				<div class="report-header-student student absolute full z-index-3 table col-sm-12">
 					<div class="inner table-cell vert-mid">
 						
-						<h3 class="report-header-student-name strong white"><b>{{school.name}}</b><a href="/edit_school/{{ school.id }}" class="btn btn-warning pull-right"><i class="fa fa-pencil-square"></i>edit</a></h3>
+						<h3 class="report-header-student-name strong white"><b>{{school.name}}</b>
+							<form action = "/school/{{ school.id }}" method = "post" class="pull-right">
+								<div class="btn-group">
+									<a href="/edit_school/{{ school.id }}" class="btn btn-warning"><i class="fa fa-pencil-square"></i>edit</a>
+									{% if current_user.employee.is_admin %}
+										<button class="btn btn-sm btn-danger" name="delete_school" value="{{ school.id }}"><i class="fa fa-trash"></i>delete</button>
+									{% endif %}
+								</div>
+							</form>
+						</h3>
 
 						<ul class="report-header-student-details student-details white">
 							
@@ -61,7 +70,7 @@
 							<div class="btn-group">
 								<a href="/edit_program/{{ program.id }}" class="btn btm-sm btn-warning"><i class="fa fa-pencil-square"></i>edit</a>
 								{% if current_user.employee.is_admin %}
-									<button class="btn btn-sm btn-danger" name="delete" value="{{ program.id }}"><i class="fa fa-trash"></i>delete</button>
+									<button class="btn btn-sm btn-danger" name="delete_program" value="{{ program.id }}"><i class="fa fa-trash"></i>delete</button>
 								{% endif %}
 							</div>
 						</form>
