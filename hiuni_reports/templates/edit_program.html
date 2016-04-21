@@ -2,8 +2,16 @@
 
 {% block content %}
 
-<div class="panel panel-primary">
-		<div class="panel-heading"><h4>Edit step {{ step.number }}</h4></div>
+	<div class="panel panel-primary">
+		
+		<div class="panel-heading">
+			{% if program %}
+				<h4>Edit <b>{{ program.name }}</b> at <b>{{ school.name }}</b></h4>
+			{% else %}
+				<h4>Add a program at <b>{{ school.name }}</b></h4>
+			{% endif %}
+		</div>
+
 		<div class="panel-body">
 			<div class="well">
 				<form class="form" role="form" method="post" action="">
@@ -16,11 +24,12 @@
 							<br>
 						{% endfor %}
 						<button class="btn btn-success" type="submit">Save</button>
-						<a href="/edit_recipe/{{ step.recipe.id }}" class="btn btn-warning">Cancel</a>
+						<a href="/school/{{ school.id }}" class="btn btn-warning">Cancel</a>
 					</div>
 				</form>
 			</div>
 		</div>
+	
 	</div>
 
 {% endblock %}

@@ -149,7 +149,7 @@ def school(school_id):
 
 		if request.method == "POST":
 			if "delete_program" in request.form:
-				program = Program.get(id = request.form["delete"])
+				program = Program.get(id = request.form["delete_program"])
 				program.delete_instance(recursive = True)
 				return redirect("/school/" + school_id)
 
@@ -236,6 +236,56 @@ def edit_school(school_id = None):
 		return render_template("edit_school.html", form = form, school = school)
 
 	else: return redirect("/")
+
+
+@application.route("/add_program/<school_id>", methods = ["GET", "POST"])
+@application.route("/edit_program/<program_id>", methods = ["GET", "POST"])
+@login_required
+def edit_program(school_id = None, program_id = None):
+	if current_user.employee:
+		if program_id:
+			program = Program.get(id = program_id)
+			school = program.school
+			form = Add_Program(
+					name = program.name,
+					cip = program.cip,
+					median_salary = program.median_salary
+				)
+		else:
+			school = School.get(id = school_id)
+			program = None
+			form = Add_Program()
+
+		if form.validate_on_submit():
+			if program == None:
+				program = Program.create(
+						school = school,
+						name = form.name.data,
+						cip = form.cip.data,
+						median_salary = int(form.median_salary.data),
+						reportable = True
+					)
+			else:
+				with database.atomic():
+					program.name = form.name.data
+					program.cip = form.cip.data
+					program.median_salary = int(form.median_salary.data)
+					program.save()
+
+			return redirect("/school/" + str(school.id))
+
+		else:
+			for field, errors in form.errors.items():
+				for error in errors:
+					flash(error)
+
+		return render_template("edit_program.html", form = form, school = school, program = program)
+
+	else: return redirect("/")
+
+
+
+
 
 
 @application.route("/manage_careers", methods = ["GET", "POST"])

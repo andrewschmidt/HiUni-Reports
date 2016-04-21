@@ -58,6 +58,7 @@ def cost_for_school(school, duration, income_level, home_state):
 	else:
 		cost = int(school.total_price.get("out-of-state students living on campus"))
 		if cost is None:
+			print "Out of state cost was none!"
 			return None
 
 	cost *= duration

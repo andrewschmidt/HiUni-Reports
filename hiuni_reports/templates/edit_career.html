@@ -45,7 +45,7 @@
 							
 							<button class="btn btn-success" type="submit">Save</button> 
 							{% if career %}
-								<a href="/manage_careers" class="btn btn-warning">Cancel</a>
+								<a href="/career/{{ career.id }}" class="btn btn-warning">Cancel</a>
 							{% else %}
 								<a href="/manage_careers" class="btn btn-warning">Cancel</a>
 							{% endif %}

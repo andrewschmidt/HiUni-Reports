@@ -108,6 +108,12 @@ class Add_School(Form):
 	net_price_average = StringField("Average net price (after taking into account aid):", validators = [is_integer])
 
 
+class Add_Program(Form):
+	name = StringField("Name of degree:", validators = [Required("Please enter a degree name.")])
+	cip = StringField("CIP Code:", validators = [Required("Please enter a CIP.")])
+	median_salary = StringField("Median Salary:", validators = [Required("Please enter a median salary."), is_integer])
+
+
 class Edit(Form):
 	text = TextAreaField("Text")
 
