@@ -104,7 +104,7 @@ class User(BaseModel):
 
 class School(BaseModel):
 	name = CharField()
-	ipeds_id = CharField(unique = True, primary_key = True) # I would like to make this the primary_key soon.
+	ipeds_id = CharField(unique = True) # I would like to make this the primary_key soon.
 	kind = CharField()
 	admission_rate = IntegerField(null = True)
 	
