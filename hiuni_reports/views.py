@@ -178,12 +178,12 @@ def edit_school(school_id = None):
 					admission_rate = str(school.admission_rate),
 					city = school.city,
 					state = school.state,
-					longitude = school.longitude,
 					latitude = school.latitude,
-					total_price_in_state = str(school.total_price["in-state students living on campus"]),
-					total_price_in_state_off_campus = str(school.total_price["in-state students living off campus (with family)"]),
-					total_price_out_of_state = str(school.total_price["out-of-state students living on campus"]),
-					net_price_average = str(school.net_price["average"])
+					longitude = school.longitude,
+					total_price_in_state = school.total_price.get("in-state students living on campus"),
+					total_price_in_state_off_campus = school.total_price.get("in-state students living off campus (with family)"),
+					total_price_out_of_state = school.total_price.get("out-of-state students living on campus"),
+					net_price_average = school.net_price.get("average")
 				)
 		else:
 			school = School()

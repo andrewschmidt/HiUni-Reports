@@ -13,7 +13,8 @@ from models import *
 
 def is_integer(form, field):
 	try:
-		int(field.data)
+		if field.data:
+			int(field.data)
 	except Exception:
 		raise ValidationError("Please input numbers simply as numbers, without any extra punctuation (like commas or dollar signs).")
 
@@ -81,6 +82,12 @@ class Recipe_Step_Form(Form):
 
 
 class Add_School(Form):
+	# First, let's hardcode our state choices:
+	states = ["Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado", "Connecticut", "Delaware", "Florida", "Georgia", "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana", "Maine", "Maryland", "Massachusetts", "Michigan", "Minnesota", "Mississippi", "Missouri", "Montana", "Nebraska", "Nevada", "New Hampshire", "New Jersey", "New Mexico", "New York", "North Carolina", "North Dakota", "Ohio", "Oklahoma", "Oregon", "Pennsylvania", "Rhode Island", "South Carolina", "South Dakota", "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington", "West Virginia", "Wisconsin", "Wyoming"]
+	state_choices = [("", "")]
+	for state in states:
+		state_choices.append((state, state))
+
 	name = StringField("Name:", validators = [Required("Please enter a name.")])
 	ipeds_id = StringField("NCES IPEDS ID:", validators = [Required("Please enter an IPEDS ID. You can find this via the NCES website. http://nces.ed.gov/globallocator/")])
 	
@@ -90,7 +97,7 @@ class Add_School(Form):
 	admission_rate = StringField("Admission rate:", validators = [is_integer])
 
 	city = StringField("City:", validators = [Required("Please enter a city.")])
-	state = StringField("State:", validators = [Required("Please enter a state.")])
+	state = SelectField("State:", choices = state_choices, validators = [Required("Please enter a state.")])
 	latitude = StringField("Latitude:")
 	longitude = StringField("Longitude:")
 
