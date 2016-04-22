@@ -135,8 +135,9 @@ def manage_schools():
 				flash("Importing schools... This may take a while.")
 
 		school_count = str(School.select().count())
+		program_count = str(Program.select().count())
 
-		return render_template("manage_schools.html", school_count = school_count)
+		return render_template("manage_schools.html", school_count = school_count, program_count = program_count)
 
 	else: return redirect("/")
 
@@ -282,10 +283,6 @@ def edit_program(school_id = None, program_id = None):
 		return render_template("edit_program.html", form = form, school = school, program = program)
 
 	else: return redirect("/")
-
-
-
-
 
 
 @application.route("/manage_careers", methods = ["GET", "POST"])

@@ -8,7 +8,7 @@
 		<div class="panel-heading"><h4>Manage schools</h4></div>
 		
 		<div class="panel-body">
-			<h4><b>{{ school_count }}</b> schools in the database</h4>
+			<h4><b>{{ '{0:,}'.format(school_count|int) }}</b> schools in the database, offering <b>{{ '{0:,}'.format(program_count|int) }}</b> programs. <a href="/add_school" class="btn btm-sm btn-success pull-right"><i class="fa fa-plus-circle"></i>new school</a></h4>
 			<br>
 			<form action = "/manage_schools" method = "post">
 				<button class = "btn btn-warning btn-lg" name = "import">Import all</button>

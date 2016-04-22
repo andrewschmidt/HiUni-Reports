@@ -108,6 +108,12 @@ class Add_School(Form):
 	net_price_average = StringField("Average net price (after taking into account aid):", validators = [is_integer])
 
 
+class Search_School(Form):
+	search_choices = ["Name", "IPEDS ID", "City, state", "Kind of school"]
+	search = StringField("", validators = [Required("Please enter text.")])
+	search_by = RadioField("Search by:", choices = search_choices, validators = [Required("Choose a property to search by.")])
+
+
 class Add_Program(Form):
 	name = StringField("Name of degree:", validators = [Required("Please enter a degree name.")])
 	cip = StringField("CIP Code:", validators = [Required("Please enter a CIP.")])
