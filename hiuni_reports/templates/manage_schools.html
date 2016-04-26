@@ -8,12 +8,34 @@
 		<div class="panel-heading"><h4>Manage schools</h4></div>
 		
 		<div class="panel-body">
-			<h4><b>{{ '{0:,}'.format(school_count|int) }}</b> schools in the database, offering <b>{{ '{0:,}'.format(program_count|int) }}</b> programs. <a href="/add_school" class="btn btm-sm btn-success pull-right"><i class="fa fa-plus-circle"></i>new school</a></h4>
-			<br>
-			<form action = "/manage_schools" method = "post">
-				<button class = "btn btn-warning btn-lg" name = "import">Import all</button>
-			</form>
+			<h4><b>{{ '{0:,}'.format(school_count|int) }}</b> schools in the database, offering <b>{{ '{0:,}'.format(program_count|int) }}</b> programs. <a href="/add_school" class="btn btn-success pull-right"><i class="fa fa-plus-circle"></i>new school</a></h4>
+			
+			{% if current_user.employee.is_admin %}
+				<form action = "/manage_schools" method = "post">
+					<button class="btn btn-warning pull-right" name="import"><i class="fa fa-cloud-download" aria-hidden="true"></i>PayScale/BLS</button>
+				</form>
+				<br><br>
+			{% endif %}
 
+			<br><br>
+			<div class="well">
+			<h4>Search for schools</h4>
+			<h6>Enter as much or as little info as you have.</h6>
+			<br>
+				<form class="form" role="form" method="post" action="">
+					{{ form.hidden_tag() }}
+						
+					<div class="form-group-md">
+						{% for field in form if field.widget.input_type != "hidden" %}
+							<label class="control-label" for="{{ field.id }}">{{ field.label }}</label>
+							{{ field(class="form-control" )}}
+							<br>
+						{% endfor %}
+						<button class="btn btn-success pull-right" type="submit">Search</button>
+						<br>
+					</div>
+				</form>
+			</div>
 		</div>
 
 	</div>

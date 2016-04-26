@@ -1,0 +1,34 @@
+
+{% extends "base.html" %}
+{% set active_page = "manage_schools" %}
+
+{% block content %}
+
+	<div class="panel panel-primary">
+		
+		<div class="panel-heading"><h4><b>{{ schools|count }}</b> found</h4></div>
+		
+		<div class="panel-body">
+			<br>
+			<ul>
+				{% for school in schools %}
+					<li>
+						<a href="/school/{{ school.id }}"><b>{{ school.name }}</b></a> — <b>{{ school.city }}, {{ school.state }}</b>
+						<form action = "/school/{{ school.id }}" method = "post" class="pull-right">
+							<div class="btn-group">
+								<a href="/edit_school/{{ school.id }}" class="btn btm-sm btn-warning"><i class="fa fa-pencil-square"></i>edit</a>
+								{% if current_user.employee.is_admin %}
+									<button class="btn btn-sm btn-danger" name="delete_school" value="{{ school.id }}"><i class="fa fa-trash"></i>delete</button>
+								{% endif %}
+							</div>
+						</form>
+					</li>
+					<hr>
+				{% endfor %}
+			</ul>
+			<br>
+
+		</div>
+	</div>
+
+{% endblock %}

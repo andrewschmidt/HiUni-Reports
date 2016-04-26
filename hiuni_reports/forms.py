@@ -109,9 +109,16 @@ class Add_School(Form):
 
 
 class Search_School(Form):
-	search_choices = ["Name", "IPEDS ID", "City, state", "Kind of school"]
-	search = StringField("", validators = [Required("Please enter text.")])
-	search_by = RadioField("Search by:", choices = search_choices, validators = [Required("Choose a property to search by.")])
+	states = ["Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado", "Connecticut", "Delaware", "Florida", "Georgia", "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana", "Maine", "Maryland", "Massachusetts", "Michigan", "Minnesota", "Mississippi", "Missouri", "Montana", "Nebraska", "Nevada", "New Hampshire", "New Jersey", "New Mexico", "New York", "North Carolina", "North Dakota", "Ohio", "Oklahoma", "Oregon", "Pennsylvania", "Rhode Island", "South Carolina", "South Dakota", "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington", "West Virginia", "Wisconsin", "Wyoming"]
+	state_choices = [("", "")]
+	for state in states:
+		state_choices.append((state, state))
+
+	name = StringField("Name")
+	ipeds_id = StringField("IPEDS ID")
+	city = StringField("City")
+	state = SelectField("State", choices = state_choices)
+	kind = SelectField("Kind of school", choices = [])
 
 
 class Add_Program(Form):
