@@ -171,7 +171,6 @@ def manage_schools():
 				for error in errors:
 					flash(error)
 
-
 		return render_template("manage_schools.html", form = form, school_count = school_count, program_count = program_count)
 
 	else: return redirect("/")
