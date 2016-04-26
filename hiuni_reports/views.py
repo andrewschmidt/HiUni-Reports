@@ -177,22 +177,6 @@ def manage_schools():
 	else: return redirect("/")
 
 
-@application.route("/search_schools/<name>_<ipeds_id>_<city>_<state>_<kind>")
-@login_required
-def search_schools(name, ipeds_id, city, state, kind):
-	if current_user.employee:
-		schools = []
-		results = School.select().where(School.name == name, School.ipeds_id == ipeds_id, School.city == city, School.state == state, School.kind == kind)
-		for school in results:
-			schools.append(school)
-
-		flash("Found schools, such as:", schools[0].name)
-
-		return render_template("search_schools.html", schools = schools)
-
-	else: return redirect("/")
-
-
 @application.route("/school/<school_id>", methods = ["GET", "POST"])
 @login_required
 def school(school_id):
