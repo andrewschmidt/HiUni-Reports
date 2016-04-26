@@ -140,6 +140,16 @@ def get_net_prices_for_school_id(ipeds_id, from_csv_sheet):
 		pass
 		
 	return net_price
+
+
+def get_nicknames_for_school_id(ipeds_id, from_csv_sheet):
+	sheet = from_csv_sheet
+	row = get_row_for_school_id(ipeds_id, from_csv_sheet = sheet)
+
+	raw_nicknames = row[get_number_for_column("Institution name alias", from_csv_sheet = sheet)]
+	nicknames = [nickname.strip() for nickname in raw_nicknames.split('|')]
+
+	return nicknames
 	
 
 def get_school_info_from_csv_sheet(sheet, for_ipeds_id):
@@ -151,12 +161,14 @@ def get_school_info_from_csv_sheet(sheet, for_ipeds_id):
 	# Pluck the appropriate info from the columns in the list -- using a function to safeguard against the columns rearranging.
 	school_info['ipeds_id'] = row[get_number_for_column("unitid", from_csv_sheet = sheet)] # This should always be the same.
 	school_info['name'] = row[get_number_for_column("institution name", from_csv_sheet = sheet)]
+	school_info['nicknames'] = get_nicknames_for_school_id(ipeds_id, from_csv_sheet = sheet)
 	school_info['kind'] = row[get_number_for_column("Institutional category", from_csv_sheet = sheet)]
 	school_info['sector'] = row[get_number_for_column("Sector of institution", from_csv_sheet = sheet)]
 	
 	school_info['admission_rate'] = row[get_number_for_column("Percent admitted - total", from_csv_sheet = sheet)]
 	if school_info['admission_rate'] == "": school_info['admission_rate'] = None
 	
+	school_info['street'] = row[get_number_for_column("Street address or post office box", from_csv_sheet = sheet)]
 	school_info['city'] = row[get_number_for_column("City location of institution", from_csv_sheet = sheet)]
 	school_info['state'] = row[get_number_for_column("State abbreviation", from_csv_sheet = sheet)]
 
@@ -268,9 +280,11 @@ def update_school_with_ipeds_id(ipeds_id, from_cost_sheet):
 
 	# Then assign the new data. Peewee is smart enough to only make changes if the data actually changed:
 	school.name = info['name']
+	school.nicknames = info['nicknames']
 	school.ipeds_id = info['ipeds_id']
 	school.kind = info['kind']
 	school.admission_rate = info['admission_rate']
+	school.street = info['street']
 	school.city = info['city']
 	school.state = info['state']
 	school.latitude = info['latitude']

@@ -104,12 +104,14 @@ class User(BaseModel):
 
 class School(BaseModel):
 	name = CharField()
+	nicknames = ArrayField(CharField, null = True)
 	ipeds_id = CharField(unique = True)
 	kind = CharField()
 	admission_rate = IntegerField(null = True)
 	
 	# Location:
-	city = CharField()
+	street = CharField(null = True)
+	city = CharField(null = True)
 	state = CharField(null = True)
 	latitude = DoubleField(null = True) # Don't forget to "CREATE EXTENSION cube, earthdistance;" to enable querying by location.
 	longitude = DoubleField(null = True)
@@ -117,6 +119,17 @@ class School(BaseModel):
 	# Cost:
 	total_price = HStoreField() # To setup, run "CREATE EXTENSION hstore;" for hiuni_database from psql.
 	net_price = HStoreField() # For public institutions, net price refers to net price for in-state students only.
+
+	def save(self, *args, **kwargs):
+		if self.latitude is None:
+			try:
+				location = geolocator.geocode(str(self.street + " " + self.city + ", " + self.state))
+				self.latitude, self.longitude = location.latitude, location.longitude
+				print "Located school, at:", str(self.latitude) + ", " + str(self.longitude)
+			except Exception:
+				print "Failed to locate school."
+			
+		return super(School, self).save(*args, **kwargs)
 
 
 class Program(BaseModel):

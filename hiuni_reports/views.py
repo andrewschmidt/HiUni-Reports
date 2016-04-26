@@ -221,10 +221,9 @@ def edit_school(school_id = None):
 					ipeds_id = school.ipeds_id,
 					existing_kind = school.kind,
 					admission_rate = str(school.admission_rate),
+					street = school.street,
 					city = school.city,
 					state = school.state,
-					latitude = school.latitude,
-					longitude = school.longitude,
 					total_price_in_state = school.total_price.get("in-state students living on campus"),
 					total_price_in_state_off_campus = school.total_price.get("in-state students living off campus (with family)"),
 					total_price_out_of_state = school.total_price.get("out-of-state students living on campus"),
@@ -243,8 +242,14 @@ def edit_school(school_id = None):
 		form.existing_kind.choices = kinds
 
 		if form.validate_on_submit():
+			try:
+				nicknames = [nicknames.strip() for nicknames in form.nicknames.data.split(',')]
+			except Exception:
+				nicknames = None
+
 			with database.atomic():
 				school.name = form.name.data
+				if nicknames: school.nicknames = nicknames
 				school.ipeds_id = form.ipeds_id.data
 				school.admission_rate = int(form.admission_rate.data)
 				
@@ -253,10 +258,9 @@ def edit_school(school_id = None):
 				else:
 					school.kind = form.new_kind.data
 
+				school.street = form.street.data
 				school.city = form.city.data
 				school.state = form.state.data
-				if form.longitude.data: school.longitude = form.longitude.data
-				if form.latitude.data: school.latitude = form.latitude.data
 
 				if not school_id:
 					school.net_price = {}

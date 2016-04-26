@@ -89,6 +89,7 @@ class Add_School(Form):
 		state_choices.append((state, state))
 
 	name = StringField("Name:", validators = [Required("Please enter a name.")])
+	nicknames = StringField("Nicknames (separated by commas):")
 	ipeds_id = StringField("NCES IPEDS ID:", validators = [Required("Please enter an IPEDS ID. You can find this via the NCES website. http://nces.ed.gov/globallocator/")])
 	
 	existing_kind = SelectField("Choose the kind of school:", choices = [], validators = [Required("Please choose a kind of school.")])
@@ -96,10 +97,9 @@ class Add_School(Form):
 	
 	admission_rate = StringField("Admission rate:", validators = [is_integer])
 
+	street = StringField("Street address:")
 	city = StringField("City:", validators = [Required("Please enter a city.")])
 	state = SelectField("State:", choices = state_choices, validators = [Required("Please enter a state.")])
-	latitude = StringField("Latitude:")
-	longitude = StringField("Longitude:")
 
 	total_price_in_state = StringField("Total price, in-state students living on campus:", validators = [is_integer])
 	total_price_in_state_off_campus = StringField("Total price, in-state students living off campus:", validators = [is_integer])
