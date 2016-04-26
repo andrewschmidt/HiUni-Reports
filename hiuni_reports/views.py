@@ -5,6 +5,7 @@ from flask.ext.login import login_required, login_user, logout_user, current_use
 
 from peewee import *
 from playhouse.postgres_ext import *
+import operator
 
 from models import * # Includes the "database" variable.
 import data_helper
@@ -129,14 +130,49 @@ def register_employee():
 @login_required
 def manage_schools():
 	if current_user.employee:
+
 		if request.method == "POST":
 			if "import" in request.form:
 				data_helper.import_school_data_async()
-				flash("Importing schools... This may take a while.")
+				flash("Importing or updating schools from PayScale and BLS... This may take a while.")
 
 		school_count = str(School.select().count())
+		program_count = str(Program.select().count())
 
-		return render_template("manage_schools.html", school_count = school_count)
+		form = Search_School()
+
+		s = School.select(School.kind).order_by(fn.COUNT(School.id)).distinct().order_by()
+		kinds = [("", "")]
+		for x in s:
+			kinds.append((x.kind, x.kind))
+		form.kind.choices = kinds
+
+		if form.validate_on_submit():
+			clauses = []
+			if form.name.data != "": clauses.append(School.name % ("%" + form.name.data + "%"))
+			if form.ipeds_id.data != "": clauses.append(School.ipeds_id == form.ipeds_id.data)
+			if form.city.data != "": clauses.append(School.city == form.city.data)
+			if form.state.data != "": clauses.append(School.state == form.state.data)
+			if form.kind.data != "": clauses.append(School.kind == form.kind.data)
+
+			try:
+				results = School.select().where(reduce(operator.and_, clauses))
+			except Exception:
+				results = School.select()
+
+			schools = []
+			for school in results:
+				schools.append(school)
+
+			return render_template("search_schools.html", schools = schools)
+
+		else:
+			for field, errors in form.errors.items():
+				for error in errors:
+					flash(error)
+
+
+		return render_template("manage_schools.html", form = form, school_count = school_count, program_count = program_count)
 
 	else: return redirect("/")
 
@@ -282,10 +318,6 @@ def edit_program(school_id = None, program_id = None):
 		return render_template("edit_program.html", form = form, school = school, program = program)
 
 	else: return redirect("/")
-
-
-
-
 
 
 @application.route("/manage_careers", methods = ["GET", "POST"])

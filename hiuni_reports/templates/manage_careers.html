@@ -8,7 +8,7 @@
 		<div class="panel-heading"><h4>Manage careers</h4></div>
 		
 		<div class="panel-body">
-			<h4><b>{{ careers|count }}</b> careers in the database, with <b>{{ recipe_count }}</b> recipes. <a href="/add_career" class="btn btm-sm btn-success pull-right"><i class="fa fa-plus-circle"></i>new career</a></h4>
+			<h4><b>{{ '{0:,}'.format((careers|count)|int) }}</b> careers in the database, with <b>{{ '{0:,}'.format(recipe_count|int) }}</b> recipes. <a href="/add_career" class="btn btm-sm btn-success pull-right"><i class="fa fa-plus-circle"></i>new career</a></h4>
 
 			
 			<br><br>
