@@ -8,14 +8,18 @@
 		<div class="panel-heading"><h4>Manage schools</h4></div>
 		
 		<div class="panel-body">
-			<h4><b>{{ '{0:,}'.format(school_count|int) }}</b> schools in the database, offering <b>{{ '{0:,}'.format(program_count|int) }}</b> programs. <a href="/add_school" class="btn btn-success pull-right"><i class="fa fa-plus-circle"></i>new school</a></h4>
-			
-			{% if current_user.employee.is_admin %}
-				<form action = "/manage_schools" method = "post">
-					<button class="btn btn-warning pull-right" name="import"><i class="fa fa-cloud-download" aria-hidden="true"></i>PayScale/BLS</button>
-				</form>
-				<br><br>
-			{% endif %}
+			<h4>
+
+				<b>{{ '{0:,}'.format(school_count|int) }}</b> schools in the database, offering <b>{{ '{0:,}'.format(program_count|int) }}</b> programs. 
+
+				<div class="btn-group pull-right">
+					<a href="/add_school" class="btn btn-success"><i class="fa fa-plus-circle"></i>new school</a>
+					{% if current_user.employee.is_admin %}
+						<a href="/import_schools" class="btn btn-warning"><i class="fa fa-cloud-download" aria-hidden="true"></i>PayScale/BLS</a>
+					{% endif %}
+				</div>
+
+			</h4>
 
 			<br><br>
 			<div class="well">

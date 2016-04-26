@@ -177,6 +177,16 @@ def manage_schools():
 	else: return redirect("/")
 
 
+@application.route("/import_schools/")
+@login_required
+def import_schools():
+	if current_user.employee.is_admin:
+		data_helper.import_school_data_async()
+		flash("Importing or updating schools from PayScale and BLS... This may take a while.")
+
+	return redirect("/")
+
+
 @application.route("/school/<school_id>", methods = ["GET", "POST"])
 @login_required
 def school(school_id):
