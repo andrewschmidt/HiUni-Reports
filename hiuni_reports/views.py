@@ -149,7 +149,9 @@ def manage_schools():
 
 		if form.validate_on_submit():
 			clauses = []
-			if form.name.data != "": clauses.append(School.name % ("%" + form.name.data + "%"))
+			if form.name.data != "":
+				clauses.append(School.name % ("%" + form.name.data + "%") | School.name ** form.name.data | School.nicknames.contains(str(form.name.data).upper()))
+				# clauses.append(School.nicknames.contains(form.name.data))
 			if form.ipeds_id.data != "": clauses.append(School.ipeds_id == form.ipeds_id.data)
 			if form.city.data != "": clauses.append(School.city == form.city.data)
 			if form.state.data != "": clauses.append(School.state == form.state.data)
@@ -215,9 +217,16 @@ def edit_school(school_id = None):
 		
 		if school_id:
 			school = School.get(id = school_id)
+			nicknames_string = ""
+			for name in school.nicknames:
+				if name != school.nicknames[-1]:
+					nicknames_string += name + ", "
+				else:
+					nicknames_string += name
 
 			form = Add_School(
 					name = school.name,
+					nicknames = nicknames_string,
 					ipeds_id = school.ipeds_id,
 					existing_kind = school.kind,
 					admission_rate = str(school.admission_rate),
@@ -243,7 +252,7 @@ def edit_school(school_id = None):
 
 		if form.validate_on_submit():
 			try:
-				nicknames = [nicknames.strip() for nicknames in form.nicknames.data.split(',')]
+				nicknames = [nicknames.strip().upper() for nicknames in form.nicknames.data.split(',')]
 			except Exception:
 				nicknames = None
 

@@ -147,7 +147,7 @@ def get_nicknames_for_school_id(ipeds_id, from_csv_sheet):
 	row = get_row_for_school_id(ipeds_id, from_csv_sheet = sheet)
 
 	raw_nicknames = row[get_number_for_column("Institution name alias", from_csv_sheet = sheet)]
-	nicknames = [nickname.strip() for nickname in raw_nicknames.split('|')]
+	nicknames = [nickname.strip().upper() for nickname in raw_nicknames.split('|')]
 
 	return nicknames
 	
