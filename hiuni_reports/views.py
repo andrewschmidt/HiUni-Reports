@@ -150,9 +150,9 @@ def manage_schools():
 		if form.validate_on_submit():
 			clauses = []
 			if form.name.data != "":
-				clauses.append(School.name ** ("%" + form.name.data + "%") | School.nicknames.contains(str(form.name.data).upper()))
-			if form.ipeds_id.data != "": clauses.append(School.ipeds_id == form.ipeds_id.data)
-			if form.city.data != "": clauses.append(School.city == form.city.data)
+				clauses.append(School.name ** ("%" + form.name.data + "%") | School.nicknames.contains(str(form.name.data).upper()) | School.ipeds_id ** form.name.data)
+			# if form.ipeds_id.data != "": clauses.append(School.ipeds_id == form.ipeds_id.data)
+			if form.city.data != "": clauses.append(School.city ** ("%" + form.city.data + "%"))
 			if form.state.data != "": clauses.append(School.state == form.state.data)
 			if form.kind.data != "": clauses.append(School.kind == form.kind.data)
 
