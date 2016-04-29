@@ -764,10 +764,11 @@ def edit_report(student_id, report_id):
 					report.save()
 					try:
 						email.report_notification(student = student, report = report)
-						flash("Published the report and emailed the student.")
+						user = student.customer.user.get()
+						flash("Published the report and emailed the student at " + user.email + ".")
 					except Exception:
 						user = student.customer.user.get()
-						flash("Failed to email the student. You'll need to notify them manually -- their email is", user.email)
+						flash("Failed to email the student. You'll need to notify them manually -- their email is " + user.email + ".")
 					return redirect("/report/" + str(student.id) + "_" + str(report.id))
 
 				if "delete_report" in request.form:
