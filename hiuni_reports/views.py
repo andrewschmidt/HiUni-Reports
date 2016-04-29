@@ -12,8 +12,6 @@ import data_helper
 import solver
 import email
 
-from decorators import async
-
 from forms import *
 
 from playhouse.migrate import *
