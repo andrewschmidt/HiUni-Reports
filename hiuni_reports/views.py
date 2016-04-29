@@ -10,7 +10,7 @@ import operator
 from models import * # Includes the "database" variable.
 import data_helper
 import solver
-import email
+import emails
 
 from forms import *
 
@@ -25,7 +25,10 @@ migrator = PostgresqlMigrator(database)
 @application.route("/index")
 def index():
 	if current_user.is_authenticated:
-		return redirect("/students")
+		if current_user.is_confirmed:
+			return redirect("/students")
+		else:
+			return redirect("/confirm_email")
 	else:
 		return redirect("/login")
 
@@ -57,6 +60,8 @@ def login():
 				user.authenticated = True
 				login_user(user, remember = form.remember.data)
 				return redirect("/students")
+			else:
+				flash("Email or password incorrect. If you need to reset your password, click <a href='/reset'>here</a>.")
 		
 		except DoesNotExist:
 			flash("Email or password incorrect.")
@@ -95,31 +100,47 @@ def register():
 			flash("Looks like somebody's already registered with that email!")
 			return redirect("/register")
 
-		email.confirm_email(user)
-
 		# Log them in!
 		user.authenticated = True
 		login_user(user, remember = True)
 
-		return redirect("/questions")
+		return redirect("/send_email_confirmation")
 
 	return render_template("register.html", form = form)
 
 
-@application.route("/confirm/<token>")
-def confirm_email(token):
-	try:
-		email = ts.loads(token, salt = application.config["EMAIL_CONFIRM_KEY"], max_age=86400)
-	except:
-		abort(404)
+@application.route("/send_email_confirmation")
+@application.route("/send_email_confirmation/<email>")
+@login_required
+def send_email_confirmation(email = None):
+	if email:
+		user = User.get(User.email == email)
+		emails.confirm_email(user)
+		flash("Confirmation email sent.")
+		return redirect("/")
+	
+	else:
+		emails.confirm_email(current_user)
+		return redirect("/confirm_email")
 
-	user = User.get(User.email == email)
-	user.is_confirmed = True
-	user.save()
 
-	print "Confirmed user", str(user.email)
+@application.route("/confirm_email")
+@application.route("/confirm_email/<token>")
+def confirm_email(token = None):
+	if token:
+		try:
+			email = ts.loads(token, salt = application.config["EMAIL_CONFIRM_KEY"], max_age=86400)
+		except:
+			abort(404)
 
-	return redirect("/")
+		user = User.get(User.email == email)
+		user.is_confirmed = True
+		user.save()
+
+		return redirect("/")
+
+	else:
+		return render_template("confirm_email.html")
 
 
 @application.route("/register_employee", methods = ["GET", "POST"])
@@ -137,11 +158,52 @@ def register_employee():
 				password = form.password.data,
 				employee = employee
 			)			
-			return redirect("/students")
+			return redirect("/send_email_confirmation/" + str(user.email))
 
 		return render_template("register_employee.html", form = form)
 
 	else: return redirect("/")
+
+
+@application.route("/reset", methods = ["GET", "POST"])
+@application.route("/reset/<token>", methods = ["GET", "POST"])
+def reset_password(token = None):
+	if token:
+		form = Password_Form()
+
+		if form.validate_on_submit():
+			try:
+				email = ts.loads(token, salt = application.config["EMAIL_CONFIRM_KEY"], max_age=86400)
+			except:
+				abort(404)
+
+			user = User.get(User.email == email)
+			user.password = form.password.data
+			user.save()
+
+			flash("Password reset. Please login.")
+			return redirect("/")
+
+		return render_template("reset_password.html", title = "Enter a new password", form = form)
+
+	else:
+		form = Email_Form()
+
+		if form.validate_on_submit():
+			email = form.email.data
+			
+			try:
+				user = User.get(User.email == email)
+			except Exception:
+				flash("Couldn't find a user with that email.")
+				return redirect("/reset")
+
+			emails.reset_password(user)
+
+			flash("Check your email for instructions on how to reset your password.")
+			return redirect("/")
+
+		return render_template("reset_password.html", title = "Enter your email", form = form)
 
 
 @application.route("/manage_schools", methods = ["GET", "POST"])
@@ -628,7 +690,7 @@ def questions(student_id = None):
 			return redirect("/index")
 
 		solver.make_pathways_async(student = student, report = report, how_many = 10)
-		email.questionnaire_notification(student = student, report = report)
+		emails.questionnaire_notification(student = student, report = report)
 
 		return redirect("/confirmation")
 
@@ -780,7 +842,7 @@ def edit_report(student_id, report_id):
 					report.published = True
 					report.save()
 					try:
-						email.report_notification(student = student, report = report)
+						emails.report_notification(student = student, report = report)
 						user = student.customer.user.get()
 						flash("Published the report and emailed the student at " + user.email + ".")
 					except Exception:

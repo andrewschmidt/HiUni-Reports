@@ -2,7 +2,7 @@ Hi {{ student.first_name }},
 
 Your HiUni Report is ready to view! We've carefully calculated the best possible pathways you could take through higher education, and we're excited to show you what we've come up with.
 
-Check it out here: www.gohiuni.com/report/{{ student.id }}_{{ report.id }}
+Check it out here: {{ report_url }}
 
 And feel free to email us with any questions. Thanks!
 

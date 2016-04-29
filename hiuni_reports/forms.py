@@ -42,6 +42,15 @@ class Registration_Form(Form):
 	organization = StringField("Name of organization:")
 
 
+class Email_Form(Form):
+	email = EmailField("Email:", validators = [Required("Please enter an email."), Email("Please enter a valid email address.")])
+
+
+class Password_Form(Form):
+	password = PasswordField("Password:", validators = [Required("Please enter a password."), EqualTo("confirm_password", message = "Passwords must match.")])
+	confirm_password = PasswordField("Confirm password:", validators = [Required("Please confirm your password.")])
+
+
 class Employee_Form(Form):
 	name = StringField("First name:", validators = [Required("Don't forget your name!")])
 	email = EmailField("Email:", validators = [Required("Please enter an email."), Email("Please enter a valid email address.")])

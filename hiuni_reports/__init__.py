@@ -79,6 +79,7 @@ def create_admin():
 			)
 		user = User.create(
 			email = application.config["ADMINEMAIL"],
+			is_confirmed = True,
 			password = application.config["ADMINPASS"],
 			employee = employee
 		)
