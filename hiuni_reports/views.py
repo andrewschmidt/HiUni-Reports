@@ -611,6 +611,8 @@ def questions(student_id = None):
 			return redirect("/index")
 
 		solver.make_pathways_async(student = student, report = report, how_many = 10)
+		email.questionnaire_notification(student = student, report = report)
+
 		return redirect("/confirmation")
 
 	else:

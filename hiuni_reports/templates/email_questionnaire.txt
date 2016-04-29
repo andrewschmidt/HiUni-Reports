@@ -1,0 +1,5 @@
+There's a new report that requires editing. Check it out here: www.gohiuni.com/edit_report/{{ student.id }}_{{ report.id }}
+
+--
+HiUni
+www.gohiuni.com

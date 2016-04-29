@@ -28,6 +28,16 @@ def report_notification(student, report):
 			"%s, your HiUni Report is ready" % student.first_name, 
 			application.config["ADMINEMAIL"],
 			[user.email],
-			render_template("email_report_ready.txt", template_folder = "emails", student = student, report = report),
-			render_template("email_report_ready.html", template_folder = "emails", student = student, report = report)
+			render_template("email_report_ready.txt", student = student, report = report),
+			render_template("email_report_ready.html", student = student, report = report)
+		)
+
+
+def questionnaire_notification(student, report):
+	send_email(
+			"A new report requires editing",
+			application.config["ADMINEMAIL"],
+			[application.config["ADMINEMAIL"]],
+			render_template("email_questionnaire.txt", student = student, report = report),
+			render_template("email_questionnaire.html", student = student, report = report)
 		)
