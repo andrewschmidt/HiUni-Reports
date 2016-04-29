@@ -20,6 +20,6 @@ def report_notification(student, report):
 			"%s, your HiUni Report is ready" % student.first_name, 
 			application.config["ADMINEMAIL"],
 			[user.email],
-			render_template("report_ready.txt", student = student, report = report),
-			render_template("report_ready.html", student = student, report = report)
+			render_template("email_report_ready.txt", template_folder = "emails", student = student, report = report),
+			render_template("email_report_ready.html", template_folder = "emails", student = student, report = report)
 		)
