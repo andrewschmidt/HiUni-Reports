@@ -4,6 +4,7 @@ from flask import Flask, g
 
 from flask.ext.bcrypt import Bcrypt
 from flask.ext.markdown import Markdown
+from flask.ext.mail import Mail
 
 
 
@@ -16,6 +17,7 @@ application.config.from_pyfile("config.py")
 
 bcrypt = Bcrypt(application)
 md = Markdown(application)
+mail = Mail(application)
 
 
 # REQUEST HANDLERS

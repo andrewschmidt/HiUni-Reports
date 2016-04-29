@@ -68,8 +68,8 @@ class Employee(BaseModel):
 
 
 class User(BaseModel):
-	customer = ForeignKeyField(Customer, related_name = "users", null = True)
-	employee = ForeignKeyField(Employee, related_name = "users", null = True)
+	customer = ForeignKeyField(Customer, related_name = "user", null = True)
+	employee = ForeignKeyField(Employee, related_name = "user", null = True)
 
 	authenticated = BooleanField(default = False)
 	email = TextField(unique = True, primary_key = True)

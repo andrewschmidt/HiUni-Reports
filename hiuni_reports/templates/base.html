@@ -35,10 +35,10 @@
 				{% if current_user.employee.is_admin %}
 
 					{% set sidebar = [
-						("/students", "students", "Edit reports"),
-						("/register_employee", "register_employee", "Add an employee"),
-						("/manage_schools", "manage_schools", "Manage schools"),
-						("/manage_careers", "manage_careers", "Manage careers")
+						("/students", "students", "Reports"),
+						("/manage_schools", "manage_schools", "Schools"),
+						("/manage_careers", "manage_careers", "Careers"),
+						("/register_employee", "register_employee", "Employees")
 					] -%}
 
 					{% set name = "Admin" %}
@@ -47,9 +47,9 @@
 				{% else %}
 
 					{% set sidebar = [
-						("/students", "students", "Edit reports"),
-						("/manage_schools", "manage_schools", "Manage schools"),
-						("/manage_careers", "manage_careers", "Manage careers")
+						("/students", "students", "Reports"),
+						("/manage_schools", "manage_schools", "Schools"),
+						("/manage_careers", "manage_careers", "Careers")
 					] -%}
 
 					{% if current_user.employee.name != None %}

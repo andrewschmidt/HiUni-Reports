@@ -6,7 +6,7 @@
 
 	<!-- Publish button for employees: -->
 	<div class = "container" style="margin-bottom: 10px;">
-		{% if current_user.employee != None %}
+		{% if current_user.employee %}
 			{% if report.published %}
 				<form action = "/report/{{ student.id }}_{{ report.id }}" method = "post">
 					<button class = "btn btn-danger btn-lg pull-left" name = "unpublish"><i class="fa fa-times-circle"></i>unpublish</button>

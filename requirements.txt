@@ -1,9 +1,11 @@
 bcrypt==2.0.0
+blinker==1.4
 boto==2.39.0
 cffi==1.5.2
 Flask==0.10.1
 Flask-Bcrypt==0.7.1
 Flask-Login==0.3.2
+Flask-Mail==0.9.1
 Flask-Markdown==0.3
 Flask-WTF==0.12
 geopy==1.11.0

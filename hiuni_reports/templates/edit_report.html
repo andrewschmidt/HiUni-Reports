@@ -6,7 +6,7 @@
 
 	<!-- Publish button for employees: -->
 	<div class = "container" style="margin-bottom: 10px;">
-		{% if current_user.employee != None %}
+		{% if current_user.employee %}
 			<form action = "/edit_report/{{ student.id }}_{{ report.id }}" method = "post">
 				{% if not report.published %}
 					<div class = "btn-group pull-left">

@@ -10,6 +10,9 @@ import operator
 from models import * # Includes the "database" variable.
 import data_helper
 import solver
+import email
+
+from decorators import async
 
 from forms import *
 
@@ -151,7 +154,6 @@ def manage_schools():
 			clauses = []
 			if form.name.data != "":
 				clauses.append(School.name ** ("%" + form.name.data + "%") | School.nicknames.contains(str(form.name.data).upper()) | School.ipeds_id ** form.name.data)
-			# if form.ipeds_id.data != "": clauses.append(School.ipeds_id == form.ipeds_id.data)
 			if form.city.data != "": clauses.append(School.city ** ("%" + form.city.data + "%"))
 			if form.state.data != "": clauses.append(School.state == form.state.data)
 			if form.kind.data != "": clauses.append(School.kind == form.kind.data)
@@ -719,6 +721,7 @@ def list_reports(student_id):
 
 
 @application.route("/report/<student_id>_<report_id>", methods = ["GET", "POST"])
+# @login_required
 def report(student_id, report_id):
 	try:
 		student = Student.get(id = student_id)
@@ -759,6 +762,12 @@ def edit_report(student_id, report_id):
 				if "publish" in request.form:
 					report.published = True
 					report.save()
+					try:
+						email.report_notification(student = student, report = report)
+						flash("Published the report and emailed the student.")
+					except Exception:
+						user = student.customer.user.get()
+						flash("Failed to email the student. You'll need to notify them manually -- their email is", user.email)
 					return redirect("/report/" + str(student.id) + "_" + str(report.id))
 
 				if "delete_report" in request.form:

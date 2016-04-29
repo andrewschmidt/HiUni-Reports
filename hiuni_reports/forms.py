@@ -115,7 +115,6 @@ class Search_School(Form):
 		state_choices.append((state, state))
 
 	name = StringField("Name")
-	# ipeds_id = StringField("IPEDS ID")
 	city = StringField("City")
 	state = SelectField("State", choices = state_choices)
 	kind = SelectField("Kind of school", choices = [])
