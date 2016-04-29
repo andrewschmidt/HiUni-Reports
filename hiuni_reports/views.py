@@ -129,13 +129,16 @@ def send_email_confirmation(email = None):
 def confirm_email(token = None):
 	if token:
 		try:
-			email = ts.loads(token, salt = application.config["EMAIL_CONFIRM_KEY"], max_age=86400)
+			email = ts.loads(token, salt = application.config["EMAIL_CONFIRM_KEY"], max_age=604800) # This gives the user one week to confirm their email.
 		except:
 			abort(404)
 
 		user = User.get(User.email == email)
 		user.is_confirmed = True
 		user.save()
+
+		if user.employee:
+			return redirect("/reset/" + str(token))
 
 		return redirect("/")
 
@@ -155,7 +158,7 @@ def register_employee():
 				)			
 			user = User.create(
 				email = form.email.data,
-				password = form.password.data,
+				password = application.config["DEFAULTPASS"],
 				employee = employee
 			)			
 			return redirect("/send_email_confirmation/" + str(user.email))
@@ -173,7 +176,7 @@ def reset_password(token = None):
 
 		if form.validate_on_submit():
 			try:
-				email = ts.loads(token, salt = application.config["EMAIL_CONFIRM_KEY"], max_age=86400)
+				email = ts.loads(token, salt = application.config["EMAIL_CONFIRM_KEY"], max_age=604800)
 			except:
 				abort(404)
 
