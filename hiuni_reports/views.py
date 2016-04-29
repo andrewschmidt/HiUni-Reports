@@ -129,7 +129,7 @@ def send_email_confirmation(email = None):
 def confirm_email(token = None):
 	if token:
 		try:
-			email = ts.loads(token, salt = application.config["EMAIL_CONFIRM_KEY"], max_age=604800) # This gives the user one week to confirm their email.
+			email = ts.loads(token, salt = application.config["EMAIL_CONFIRM_KEY"])
 		except:
 			abort(404)
 
@@ -176,9 +176,10 @@ def reset_password(token = None):
 
 		if form.validate_on_submit():
 			try:
-				email = ts.loads(token, salt = application.config["EMAIL_CONFIRM_KEY"], max_age=604800)
+				email = ts.loads(token, salt = application.config["EMAIL_CONFIRM_KEY"], max_age = 259200) # That's three days.
 			except:
-				abort(404)
+				flash("You waited too long to set your password. Try again.")
+				return redirect("/reset")
 
 			user = User.get(User.email == email)
 			user.password = form.password.data
