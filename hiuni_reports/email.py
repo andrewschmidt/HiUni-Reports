@@ -8,22 +8,23 @@ from flask.ext.mail import Message
 from decorators import async
 
 
+
+@async
+def send_email_async(application, msg):
+	with application.app_context():
+		mail.send(msg)
+
+
 def send_email(subject, sender, recipients, text_body, html_body):
 	msg = Message(subject, sender = sender, recipients = recipients)
 	msg.body = text_body
 	msg.html = html_body
-	mail.send(msg)
-
-
-@async
-def send_email_async(subject, sender, recipients, text_body, html_body):
-	with application.app_context():
-		send_email(subject, sender, recipients, text_body, html_body)
+	send_email_async(application, msg)
 
 
 def report_notification(student, report):
 	user = student.customer.user.get()
-	send_email_async(
+	send_email(
 			"%s, your HiUni Report is ready" % student.first_name, 
 			application.config["ADMINEMAIL"],
 			[user.email],
