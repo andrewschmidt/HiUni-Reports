@@ -73,6 +73,7 @@ class User(BaseModel):
 
 	authenticated = BooleanField(default = False)
 	email = TextField(unique = True, primary_key = True)
+	is_confirmed = BooleanField(default = False)
 	_password = CharField()
 
 	@property

@@ -1,4 +1,4 @@
-from hiuni_reports import application, md
+from hiuni_reports import application, md, ts
 from flask import render_template, redirect, request, abort, flash, session, url_for
 
 from flask.ext.login import login_required, login_user, logout_user, current_user
@@ -37,7 +37,7 @@ def index():
 def migrations():
 	if current_user.employee.is_admin:
 		# migrate(
-		# 	migrator.add_column("employee", "is_admin", BooleanField(default = False))
+		# 	migrator.add_column("user", "is_confirmed", BooleanField(default = False))
 		# )
 		# print "Migrated!"
 		return redirect("/")
@@ -64,12 +64,11 @@ def login():
 	return render_template("login.html", form = form)
 
 
-
 @application.route("/logout")
 def logout():
 	if current_user.is_authenticated:
 		logout_user()
-	return redirect("/index")
+	return redirect("/")
 
 
 @application.route("/register", methods = ["GET", "POST"])
@@ -96,6 +95,8 @@ def register():
 			flash("Looks like somebody's already registered with that email!")
 			return redirect("/register")
 
+		email.confirm_email(user)
+
 		# Log them in!
 		user.authenticated = True
 		login_user(user, remember = True)
@@ -103,6 +104,22 @@ def register():
 		return redirect("/questions")
 
 	return render_template("register.html", form = form)
+
+
+@application.route("/confirm/<token>")
+def confirm_email(token):
+	try:
+		email = ts.loads(token, salt = application.config["EMAIL_CONFIRM_KEY"], max_age=86400)
+	except:
+		abort(404)
+
+	user = User.get(User.email == email)
+	user.is_confirmed = True
+	user.save()
+
+	print "Confirmed user", str(user.email)
+
+	return redirect("/")
 
 
 @application.route("/register_employee", methods = ["GET", "POST"])

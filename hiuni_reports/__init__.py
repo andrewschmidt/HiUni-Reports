@@ -5,6 +5,7 @@ from flask import Flask, g
 from flask.ext.bcrypt import Bcrypt
 from flask.ext.markdown import Markdown
 from flask.ext.mail import Mail
+from itsdangerous import URLSafeTimedSerializer
 
 
 
@@ -18,6 +19,7 @@ application.config.from_pyfile("config.py")
 bcrypt = Bcrypt(application)
 md = Markdown(application)
 mail = Mail(application)
+ts = URLSafeTimedSerializer(application.config["SECRET_KEY"])
 
 
 # REQUEST HANDLERS

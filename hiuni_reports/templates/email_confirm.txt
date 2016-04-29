@@ -1,0 +1,9 @@
+Hello,
+
+Please confirm your email by clicking here: {{ confirm_url }}
+
+Thanks!
+
+--
+The HiUni team
+www.gohiuni.com
