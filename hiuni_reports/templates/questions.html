@@ -129,11 +129,50 @@
 						<p style="font-size: 16px; font-weight: 400; line-height: 1.5">It's all downhill from here on out.</p>
 						<br>
 
-						<p style="font-size: 16px; line-height: 1"><b>Last but not least: where do you live?</b></p>
+						<p style="font-size: 16px; line-height: 1"><b>What's your GPA?</b></p>
+						<div class="form-group">
+							{{ form.gpa(class="form-control") }}
+						</div>
+						<br>
+
+						<p style="font-size: 16px; line-height: 1"><b>What's your SAT or ACT score?</b></p>
+						<p style="font-size: 14px; font-weight: 300; line-height: 1.5">Haven't taken them? Leave it blank!</p>
+						<div class="form-group">
+							{{ form.test_score(class="form-control") }}
+						</div>
+						<br>
+
+						<p style="font-size: 16px; line-height: 1"><b>What city do you live in?</b></p>
 						<p style="font-size: 14px; font-weight: 300; line-height: 1.5">Be extra careful to get your city right!</p>
 						<div class="form-group form-inline">
 							{{ form.city(class="form-control", placeholder="City") }}
 							{{ form.state(class="form-control", placeholder="State") }}
+						</div>
+						<br>
+
+						<p style="font-size: 16px; line-height: 1"><b>Is it important to you to stay close to home?</b></p>
+						<div class="form-group">
+							{{ form.stay_home() }}
+						</div>
+						<br>
+
+						<p style="font-size: 16px; line-height: 1"><b>What's a college you're already considering?</b></p>
+						<div class="form-group">
+							{{ form.considering(class="form-control") }}
+						</div>
+						<br>
+
+						<p style="font-size: 16px; line-height: 1"><b>Are you willing to consider online & alternative colleges?</b></p>
+						<p style="font-size: 14px; font-weight: 300; line-height: 1.5">If you aren't sure, stick with "yes."</p>
+						<div class="form-group">
+							{{ form.alternatives() }}
+						</div>
+						<br>
+
+						<p style="font-size: 16px; line-height: 1"><b>Do you have any additional needs we should know about?</b></p>
+						<p style="font-size: 14px; font-weight: 300; line-height: 1.5">Anything at all!</p>
+						<div class="form-group">
+							{{ form.misc(class="form-control") }}
 						</div>
 						<br>
 

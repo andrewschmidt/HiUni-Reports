@@ -638,10 +638,18 @@ def questions(student_id = None):
 				first_name = student.first_name,
 				last_name = student.last_name,
 				email = student.email,
+				income = student.income,
+				payment = student.payment,
+				scholarships = student.scholarships,
+				budget = student.budget,
+				gpa = student.gpa,
+				test_score = student.test_score,
 				city = student.city,
 				state = student.state,
-				income = student.income,
-				budget = student.budget
+				stay_home = student.stay_home,
+				considering = student.considering,
+				alternatives = student.alternatives,
+				misc = student.misc
 			)
 	else:
 		student = Student()
@@ -662,10 +670,23 @@ def questions(student_id = None):
 				student.first_name = form.first_name.data
 				student.last_name = form.last_name.data
 				student.email = form.email.data
+				
 				student.income = form.income.data
+				student.payment = form.payment.data
+				student.scholarships = form.scholarships.data
 				student.budget = int(form.budget.data)
+
+				student.gpa = form.gpa.data
+				student.test_score = form.test_score.data
+				
 				student.city = form.city.data
 				student.state = form.state.data
+				student.stay_home = form.stay_home.data
+				
+				student.considering = form.considering.data
+				student.alternatives = form.alternatives.data
+				student.misc = form.misc.data
+
 				student.customer = current_user.customer
 				
 				if student.experience:
@@ -690,7 +711,7 @@ def questions(student_id = None):
 				)
 
 		except IntegrityError:
-			flash("It looks like you've already created a profile. Try logging in!")
+			flash("It looks like you've already created a profile. Try <a href='/login'>logging in</a>!")
 			return redirect("/index")
 
 		solver.make_pathways_async(student = student, report = report, how_many = 10)
@@ -701,7 +722,7 @@ def questions(student_id = None):
 	else:
 		for field, errors in form.errors.items():
 			for error in errors:
-				flash(error)
+				flash(field.name + ": " + error)
 
 	return render_template("questions.html", form = form, hide_photo = hide_photo)
 

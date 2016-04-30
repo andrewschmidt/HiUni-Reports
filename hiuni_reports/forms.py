@@ -176,18 +176,26 @@ class Questionnaire_Form(Form):
 	last_name = StringField("Last name:", validators = [Required("Please enter your last name.")])
 	email = EmailField("Email:", validators = [Required("Please enter your email."), Email("Please enter a valid email address.")])
 	photo = FileField("Photo:", validators = [FileAllowed(["jpg", "png", "jpeg"], "Your photo needs to be either a JPEG or PNG. Sorry!")])
+	
 	career = SelectQueryField("Career:", query = Career.select().join(Recipe).distinct().where(Recipe.career == Career.id), get_label = "name", allow_blank = True, blank_text = " ", validators = [Required("Please choose a career.")])
-	income = SelectField("What's your family's income level?", choices = income_choices, validators = [Required("Please select your family's income level.")])
-	budget = SelectField("What's your budget for higher education?", choices = budget_choices, validators = [Required("Please enter a budget.")])
-	city = StringField("What city do you live in?", validators = [Required("Please enter the city you live in.")])
-	state = SelectField("What state do you live in?", choices = state_choices, validators = [Required("Please enter the state you live in.")])
-
-	# Additional fields:
 	appeal = TextAreaField("Why does this career appeal to you?")
 	experience = TextAreaField("Do you have any experiences related to the career you chose?")
-	scholarships = StringField("If you're expecting to receive scholarships or private grants, how much do you expect total?")
+	
+	income = SelectField("What's your family's income level?", choices = income_choices, validators = [Required("Please select your family's income level.")])
+	budget = SelectField("What's your budget for higher education?", choices = budget_choices, validators = [Required("Please enter a budget.")])
 	
 	list_of_choices = ["Personal savings", "Student loans", "Help from parents or relatives", "Federal grants", "Scholarships or private grants"]
 	choices = [(x, x) for x in list_of_choices]
 	payment = MultiCheckboxField("How do you plan to pay for college?", choices = choices)
+	scholarships = StringField("If you're expecting to receive scholarships or private grants, how much do you expect total?")
 
+	gpa = StringField("What's your high school GPA?")
+	test_score = StringField("What's your SAT or ACT score?")
+	
+	city = StringField("What city do you live in?", validators = [Required("Please enter the city you live in.")])
+	state = SelectField("What state do you live in?", choices = state_choices, validators = [Required("Please enter the state you live in.")])
+	stay_home = RadioField("Is it important to you to stay close to home?", choices = [("Yes", "Yes"), ("No", "No")])
+
+	considering = StringField("What's a college you're already considering?")
+	alternatives = RadioField("Are you willing to consider online & alternative schools?", choices = [("Yes", "Yes"), ("No", "No")])
+	misc = TextAreaField("Do you have any additional needs we should know about?")

@@ -211,16 +211,26 @@ class Student(Model):
 
 		remove(filename)
 	
+	experience = HStoreField(null = True) # Search this list by career name.
+	appeal = HStoreField(null = True) # Likewise.
+
 	income = CharField()
+	payment = ArrayField(CharField, null = True)
+	scholarships = CharField(null = True)
 	budget = IntegerField()
 	
 	city = CharField()
 	state = CharField()
 	latitude = DoubleField(null = True)
 	longitude = DoubleField(null = True)
+	stay_home = CharField(null = True)
 
-	experience = HStoreField(null = True) # Search this list by career name.
-	appeal = HStoreField(null = True) # Likewise.
+	gpa = CharField(null = True)
+	test_score = CharField(null = True)
+
+	considering = CharField(null = True)
+	alternatives = CharField(null = True)
+	misc = TextField(null = True)
 
 	customer = ForeignKeyField(Customer, related_name = "students")
 
