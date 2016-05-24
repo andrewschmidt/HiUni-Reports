@@ -495,26 +495,30 @@ def add_career():
 @login_required
 def edit_career(career_id):
 	if current_user.employee:
-		career = Career.get(id = career_id)
-		form = Add_Career(name = career.name, description = career.description)
+		try:
+			career = Career.get(id = career_id)
+			form = Add_Career(name = career.name, description = career.description)
 
-		if form.validate_on_submit():
-			career.name = form.name.data
-			career.description = form.description.data
-			if form.image.data:
-				career.image = form.image.data
+			if form.validate_on_submit():
+				career.name = form.name.data
+				career.description = form.description.data
+				if form.image.data:
+					career.image = form.image.data
 
-			career.save()
-			flash("Updated the career!")
+				career.save()
+				flash("Updated the career!")
 
-			return redirect("/career/" + str(career.id))
+				return redirect("/career/" + str(career.id))
 
-		else:
-			for field, errors in form.errors.items():
-				for error in errors:
-					flash(error)
+			else:
+				for field, errors in form.errors.items():
+					for error in errors:
+						flash(error)
 
-		return render_template("edit_career.html", form = form, career = career)
+			return render_template("edit_career.html", form = form, career = career)
+
+		except DoesNotExist:
+			abort(404)
 
 	else: return redirect("/")
 
@@ -586,7 +590,6 @@ def edit_recipe_step(recipe_id, step_id):
 	if current_user.employee:
 		try:
 			step = Step.get(id = step_id)
-			
 			cips = ", ".join(step.cips)
 
 			form = Recipe_Step_Form(
@@ -597,6 +600,14 @@ def edit_recipe_step(recipe_id, step_id):
 					sort_by = step.sort_by,
 					description = step.description
 				)
+
+			# Dynamically generate the choices for the "school kind" dropdown, based on what's in the database:
+			s = School.select(School.kind).order_by(fn.COUNT(School.id)).distinct().order_by()
+			kinds = [("", "")]
+			for x in s:
+				kinds.append((x.kind, x.kind))
+
+			form.school_kind.choices = kinds
 
 			if form.validate_on_submit():
 				cips = [cip.strip() for cip in form.cips.data.split(',')]
